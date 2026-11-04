@@ -1,0 +1,69 @@
+#workbenchVersionLabel { color: var(--am-muted); font-size: 11px; font-weight: 400; }
+#workbenchUpdateButton.has-update #workbenchVersionLabel,
+.workbench-version-badge { display: inline-flex; align-items: center; justify-content: center; min-height: 22px; padding: 0 8px; border-radius: var(--am-radius-pill, 999px); font-size: 11px; font-weight: 400; line-height: 1.4; white-space: nowrap; color: var(--am-muted); background: var(--am-soft); }
+#workbenchUpdateButton.has-update #workbenchVersionLabel,
+.workbench-version-badge.is-new { color: var(--am-green, #248a5a); background: rgba(36, 138, 90, .1); }
+.workbench-update-dialog { box-sizing: border-box; width: min(540px, calc(100vw - 32px)); max-height: 85dvh; overflow: auto; padding: 28px; border: 0; border-radius: 24px; color: var(--am-text); background: var(--am-panel, white); box-shadow: var(--am-shadow-modal); scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
+.workbench-update-dialog::backdrop { background: rgba(0,0,0,.25); backdrop-filter: blur(3px); }
+.workbench-update-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.workbench-update-dialog h2 { margin: 0; font-size: 20px; }
+.workbench-update-dialog .update-close { border: 0; border-radius: 50%; background: var(--am-soft); width: 34px; height: 34px; cursor: pointer; color: var(--am-muted); font-size: 20px; }
+.workbench-update-dialog dl { display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; margin: 24px 0; font-size: 13px; }
+.workbench-update-dialog dt { color: var(--am-muted); font-weight: 400; }
+.workbench-update-dialog dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.workbench-update-dialog .workbench-version-badge { justify-self: end; }
+.workbench-update-dialog h3 { font-size: 13px; font-weight: 400; margin: 0 0 10px; }
+.workbench-update-notes { white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit; font-size: 13px; line-height: 1.8; background: var(--am-soft); padding: 16px; border-radius: 12px; max-height: 230px; overflow: auto; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
+.workbench-update-message { font-size: 13px; line-height: 1.7; color: var(--am-muted); font-weight: 400; overflow-wrap: anywhere; }
+.workbench-update-message.is-error { color: #b74936; }
+.workbench-update-dialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.workbench-update-dialog::-webkit-scrollbar,.workbench-update-notes::-webkit-scrollbar { width: 6px; height: 6px; }
+.workbench-update-dialog::-webkit-scrollbar-track,.workbench-update-notes::-webkit-scrollbar-track { background: transparent; }
+.workbench-update-dialog::-webkit-scrollbar-thumb,.workbench-update-notes::-webkit-scrollbar-thumb { background: transparent; border: 0; border-radius: 999px; }
+.workbench-update-dialog.is-scrolling,.workbench-update-notes.is-scrolling { scrollbar-color: #b7b7b780 transparent; }
+.workbench-update-dialog.is-scrolling::-webkit-scrollbar-thumb,.workbench-update-notes.is-scrolling::-webkit-scrollbar-thumb { background: #b7b7b780; }
+@supports selector(::-webkit-scrollbar) { .workbench-update-dialog,.workbench-update-notes,.workbench-update-dialog.is-scrolling,.workbench-update-notes.is-scrolling { scrollbar-width: auto; scrollbar-color: auto; } }
+@media(max-width: 480px) { .workbench-update-dialog { padding: 22px; } }
+/* The account label is hidden in compact navigation; retain a usable entry.
+   Desktop-only: 601–900px keeps the mobile/tablet sidebar layout. */
+@media(min-width:901px) {
+  .is-account-collapsed #accountIdentity { flex: none; width: 36px; }
+  .is-account-collapsed #accountIdentity .identity-trigger { width: 36px; min-height: 32px; padding: 0; justify-content: center; }
+  .is-account-collapsed #accountIdentity .identity-trigger::before { content: "账号"; font-size: 11px; font-weight: 400; }
+}
+@media(min-width:601px) and (max-width:850px) {
+  #accountIdentity { flex: none; width: 36px; }
+  #accountIdentity .identity-trigger { width: 36px; min-height: 32px; padding: 0; justify-content: center; }
+  #accountIdentity .identity-trigger::before { content: "账号"; font-size: 11px; font-weight: 400; }
+}
+.workbench-has-update #identityTrigger { position: relative; }
+.workbench-has-update #identityTrigger::after { content: ''; position: absolute; right: 4px; top: 4px; width: 7px; height: 7px; border-radius: 50%; background: #db5149; pointer-events: none; }
+/* 展开的未登录入口：新版本红点跟随「登录」文字。 */
+@media(min-width:901px) {
+  .workbench-has-update .tool-layout:not(.is-account-collapsed) .is-logged-out #identityTrigger::after { content: none; }
+  .workbench-has-update .tool-layout:not(.is-account-collapsed) .is-logged-out #identityTrigger strong { position: relative; width: fit-content; overflow: visible; }
+  .workbench-has-update .tool-layout:not(.is-account-collapsed) .is-logged-out #identityTrigger strong::after { content: ''; position: absolute; left: calc(100% + 3px); top: -2px; width: 7px; height: 7px; border-radius: 50%; background: #db5149; pointer-events: none; }
+}
+.workbench-update-dialog footer a { display: inline-flex; align-items: center; text-decoration: none; padding: 8px 14px; border-radius: 10px; }
+.workbench-update-dialog [hidden] { display: none !important; }
+.workbench-update-dialog details { font-size: 13px; line-height: 1.7; margin: 16px 0; overflow-wrap: anywhere; }
+.workbench-update-dialog summary { cursor: pointer; font-weight: 500; }
+.workbench-update-dialog textarea { box-sizing: border-box; width: 100%; min-height: 180px; margin-top: 8px; padding: 12px; font: inherit; font-size: 13px; border: 1px solid var(--am-border, #ddd); border-radius: 12px; background: var(--am-soft); color: inherit; }
+
+/* Shared source/desktop update dialog. */
+.workbench-update-status { display: flex; align-items: center; gap: 12px; margin-top: 25px; }
+.update-status-icon { display: grid; place-items: center; flex: 0 0 40px; height: 40px; border-radius: 50%; color: #288151; background: #edf6f0; font-size: 23px; }
+.update-status-icon.is-neutral { color: var(--am-muted); background: var(--am-soft); }
+.update-status-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.workbench-update-status h3 { margin: 0; font-size: 17px; font-weight: 600; }
+.update-distribution { padding: 4px 8px; border-radius: 6px; font-size: 11px; color: var(--am-muted); background: var(--am-soft); }
+.workbench-update-status p { margin: 6px 0 0; color: var(--am-muted); font-size: 12px; line-height: 1.6; }
+.workbench-update-action { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--am-border, #eee); }
+.workbench-update-action h3 { margin: 0 0 7px; font-size: 14px; font-weight: 500; }
+.workbench-update-action p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--am-muted); }
+.workbench-update-message:empty { display: none; }
+.workbench-update-dialog footer .am-primary-action { background: #202124; color: #fff; border: 0; }
+.workbench-update-dialog footer .am-primary-action:hover { background: #37383a; color: #fff; }
+.workbench-update-dialog footer .am-primary-action:disabled { opacity: .5; cursor: default; }
+.workbench-update-dialog footer .am-primary-action, .workbench-update-dialog footer .am-secondary-action { min-height: 40px; padding: 11px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; }
+.workbench-update-dialog footer :focus-visible { outline: 2px solid var(--am-text, #202124); outline-offset: 3px; }

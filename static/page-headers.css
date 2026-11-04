@@ -1,0 +1,89 @@
+/* Shared module heading geometry. Load after module styles so responsive
+   overrides cannot move headings when switching between modules. */
+:root {
+  --module-heading-inset-top: 18px;
+  --module-heading-inset-inline: 20px;
+}
+@media (max-width: 640px) {
+  :root {
+    --module-heading-inset-top: 14px;
+  }
+}
+
+#homeContent .home-overview,
+#topicRecommendationsContent > .tr-header,
+#radarContent > .radar-header,
+#monitorContent > .monitor-header,
+#reviewContent > .review-summary-panel,
+#topicsContent .topics-form-panel,
+#downloadForm.draft-panel,
+#settingsContent > .project-settings-card,
+#breakdownContent .breakdown-intro,
+#workspaceStageHeader,
+#pluginsContent,
+#accountContent:not(.split-modules),
+#accountContent.split-modules > .account-overview {
+  padding-top: var(--module-heading-inset-top);
+  padding-left: var(--module-heading-inset-inline);
+  padding-right: var(--module-heading-inset-inline);
+}
+
+#homeContent .home-header-copy h2,
+#topicRecommendationsContent .tr-header h2,
+#radarContent .radar-header-copy h2,
+#monitorContent .monitor-header-copy h2,
+#reviewContent .review-header-copy h2,
+#topicsContent .radar-header-copy h2,
+#downloadForm .radar-header-copy h2,
+#settingsContent .project-settings-head > h2,
+#breakdownContent .breakdown-intro h2,
+#workspaceStageHeader .workspace-header-copy h2,
+#pluginsContent .pm-title,
+#accountContent .account-heading h1 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+#homeContent .home-subtitle,
+#topicRecommendationsContent .tr-header p:first-of-type,
+#radarContent .radar-subtitle,
+#monitorContent .monitor-subtitle,
+#reviewContent .review-subtitle,
+#topicsContent .radar-subtitle,
+#downloadForm .radar-subtitle,
+#settingsContent .project-settings-subtitle,
+#breakdownContent .breakdown-intro > p,
+#workspaceStageHeader .workspace-subtitle,
+#pluginsContent .pm-subtitle,
+#accountContent .account-heading p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: normal;
+}
+
+#accountContent .account-heading { align-items: flex-start; }
+
+/* Main cards and their body sections share the heading inset at every width.
+   Keep vertical spacing and nested controls independent of this page geometry. */
+#homeContent .home-panel,
+#homeContent .home-focus,
+#homeContent .home-review-entry,
+#topicRecommendationsContent > .radar-panel,
+#radarContent .radar-panel,
+#monitorContent .monitor-panel,
+#reviewContent .review-panel,
+#topicsContent .topics-panel,
+#downloadForm.draft-panel,
+#breakdownContent .breakdown-sidebar,
+#breakdownContent .breakdown-form,
+#breakdownContent .breakdown-task-state,
+#breakdownContent #breakdownResult,
+#workspaceContent .workflow-stage,
+#workspaceContent:has(#taskWorkspace:not([hidden])) .workflow-stage,
+#workspaceContent:has(#taskWorkspace:not([hidden])) .pm-stage-host,
+#accountContent.split-modules > #pageBody,
+#modulePlaceholder {
+  padding-left: var(--module-heading-inset-inline);
+  padding-right: var(--module-heading-inset-inline);
+}

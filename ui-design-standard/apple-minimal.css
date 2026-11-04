@@ -1,0 +1,813 @@
+/* 墨鱼工作台公共基础样式。业务几何由 static/styles.css 与 page-headers.css 补充。
+   am-admin-* / am-title 保留为旧模板兼容类，新模块采用 am-module-*。 */
+:root {
+  color-scheme: light;
+  --am-bg: #f6f6f7;
+  --am-bg-start: #ffffff;
+  --am-panel: #ffffff;
+  --am-surface: rgba(255, 255, 255, 0.92);
+  --am-surface-muted: rgba(255, 255, 255, 0.72);
+  --am-soft: #f2f2f3;
+  --am-soft-2: #e9e9eb;
+  --am-control: #f8f8f8;
+  --am-text: #1d1d1f;
+  --am-muted: #6e6e73;
+  --am-sub: #74747a;
+  --am-faint: #a0a0a6;
+  --am-line: rgba(29, 29, 31, 0.09);
+  --am-line-strong: rgba(29, 29, 31, 0.15);
+  --am-line-soft: rgba(29, 29, 31, 0.055);
+  --am-border: #d2d2d7;
+  --am-border-soft: #e5e5ea;
+  --am-accent: #1d1d1f;
+  --am-accent-rgb: 29, 29, 31;
+  --am-accent-soft: rgba(29, 29, 31, 0.11);
+  --am-blue: #2d6cdf;
+  --am-green: #248a5a;
+  --am-orange: #ad6a1c;
+  --am-red: #d94b4b;
+  --am-danger: #b42318;
+  --am-radius-nav: 10px;
+  --am-radius-control: 14px;
+  --am-radius-card: 18px;
+  --am-radius-float: 20px;
+  --am-radius-modal: 28px;
+  --am-radius-pill: 999px;
+  --am-shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.04);
+  --am-shadow-card: 0 18px 42px rgba(0, 0, 0, 0.06);
+  --am-shadow-float: 0 24px 70px rgba(0, 0, 0, 0.18);
+  --am-shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.14), 0 4px 18px rgba(0, 0, 0, 0.06);
+  --am-sidebar-width: 224px; /* 旧后台模板，非工作台导航宽度 */
+  --am-workspace-gap: 15px;
+  --am-workspace-rail-width: 180px;
+  --am-workspace-rail-collapsed-width: 76px;
+  --am-module-inset-top: 18px;
+  --am-module-inset-inline: 20px;
+  --am-module-title-size: 20px;
+  --am-module-title-line-height: 28px;
+  --am-modal-subtitle-gap: 8px;
+  --am-overdue-bg: rgba(216, 138, 50, 0.14);
+  --am-overdue-text: #a8641f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--am-text);
+  background: var(--am-bg);
+  /* Explicitly select the existing macOS Chinese face instead of letting
+     Chromium and WebKit choose different system aliases/synthetic weights. */
+  font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: 0;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  font: inherit;
+}
+
+button,
+select,
+textarea,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Shared action-focus policy. Intentional !important prevents late-loaded
+   module/plugin styles from restoring outer rings. Keep native borders and
+   selection states; keyboard navigation uses a non-ring cue instead. */
+:is(button, a[href], [role="button"], [role="tab"], [role="menuitem"], summary, [tabindex]):not(input, select, textarea, [contenteditable]:not([contenteditable="false"])):focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+html[data-mofish-keyboard-navigation] :is(button, a[href], [role="button"], [role="tab"], [role="menuitem"], summary, [tabindex]):not(input, select, textarea, [contenteditable]:not([contenteditable="false"])):focus {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  filter: brightness(.9);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+.am-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, var(--am-bg-start) 0, var(--am-bg) 210px),
+    var(--am-bg);
+}
+
+.am-admin-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--am-sidebar-width) minmax(0, 1fr);
+}
+
+.am-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 34px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--am-line);
+  background: rgba(246, 246, 247, 0.86);
+}
+
+.am-brand {
+  display: grid;
+  gap: 4px;
+  padding: 0 10px;
+}
+
+.am-brand strong {
+  display: block;
+  font-size: 1.04rem;
+  font-weight: 780;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.am-nav {
+  display: grid;
+  gap: 3px;
+  margin-top: 72px;
+}
+
+.am-nav-item {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  border: 0;
+  border-radius: var(--am-radius-nav);
+  padding: 0 10px;
+  color: var(--am-sub);
+  background: transparent;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 680;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.am-nav-item:hover,
+.am-nav-item:focus-visible {
+  color: var(--am-text);
+  background: rgba(29, 29, 31, 0.045);
+  outline: none;
+}
+
+.am-nav-item.is-active,
+.am-nav-item.active {
+  color: var(--am-text);
+  background: var(--am-panel);
+}
+
+.am-main {
+  min-width: 0;
+  padding: 42px 30px 64px;
+}
+
+.am-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.am-topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.am-eyebrow {
+  margin: 0 0 8px;
+  color: var(--am-faint);
+  font-size: 0.72rem;
+  font-weight: 740;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.am-title {
+  margin: 0;
+  font-size: 2.18rem;
+  line-height: 1.08;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.am-section-title {
+  margin: 0;
+  color: var(--am-text);
+  font-size: 1.08rem;
+  line-height: 1.2;
+  font-weight: 780;
+  letter-spacing: 0;
+}
+
+.am-dashboard,
+.am-stack {
+  display: grid;
+  gap: 28px;
+}
+
+.am-dashboard {
+  margin-top: 26px;
+}
+
+.am-content-panel,
+.am-table-panel,
+.am-form-panel {
+  display: grid;
+  gap: 18px;
+  border: 0;
+  border-radius: var(--am-radius-card);
+  background: var(--am-panel);
+}
+
+.am-content-panel {
+  padding: 20px 22px 22px;
+}
+
+.am-form-panel {
+  padding: 14px;
+}
+
+.am-table-panel {
+  padding: 0 14px;
+  overflow: hidden;
+}
+
+.am-card {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 0;
+  border-radius: var(--am-radius-card);
+  background: var(--am-panel);
+}
+
+.am-metric-card {
+  min-height: 94px;
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--am-soft);
+}
+
+.am-metric-card span {
+  color: var(--am-sub);
+  font-size: 0.76rem;
+  font-weight: 720;
+  line-height: 1.35;
+}
+
+.am-metric-card strong {
+  color: var(--am-text);
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.am-field {
+  display: grid;
+  gap: 7px;
+  color: var(--am-sub);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.am-input,
+.am-select,
+.am-textarea,
+.am-field input,
+.am-field select,
+.am-field textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: var(--am-radius-control);
+  padding: 0 13px;
+  color: var(--am-text);
+  background: var(--am-control);
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.am-textarea,
+.am-field textarea {
+  min-height: 220px;
+  padding: 12px 13px;
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.am-input:focus,
+.am-select:focus,
+.am-textarea:focus,
+.am-field input:focus,
+.am-field select:focus,
+.am-field textarea:focus {
+  border-color: transparent;
+  background: var(--am-control);
+  outline: none;
+  box-shadow: none;
+}
+
+.am-button,
+.am-primary-action,
+.am-secondary-action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--am-radius-control);
+  padding: 0 18px;
+  font-size: 0.9rem;
+  font-weight: 740;
+  line-height: 1;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.am-primary-action {
+  color: #ffffff;
+  background: var(--am-accent);
+}
+
+.am-secondary-action {
+  color: var(--am-text);
+  background: var(--am-control);
+}
+
+.am-button:hover,
+.am-primary-action:hover,
+.am-secondary-action:hover,
+.am-button:focus-visible,
+.am-primary-action:focus-visible,
+.am-secondary-action:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.am-secondary-action:hover,
+.am-secondary-action:focus-visible {
+  background: var(--am-soft-2);
+}
+
+.am-primary-action:disabled,
+.am-secondary-action:disabled,
+.am-button:disabled {
+  cursor: not-allowed;
+  color: var(--am-faint);
+  background: var(--am-control);
+  transform: none;
+  opacity: 0.72;
+}
+
+.am-pill-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--am-radius-pill);
+  padding: 0 18px;
+  color: #ffffff;
+  background: var(--am-text);
+  font-weight: 600;
+  line-height: 1;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.am-pill-button:hover {
+  background: #000000;
+  transform: translateY(-1px);
+}
+
+.am-icon-button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f1f3;
+  color: #515154;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.am-icon-button:hover {
+  background: #e0e0e5;
+  color: var(--am-text);
+  transform: scale(1.06);
+}
+
+.am-chip,
+.am-status {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--am-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 720;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.am-chip {
+  color: var(--am-sub);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.am-status.is-success {
+  color: var(--am-green);
+  background: rgba(36, 138, 90, 0.1);
+}
+
+.am-status.is-info,
+.am-status.is-loading {
+  color: var(--am-blue);
+  background: rgba(45, 108, 223, 0.1);
+}
+
+.am-status.is-warning {
+  color: var(--am-orange);
+  background: rgba(173, 106, 28, 0.11);
+}
+
+.am-status.is-danger,
+.am-status.is-error {
+  color: var(--am-red);
+  background: rgba(217, 75, 75, 0.1);
+}
+
+.am-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--am-text);
+  font-size: 0.88rem;
+}
+
+.am-table th,
+.am-table td {
+  padding: 14px 10px;
+  border-bottom: 1px solid var(--am-line-soft);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.am-table th {
+  color: var(--am-sub);
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.am-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.am-pagination {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--am-radius-card);
+  background: var(--am-panel);
+}
+
+.am-page-button {
+  min-width: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 11px;
+  color: var(--am-sub);
+  background: transparent;
+  font-size: 0.84rem;
+  font-weight: 720;
+}
+
+.am-page-button:hover,
+.am-page-button:focus-visible {
+  color: var(--am-text);
+  background: var(--am-control);
+  outline: none;
+}
+
+.am-page-button.is-active,
+.am-page-button.active {
+  color: #ffffff;
+  background: var(--am-text);
+}
+
+.am-toast {
+  position: fixed;
+  left: 50%;
+  top: max(16px, env(safe-area-inset-top));
+  z-index: 86;
+  width: fit-content;
+  max-width: calc(100vw - 32px);
+  padding: 12px 18px;
+  border: 0;
+  border-radius: var(--am-radius-pill);
+  color: var(--am-blue);
+  background: rgba(45, 108, 223, 0.1);
+  box-shadow: none;
+  font-size: 0.9rem;
+  font-weight: 760;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, -12px);
+  transition: opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
+}
+
+.am-toast.is-visible,
+.am-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.am-toast.is-success {
+  color: var(--am-green);
+  background: rgba(36, 138, 90, 0.1);
+}
+
+.am-toast.is-loading,
+.am-toast.is-info {
+  color: var(--am-blue);
+  background: rgba(45, 108, 223, 0.1);
+}
+
+.am-toast.is-error,
+.am-toast.is-danger {
+  color: var(--am-red);
+  background: rgba(217, 75, 75, 0.1);
+}
+
+.am-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 72;
+  display: grid;
+  width: min(520px, calc(100vw - 36px));
+  max-height: min(720px, calc(100vh - 34px));
+  gap: 20px;
+  padding: 30px;
+  border: 0;
+  border-radius: var(--am-radius-modal);
+  background: var(--am-panel);
+  box-shadow: var(--am-shadow-modal);
+  transform: translate(-50%, -50%);
+}
+
+.am-modal[hidden],
+.am-hidden {
+  display: none;
+}
+
+.am-modal-head {
+  display: grid;
+  gap: 7px;
+  padding-right: 34px;
+}
+
+.am-modal-head h2 {
+  margin: 0;
+  color: var(--am-text);
+  font-size: 1.74rem;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.am-modal-head p {
+  margin: 0;
+  color: var(--am-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.am-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f1f3;
+  color: #515154;
+}
+
+.am-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--am-border-soft);
+  border-top-color: var(--am-text);
+  border-radius: 50%;
+  animation: am-spin 900ms linear infinite;
+}
+
+@keyframes am-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 920px) {
+  .am-admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .am-sidebar {
+    position: static;
+    height: auto;
+    padding: 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--am-line);
+  }
+
+  .am-nav {
+    margin-top: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .am-main {
+    padding: 30px 20px 48px;
+  }
+
+  .am-topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .am-title {
+    font-size: 1.72rem;
+  }
+
+  .am-topbar-actions,
+  .am-pagination {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .am-modal {
+    padding: 24px;
+    border-radius: 24px;
+  }
+}
+
+/* 输入类控件统一无聚焦描边；排除按钮、勾选项与滑块等非文本控件。 */
+:is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]):not([type="color"]):not([type="image"]), textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"]):is(:focus, :focus-visible) {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Modal close controls: center geometry independently of font baselines. */
+button.am-modal-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex: 0 0 auto;
+  padding: 0;
+  line-height: 1;
+}
+.am-modal-close-icon {
+  display: block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  transform: rotate(0deg);
+  transform-origin: center;
+  transition: transform 450ms ease-in-out;
+}
+
+button.am-modal-dismiss:hover .am-modal-close-icon {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .am-modal-close-icon { transition: none; }
+}
+
+/* 工作台模块规范：新模块可复用，既有业务选择器仍由各模块维护。 */
+.am-module-header {
+  padding: var(--am-module-inset-top) var(--am-module-inset-inline) 0;
+}
+.am-module-title {
+  margin: 0;
+  color: var(--am-text);
+  font-size: var(--am-module-title-size);
+  line-height: var(--am-module-title-line-height);
+  font-weight: 780;
+}
+.am-module-subtitle {
+  margin: 6px 0 0;
+  color: var(--am-muted);
+  font-size: 13px;
+  line-height: normal;
+  font-weight: 400;
+}
+.am-module-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.am-form-stack { display: grid; gap: 18px; }
+.am-field :is(input, select, textarea),
+.am-input, .am-select, .am-textarea { font-weight: 400; }
+.am-field :is(input, textarea)::placeholder,
+.am-input::placeholder, .am-textarea::placeholder { font-weight: 400; }
+
+/* 首页紧凑主操作的明确变体，不覆盖 44px 通用按钮。 */
+.am-button-compact {
+  min-height: 40px;
+  padding: 10px 17px;
+  border-radius: 11px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* 仅用于明确需要局部滚动的容器，不对所有输入框强制滚动。 */
+.am-scroll-region {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(29, 29, 31, .16) transparent;
+}
+.am-scroll-region::-webkit-scrollbar { width: 6px; height: 6px; }
+.am-scroll-region::-webkit-scrollbar-track { background: transparent; border: 0; box-shadow: none; }
+.am-scroll-region::-webkit-scrollbar-thumb {
+  background: rgba(29, 29, 31, .16);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+}
+.am-scroll-region:hover { scrollbar-color: rgba(29, 29, 31, .28) transparent; }
+.am-scroll-region:hover::-webkit-scrollbar-thumb { background: rgba(29, 29, 31, .28); }
+@supports selector(::-webkit-scrollbar) {
+  .am-scroll-region, .am-scroll-region:hover { scrollbar-width: auto; scrollbar-color: auto; }
+}
+@media (max-width: 640px) {
+  :root { --am-module-inset-top: 14px; }
+}

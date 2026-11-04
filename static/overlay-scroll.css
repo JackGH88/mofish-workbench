@@ -1,0 +1,13 @@
+/* Native scroll containment complements the gesture guard at scroll boundaries.
+   This changes neither scrollability nor scrollbar appearance. */
+:is(dialog, .prompt-modal, .account-switcher-popover, [popover]:not([role="status"]), [role="menu"], .topics-select-menu),
+:is(dialog, .prompt-modal, .account-switcher-popover, [popover]:not([role="status"]), [role="menu"], .topics-select-menu) * {
+  overscroll-behavior: contain;
+}
+
+/* Truncated labels are non-user-scrollable overflow boxes. In WebKit, contain
+   on these boxes traps wheel input before it reaches the workspace list. */
+.account-switcher-popover .account-record strong,
+.account-switcher-popover .account-record small {
+  overscroll-behavior: auto;
+}

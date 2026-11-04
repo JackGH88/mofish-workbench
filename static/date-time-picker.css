@@ -1,0 +1,59 @@
+/* Shared with plugin Shadow DOM; all rules scoped to avoid changing host forms. */
+.wb-datetime-control{position:relative;display:block;min-width:0;width:100%}
+.wb-datetime-control>input{width:100%;min-width:0;padding-right:42px!important;box-sizing:border-box}
+.wb-datetime-control>.wb-datetime-trigger{position:absolute;right:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:34px;height:34px;min-height:0;padding:0;border:0;border-radius:10px;background:transparent;color:inherit;cursor:pointer;box-shadow:none}
+.wb-datetime-trigger svg,.wb-nav-arrow{display:block;width:18px;height:18px;flex:none;pointer-events:none}
+.wb-datetime-trigger:disabled{opacity:.35;cursor:default}
+.wb-datetime-trigger:focus-visible{outline:2px solid #777;outline-offset:2px}
+.wb-datetime-popup{position:fixed;inset:auto;z-index:100000;margin:0;padding:18px;box-sizing:border-box;width:320px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);overflow:auto;border:0;border-radius:18px;background:#fff;color:#1d1d1f;box-shadow:0 14px 48px #00000020;font:14px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;text-align:left;scrollbar-width:none}
+.wb-datetime-popup:not([open]){display:none}.wb-datetime-popup::backdrop{background:transparent;backdrop-filter:none}
+.wb-datetime-popup *{box-sizing:border-box}.wb-datetime-popup button,.wb-datetime-popup input{font:inherit;color:inherit}
+.wb-datetime-popup button{display:inline-block;width:auto;min-width:0;min-height:32px;margin:0;padding:6px 10px;border:0;border-radius:10px;box-shadow:none;background:#f8f8f8;color:#1d1d1f;cursor:pointer;line-height:1.4;text-align:center}
+.wb-datetime-popup button:hover{background:#e9e9eb}.wb-datetime-popup button:disabled{opacity:.35;cursor:default}
+.wb-datetime-popup button:focus-visible,.wb-datetime-popup input:focus-visible{outline:2px solid #777;outline-offset:1px}
+.wb-datetime-popup svg{width:18px;height:18px;display:block;flex:none;pointer-events:none}
+.wb-datetime-popup .dt-head{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.wb-datetime-popup .dt-month{margin-right:auto;font-weight:600;background:transparent;padding:6px}
+.wb-datetime-popup .dt-icon{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0}
+.wb-datetime-popup .dt-week,.wb-datetime-popup .dt-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.wb-datetime-popup .dt-week span{text-align:center;color:#999;font-size:11px;padding:6px 0}
+.wb-datetime-popup .dt-days button{min-height:36px;height:36px;width:100%;padding:0;border-radius:50%;background:transparent;font-size:13px}
+.wb-datetime-popup .dt-days button:hover{background:#f2f2f3}.wb-datetime-popup .dt-days .is-other{color:#bcbcc1}
+.wb-datetime-popup .dt-days .is-today{box-shadow:inset 0 0 0 1px #bbb}
+.wb-datetime-popup .dt-days .is-selected,.wb-datetime-popup .dt-months .is-selected{background:#222;color:#fff;border:0;box-shadow:none}
+.wb-datetime-popup .dt-months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin-top:12px}
+.wb-datetime-popup .dt-year{display:block;font-size:12px;color:#6e6e73}
+.wb-datetime-popup .dt-year input{width:100%;padding:10px;border:0;border-radius:10px;background:#f8f8f8}
+.wb-datetime-popup .dt-time-title{font-size:12px;color:#777;margin:14px 0 10px;line-height:1.7}
+.wb-datetime-popup .dt-time-inputs{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:center}
+.wb-datetime-popup .dt-time-inputs>span{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;color:#6e6e73}
+.wb-datetime-popup .dt-time-inputs input{width:100%;min-width:0;padding:9px;border:0;border-radius:10px;background:#f8f8f8;text-align:center;font-size:18px;font-variant-numeric:tabular-nums;line-height:1.4}
+.wb-datetime-popup .dt-time-lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.wb-datetime-popup .dt-time-wheel{position:relative;height:150px;background:#fafafa;border-radius:12px;overflow:hidden}
+.wb-datetime-popup .dt-time-highlight{position:absolute;top:50%;transform:translateY(-50%);left:4px;right:4px;height:30px;border-radius:10px;background:#222;pointer-events:none}
+.wb-datetime-popup .dt-time-list{position:absolute;inset:0;overflow:auto;scrollbar-width:none;padding:0 4px;overscroll-behavior:contain;overflow-anchor:none}
+/* Spacer heights track the viewport so both end values can reach its center. */
+.wb-datetime-popup .dt-time-list::before,.wb-datetime-popup .dt-time-list::after{content:"";display:block;height:calc(50% - 15px)}
+.wb-datetime-popup .dt-time-list::-webkit-scrollbar,.wb-datetime-popup::-webkit-scrollbar{display:none;width:0;height:0}
+.wb-datetime-popup .dt-time-list button{display:block;width:100%;min-height:30px;height:30px;padding:5px;background:transparent;font-variant-numeric:tabular-nums}
+.wb-datetime-popup .dt-time-list button:hover{background:transparent}
+.wb-datetime-popup .dt-time-list .is-selected{background:transparent;color:white}
+.wb-datetime-popup .dt-footer{display:flex;align-items:center;gap:8px;border-top:1px solid #eee;padding-top:12px;margin-top:14px}
+.wb-datetime-popup .dt-footer button{font-size:12px;min-height:32px;padding:6px 10px}.wb-datetime-popup .dt-cancel{margin-left:auto}
+.wb-datetime-popup .dt-primary{background:#1d1d1f;color:#fff}.wb-datetime-popup .dt-primary:hover{background:#38383b}
+.wb-datetime-popup input::-webkit-inner-spin-button{-webkit-appearance:none}
+.wb-nav-arrow{margin:auto}
+
+.wb-datetime-popup[data-mode="datetime"]{width:540px}
+.wb-datetime-popup[data-mode="datetime"] .dt-body{display:grid;grid-template-columns:minmax(0,284px) minmax(0,1fr);gap:20px}
+.wb-datetime-popup .dt-date-panel,.wb-datetime-popup .dt-time-panel{min-width:0}
+.wb-datetime-popup .dt-time-title{margin-top:0}
+@media(min-width:580px){
+.wb-datetime-popup[data-mode="datetime"] .dt-time-panel{display:flex;flex-direction:column;min-height:0}
+.wb-datetime-popup[data-mode="datetime"] .dt-time-lists{flex:1;min-height:30px}
+.wb-datetime-popup[data-mode="datetime"] .dt-time-wheel{height:auto;min-height:0}
+}
+@media(max-width:579px){
+.wb-datetime-popup[data-mode="datetime"]{width:320px}
+.wb-datetime-popup[data-mode="datetime"] .dt-body{grid-template-columns:minmax(0,1fr);gap:14px}
+}

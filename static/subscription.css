@@ -1,0 +1,372 @@
+/* 订阅与积分：由已确认的静态预览 static/previews/subscription/preview.css 抽取。
+   仅保留正式页面使用的规则；预览专用（顶栏、演示外壳、侧栏布局）不在此文件。 */
+.account-page button:disabled, #subscriptionModal button:disabled { cursor:not-allowed; transform:none; }
+.account-page button:focus-visible, #subscriptionModal button:focus-visible { outline:3px solid var(--am-accent-soft); outline-offset:3px; }
+.identity { border-top:1px solid var(--am-line-soft); padding-top:20px; min-width:0; }
+.identity-top { display:flex; align-items:center; gap:10px; }
+.identity-avatar { width:38px; height:38px; display:grid; place-items:center; border-radius:50%; background:var(--am-text); color:white; font-size:18px; flex:none; }
+.identity strong { font-size:13px; font-weight:600; }
+.identity small { display:block; font-size:11px; margin-top:4px; }
+.plan-badge { display:inline-block; color:var(--am-orange); background:color-mix(in srgb,var(--am-orange) 10%,white); padding:3px 8px; border-radius:6px; font-size:11px; }
+.plan-badge.is-active { color:var(--am-green); background:color-mix(in srgb,var(--am-green) 10%,white); }
+.identity p { font-size:12px; color:var(--am-muted); margin:12px 0 8px; }
+.identity button { padding:7px 0; border:0; background:none; font-size:13px; display:flex; justify-content:space-between; width:100%; text-align:left; }
+.account-page { padding:28px 32px; background:var(--am-panel); border-radius:var(--am-radius-card); min-height:calc(100dvh - 59px); min-width:0; }
+.account-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; }
+.account-heading h1 { font-size:20px; letter-spacing:0; margin:0 0 8px; line-height:1.3; font-weight:780; }
+.account-heading p { margin:0; color:var(--am-muted); font-size:13px; }
+.account-tabs { width:fit-content; margin-bottom:24px; }
+.summary { display:grid; grid-template-columns:1fr 1fr 1fr 1.7fr; background:var(--am-soft); border-radius:8px; padding:22px 24px; margin:0 0 28px; }
+.summary>div { padding:0 22px; border-right:1px solid var(--am-line); min-width:0; }
+.summary>div:first-child { padding-left:0; }
+.summary>div:last-child { border:0; padding-right:0; }
+.summary dt { font-size:12px; color:var(--am-muted); margin-bottom:10px; }
+.summary dd { margin:0; font-size:25px; font-weight:680; line-height:1.25; font-variant-numeric:tabular-nums; }
+.summary .date { font-size:19px; padding-top:4px; white-space:nowrap; }
+.section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:0 0 18px; }
+.section-head h2 { margin:0; font-size:18px; font-weight:680; }
+.section-head small { color:var(--am-faint); font-size:12px; }
+.plan-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+.plan-card { border:0; background:var(--am-control); border-radius:var(--am-radius-card); padding:24px; position:relative; display:flex; flex-direction:column; min-width:0; }
+.plan-card.current { background:var(--am-soft); }
+.plan-card h3 { font-size:19px; margin:17px 0 18px; font-weight:680; }
+.current-tag { position:absolute; top:13px; right:18px; background:var(--am-soft-2); color:var(--am-muted); border-radius:var(--am-radius-pill); font-size:10px; padding:3px 9px; }
+.price { display:flex; align-items:baseline; white-space:nowrap; gap:3px; line-height:1.1; }
+.price b { font-size:43px; font-weight:720; letter-spacing:0; }
+.price span { font-size:14px; }
+.price .currency { font-size:21px; font-weight:600; }
+.plan-points { font-size:17px; color:var(--am-muted); margin:12px 0 20px; }
+.plan-features { list-style:none; margin:0 0 24px; padding:18px 0 0; border-top:1px solid var(--am-line); font-size:12px; color:var(--am-muted); display:grid; gap:12px; flex:1; }
+.plan-features li { display:flex; gap:9px; align-items:center; }
+.tick { width:15px; height:15px; display:inline-grid; place-items:center; background:var(--am-faint); color:white; border-radius:50%; font-size:10px; }
+.notice { display:flex; gap:12px; align-items:flex-start; background:color-mix(in srgb,var(--am-orange) 8%,white); color:var(--am-orange); padding:16px 18px; border-radius:var(--am-radius-control); margin-top:20px; font-size:13px; line-height:1.6; }
+.notice .notice-icon { flex:none; border-radius:50%; width:19px; height:19px; background:var(--am-orange); color:white; text-align:center; line-height:19px; margin-top:1px; font-weight:700; }
+.notice strong { font-weight:600; }
+.notice small { display:block; color:var(--am-muted); font-size:12px; margin-top:3px; }
+.notice.info { background:color-mix(in srgb,var(--am-blue) 7%,white); color:var(--am-blue); }
+.notice.info .notice-icon { background:var(--am-blue); }
+.page-foot { border-top:1px solid var(--am-line-soft); padding-top:17px; color:var(--am-faint); font-size:12px; margin:22px 0 0; }
+.filters { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.detail-panel { margin-top:28px; border-radius:var(--am-radius-control); padding:24px; background:var(--am-control); }
+.detail-panel h3 {font-size:15px;margin:0 0 24px;}
+.detail-grid {display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:24px;}
+.detail-grid span{display:block;font-size:12px;color:var(--am-faint);margin-bottom:8px;}
+.detail-grid b{font-size:14px;font-weight:550;}
+.empty {padding:55px 20px;text-align:center;color:var(--am-faint);line-height:2;}
+.empty strong{display:block;color:var(--am-muted);font-size:16px;}
+.modal-head {display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;}
+.modal-head h2{font-size:24px;margin:0;font-weight:700;}
+.close-button{width:34px;height:34px;border:0;border-radius:50%;background:var(--am-control);color:var(--am-muted);font-size:22px;line-height:1;}
+.modal-sub{font-size:13px;color:var(--am-muted);line-height:1.7;margin:8px 0 23px;}
+.field {display:grid;gap:9px;margin-top:20px;font-size:13px;}
+.field>span{font-weight:400;}
+.field input { min-width:0; }
+.code-field{display:flex;align-items:center;background:var(--am-control);border-radius:10px;}
+.code-field input{min-width:0;}
+.code-field button{flex:none;background:none;border:0;padding:12px;font-size:12px;color:var(--am-muted);}
+.checkline{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--am-muted);line-height:1.7;margin:20px 0;}
+.checkline input{accent-color:var(--am-text);flex:none;width:15px;height:15px;margin-top:3px;}
+.checkline button{border:0;background:none;padding:0;font-size:12px;color:var(--am-text);}
+.modal-foot{margin-top:22px;display:flex;justify-content:flex-end;gap:10px;}
+.modal-foot button{flex:1;}
+.buy-summary {padding:19px;background:var(--am-soft);border-radius:var(--am-radius-control);margin-top:22px;}
+.buy-summary h3{font-size:16px;margin:0 0 12px;}
+.buy-summary .price b{font-size:35px;}
+.buy-summary p{font-size:13px;color:var(--am-muted);margin:9px 0 0;}
+.pay-total{display:flex;align-items:center;justify-content:space-between;padding-top:20px;gap:16px;}
+.pay-total b{font-size:27px;}
+.pay-total span{font-size:13px;}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;}
+.payment-methods label{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:48px;box-sizing:border-box;font-size:13px;line-height:18px;font-weight:400;border:1px solid var(--am-line);border-radius:var(--am-radius-control);padding:14px 16px;cursor:pointer;text-align:left;}
+.payment-methods label:has(input:checked){border-color:var(--am-text);background:var(--am-control);}
+.payment-methods input{position:absolute;width:1px;height:1px;margin:0;padding:0;border:0;clip-path:inset(50%);overflow:hidden;white-space:nowrap;}
+.payment-methods label:has(input:focus-visible){outline:2px solid var(--am-text);outline-offset:2px;}
+.success-icon{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--am-green) 10%,white);color:var(--am-green);font-size:27px;margin:8px auto 20px;}
+.center{text-align:center;}
+.center h2{font-size:24px;margin:0 0 10px;}
+.center p{color:var(--am-muted);font-size:13px;line-height:1.8;}
+.demo-label{display:inline-block;background:var(--am-control);border-radius:6px;padding:4px 8px;color:var(--am-faint);font-size:11px;margin-top:16px;}
+.state-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.state-card{background:var(--am-control);border-radius:var(--am-radius-card);padding:26px;}
+.state-card .eyebrow{font-size:11px;color:var(--am-faint);}
+.state-card h2{font-size:21px;margin:20px 0 12px;}
+.state-card p{font-size:13px;color:var(--am-muted);line-height:1.8;}
+.state-card button{margin-top:15px;}
+.state-card .notice{font-size:12px;padding:12px;}
+.spinner{width:26px;height:26px;border:3px solid var(--am-border-soft);border-top-color:var(--am-text);border-radius:50%;animation:spin .9s linear infinite;margin:22px auto;}
+@media(min-width:1500px){.account-page{padding:28px 32px;}.plan-card{padding:30px;}.plan-card h3{margin-top:18px;}.plan-features{font-size:14px;gap:16px;}.price b{font-size:48px;}}
+@media(max-width:1300px){.plan-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:1150px){.account-page{padding:28px 24px;}.plan-card{padding:18px 15px;}.price b{font-size:35px;}.summary{padding:20px 18px;}.summary>div{padding:0 12px;}.summary dd{font-size:22px;}.summary .date{font-size:15px;}.plan-features{font-size:11px;}}
+@media(max-width:850px){.account-page{padding:24px 20px;}.account-heading h1{font-size:20px;}.plan-grid{gap:10px;}.plan-card{padding:18px 12px;}.plan-card h3{font-size:17px;}.price b{font-size:29px;}.plan-points{font-size:14px;}.plan-features{font-size:10px;}.summary{grid-template-columns:1fr 1fr;gap:22px;}.summary>div{padding:0;border:0;}.summary dd{font-size:22px;}.summary .date{font-size:17px;}.state-grid{grid-template-columns:1fr;}.detail-grid{grid-template-columns:1fr 1fr;}.section-head{align-items:flex-start;flex-wrap:wrap;}}
+@media(max-width:600px){.account-page{min-height:calc(100dvh - 56px);padding:25px 18px;}.account-heading h1{font-size:20px;}.account-tabs{width:100%;gap:0;}.plan-grid{grid-template-columns:1fr;gap:13px;}.plan-card{padding:22px;}.plan-card h3{margin:0 0 15px;font-size:20px;}.price b{font-size:40px;}.plan-features{font-size:13px;gap:12px;}.plan-points{font-size:16px;}.plan-card .section-head small{font-size:11px;}.notice{font-size:12px;}.summary{padding:20px;}.summary .date{font-size:15px;}.detail-grid{grid-template-columns:1fr;}.records td,.records th{padding:16px 12px;}.modal-head h2{font-size:21px;}.pay-total b{font-size:24px;}.account-heading{margin-bottom:20px;}.state-card{padding:22px;}}
+/* Only prototype surfaces: do not override preserved settings panels. */
+.filters .am-select { width:auto; min-width:120px; }
+.filters [data-sub-action="refresh-ledger"] { font-weight:400; }
+.code-field { background:var(--am-control); border-radius:var(--am-radius-control); }
+.account-page .am-primary-action:active, #subscriptionModal .am-primary-action:active, .account-page .am-secondary-action:active, #subscriptionModal .am-secondary-action:active { transform:none; }
+.plan-card .am-primary-action { width:100%; }
+.identity .identity-trigger { align-items:center; justify-content:flex-start; gap:10px; padding:8px 0; border-radius:var(--am-radius-nav); color:var(--am-text); }
+.identity .identity-trigger:hover { background:var(--am-control); }
+.identity .identity-trigger:focus-visible { outline:3px solid var(--am-accent-soft); outline-offset:3px; }
+.identity-trigger strong { white-space:nowrap; }
+@media(min-width:601px) and (max-width:850px){.identity-trigger strong { display:none; }}
+.account-footer { display:flex; align-items:center; gap:4px; padding-top:14px; border-top:0; min-width:0; }
+/* 账号入口为单行文字，去掉分隔线和上内边距，与右侧收起按钮垂直居中。 */
+.account-footer .identity { border-top:0; padding-top:0; }
+.identity.is-logged-out { padding-top:0; }
+/* 未登录入口只剩「登录」两个字，它的左侧要与上方导航的「脚本 / 复盘」文字左侧对齐：
+   导航按钮左内边距 12px + 图标盒 20px + 图标与文字间距 12px，即距侧栏内容左缘 44px。
+   已登录时入口用于显示手机号，不受这条影响。 */
+@media(min-width:901px){
+  .account-footer .identity.is-logged-out .identity-trigger { padding-left:44px; }
+  .tool-layout:not(.is-account-collapsed) .account-footer .identity:not(.is-logged-out) .identity-trigger { padding-left:8px; }
+}
+.account-footer .identity-trigger { gap:7px; padding:6px 0; }
+.account-footer .identity-avatar { width:26px; height:26px; font-size:13px; }
+.identity-copy { display:grid; gap:4px; min-width:0; }
+.identity .identity-copy strong { font-size:11.5px; line-height:1.3; }
+.identity .identity-copy small { margin:0; color:var(--am-muted); font-size:10px; line-height:1.3; white-space:nowrap; }
+.summary { display:flex; flex-wrap:wrap; justify-content:flex-start; gap:0; background:transparent; padding:6px 0; border-radius:0; margin-bottom:28px; }
+.summary>div { flex:0 0 auto; padding:0 28px; border:0; border-left:1px solid var(--am-line-soft); min-width:120px; }
+.summary>div:first-child { padding-left:0; border-left:0; }
+.summary>div:last-child { border-left:1px solid var(--am-line-soft); padding-right:0; }
+.summary dt { color:var(--am-faint); font-size:11px; font-weight:600; margin-bottom:6px; }
+.summary dd { font-size:22px; font-weight:700; line-height:1.3; }
+.summary .date { font-size:19px; line-height:1.5; padding-top:0; }
+@media(min-width:601px) and (max-width:850px){.account-footer { flex-direction:column; gap:8px; }.identity-copy { display:none; }}
+@media(max-width:700px){.summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 0; }.summary>div { min-width:0; padding:0 14px; }.summary>div:nth-child(3) { padding-left:0; border-left:0; }.summary .date { font-size:15px; white-space:normal; }}
+/* V5: typography shared with the creator switcher; no avatar circle. */
+.identity .identity-copy strong, .popover-account-copy strong { font-size:14px; font-weight:700; line-height:1.3; }
+.identity .identity-copy small, .popover-account-copy small { display:block; margin:0; color:var(--am-muted); font-size:0.8rem; font-weight:400; line-height:1.45; }
+.popover-account-copy { display:grid; gap:4px; }
+/* Separate overview and tab content into two surfaces, matching the workbench module gap. */
+/* 整屏最小高度只撑开页面，不将剩余空间分配到概览和明细卡片。 */
+.account-page.split-modules { padding:0; background:transparent; border-radius:0; min-height:0; display:grid; align-content:start; gap:var(--workspace-gap); }
+.split-modules>.account-overview, .split-modules>#pageBody { background:var(--am-panel); border-radius:var(--am-radius-card); padding:28px 32px; min-width:0; }
+.split-modules .summary { margin-bottom:0; }
+@media(max-width:850px){.split-modules>.account-overview, .split-modules>#pageBody { padding:24px 20px; }}
+@media(max-width:600px){.split-modules>.account-overview, .split-modules>#pageBody { padding:25px 18px; }}
+/* Account-level navigation is larger than the compact settings tabs. */
+.account-tabs .project-settings-tab, #settingsContent .project-settings-tab { min-height:36px; padding:0 18px; font-size:14px; }
+/* Each subscription is an independent module on the workspace background. */
+.split-modules>#pageBody.plans-body { padding:0; background:transparent; border-radius:0; }
+.plans-body .plan-grid { gap:var(--workspace-gap); }
+.plans-body .plan-card { background:var(--am-panel); }
+.plan-card-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+.plan-card .plan-card-heading h3 { margin:0; }
+.plan-tier-tag { padding:5px 10px; border-radius:var(--am-radius-pill); font-size:12px; font-weight:600; line-height:1.4; white-space:nowrap; color:var(--tier-color); background:color-mix(in srgb,var(--tier-color) 9%,var(--am-panel)); }
+/* 三档额度标签的配色：不定义这三条，--tier-color 就是空的，标签会退化成黑字无底色。 */
+.tier-0 { --tier-color:var(--am-green); }
+.tier-1 { --tier-color:var(--am-blue); }
+.tier-2 { --tier-color:var(--am-orange); }
+.plan-title-row { display:flex; align-items:center; gap:8px; }
+.plan-title-row .current-tag { position:static; padding:0; border-radius:0; background:transparent; font-size:11px; color:var(--am-muted); }
+.plan-rules { background:var(--am-panel); border-radius:var(--am-radius-card); padding:24px 32px; margin-top:var(--workspace-gap); }
+.plan-rules .notice { margin-top:0; }
+@media(max-width:850px){.plan-rules { padding:24px 20px; }}
+@media(max-width:600px){.plan-rules { padding:25px 18px; }}
+.plan-card .plan-buy-button { width:100%; }
+.plan-card .plan-buy-button:hover, .plan-card .plan-buy-button:focus-visible { background:var(--am-accent); color:#fff; transform:none; }
+.plan-card .plan-points { display:flex; align-items:center; gap:6px; }
+.plan-card .plan-points strong { font-size:16px; font-weight:720; color:var(--am-text); line-height:1.3; font-variant-numeric:tabular-nums; }
+.plan-card .plan-points span { font-size:14px; line-height:1.3; font-weight:600; color:var(--am-muted); }
+#subscriptionModal .order-modal-detail .detail-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+#subscriptionModal .order-modal-detail .detail-grid>div:last-child { grid-column:1 / -1; }
+.plan-card .plan-entitlements { flex:none; margin-bottom:22px; font-size:14px; line-height:1.6; font-weight:600; color:var(--am-text); gap:8px; }
+.plan-capabilities { list-style:none; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px; margin:0 0 28px; padding:0; color:var(--am-muted); font-size:13px; line-height:1.6; flex:1; }
+.plan-capabilities li { display:flex; align-items:center; gap:7px; }
+.plan-capabilities .tick, .plan-entitlements .tick { flex-shrink:0; }
+@media(min-width:601px) and (max-width:1000px){.plan-capabilities { grid-template-columns:1fr; }}
+.plan-capabilities-label { margin:0 0 12px; font-size:12px; color:var(--am-faint); }
+.plan-capabilities .tick { background:transparent; color:var(--am-faint); width:12px; height:auto; font-size:12px; }
+.plan-entitlements .tick { background:transparent; color:var(--am-green); font-size:14px; }
+/* Shared table typography and compact, consistent record rows. */
+.records { white-space:nowrap; font-variant-numeric:tabular-nums; }
+.records th { padding:12px 14px; background:transparent; }
+.records th:first-child { border-radius:12px 0 0 12px; }
+.records th:first-child, .records td:first-child { padding-left:0; }
+.records th:last-child { border-radius:0 12px 12px 0; }
+.records td { height:62px; padding:12px 14px; box-sizing:border-box; }
+.records .record-name, .records .record-amount { color:var(--am-text); font-weight:600; }
+.records .record-meta { color:var(--am-muted); font-size:13px; }
+/* 积分明细：时间列右对齐，末列文字与上方筛选按钮右缘对齐。 */
+.records.ledger-table th:last-child, .records.ledger-table td:last-child { text-align:right; padding-right:0; }
+.records .numeric { text-align:right; }
+.records .point-change { font-weight:600; }
+.records .point-change.issued { color:var(--am-green); }
+.records .point-change.frozen { color:var(--am-blue); }
+.records .point-change.expired { color:var(--am-muted); }
+.record-status-neutral { background:var(--am-soft); color:var(--am-muted); }
+.record-link { display:inline-flex; align-items:center; min-height:34px; padding:0 8px; margin-left:-8px; border:0; border-radius:8px; background:transparent; color:var(--am-muted); font-size:13px; font-weight:500; }
+.record-link:hover, .record-link:focus-visible { background:var(--am-control); color:var(--am-text); text-decoration:underline; text-underline-offset:3px; }
+.records .record-action { min-height:34px; padding:0 12px; font-size:13px; border-radius:var(--am-radius-control); }
+.records .record-status-group { display:inline-flex; align-items:center; gap:10px; }
+.records .record-status-action { box-sizing:border-box; min-height:28px; display:inline-flex; align-items:center; padding:0 10px; border:1px solid var(--am-line-strong); border-radius:var(--am-radius-pill); background:var(--am-panel); color:var(--am-text); font-size:0.78rem; font-weight:600; line-height:1; white-space:nowrap; cursor:pointer; }
+.records .record-status-action:hover, .records .record-status-action:focus-visible { background:var(--am-control); border-color:var(--am-text); }
+.record-note { margin:16px 0 0; font-size:12px; line-height:1.6; color:var(--am-muted); }
+.popover-session { font-size:13px; line-height:1.4; color:var(--am-muted); }
+.workflow-demo-options { display:flex; flex-wrap:wrap; gap:16px; }
+.record-filter { min-width:120px; }
+.record-filter>.topics-select-button { width:100%; }
+.record-filter .topics-select-menu button:focus-visible { outline:none; background:var(--am-control); }
+
+/* 正式工作台布局适配：侧栏账户入口、账号悬浮卡片与账户页容器。
+   预览专用的顶栏与演示外壳不在此文件。 */
+.identity { min-width:0; }
+.identity .identity-trigger { display:flex; width:100%; border:0; background:transparent; font:inherit; text-align:left; cursor:pointer; }
+.account-footer .identity { flex:1; min-width:0; }
+#accountPopover { position:fixed; inset:auto; margin:0; width:260px; max-width:calc(100vw - 24px); padding:10px; border:0; border-radius:var(--am-radius-float); background:var(--am-panel); color:var(--am-text); box-shadow:var(--am-shadow-float); }
+#accountPopover::backdrop { background:transparent; }
+.account-popover-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:14px 12px 18px; border-bottom:1px solid var(--am-line-soft); }
+.account-popover-head strong { font-size:14px; font-weight:650; }
+.account-popover-list { display:grid; gap:4px; padding-top:8px; }
+.account-popover-list button { width:100%; display:flex; align-items:center; justify-content:space-between; min-height:36px; padding:0 12px; border:0; border-radius:var(--am-radius-nav); background:transparent; color:var(--am-text); font:inherit; font-size:14px; text-align:left; cursor:pointer; }
+.account-popover-list button:hover { background:var(--am-control); }
+.account-popover-list button:focus-visible { outline:3px solid var(--am-accent-soft); outline-offset:-3px; }
+.account-popover-list button>span:last-child { color:var(--am-faint); }
+.account-popover-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; padding:14px 12px 6px; border-top:1px solid var(--am-line-soft); }
+.account-popover-footer[hidden] { display:none; }
+.popover-session { font-size:13px; line-height:1.4; color:var(--am-muted); }
+.account-popover-footer .text-button { display:inline-flex; align-items:center; min-height:34px; padding:0 6px; border:0; border-radius:8px; background:transparent; color:var(--am-muted); font:inherit; font-size:13px; line-height:1.4; white-space:nowrap; cursor:pointer; }
+.account-popover-footer .text-button:hover { background:var(--am-control); color:var(--am-text); }
+/* 表单与列表的基础件：这两条确认版就有，正式表漏掉后窄屏表格不会横向滚动。 */
+.text-button { border:0; background:none; padding:2px 0; color:var(--am-muted); font-size:13px; cursor:pointer; }
+.text-button:hover { color:var(--am-text); }
+.table-scroll { overflow-x:auto; width:100%; }
+#settingsContent .project-settings-tab-row { border-bottom:0; }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition:none!important;}}
+#accountContent { min-height:calc(100dvh - 30px); }
+#subscriptionModal { border:0; border-radius:var(--am-radius-modal); width:min(520px,calc(100vw - 36px)); max-height:calc(100dvh - 32px); padding:30px; box-shadow:var(--am-shadow-modal); color:var(--am-text); background:white; overflow:auto; }
+#subscriptionModal::backdrop { background:rgba(var(--am-accent-rgb),.29); backdrop-filter:blur(3px); }
+#subscriptionModal .am-primary-action.full, #subscriptionModal .am-secondary-action.full { width:100%; }
+
+/* 支付方式图标：品牌色实心路径，与文字垂直居中。 */
+.pay-method-icon { flex:none; display:block; }
+
+/* Task attribution stays inside the existing business column. */
+.records .record-name { white-space: normal; overflow-wrap: anywhere; }
+.record-business-title { font-weight: 600; }
+.record-business-context, .record-interface { font-size: 12px; font-weight: 400; line-height: 1.6; color: #777980; white-space: normal; overflow-wrap: anywhere; }
+.record-business-context { margin-top: 5px; }
+.record-interface { margin-top: 6px; }
+.record-interface summary { cursor: pointer; color: #326de6; }
+.record-interface[open] summary { margin-bottom: 4px; }
+
+#subscriptionModal > .modal-head{margin-bottom:0}
+#subscriptionModal > .modal-sub,
+#subscriptionModal > .modal-head + section > .modal-sub:first-child{margin-top:var(--am-modal-subtitle-gap,8px)}
+
+/* Confirmed custom-service card and contact dialog; scoped to this feature. */
+.custom-service-card { background:#fff; border:0; }
+.custom-service-card .custom-title, .custom-service-card p, #subscriptionModal.custom-service-modal h2, #subscriptionModal.custom-service-modal p { margin:0; }
+.custom-service-card .plan-card-heading { margin-bottom:26px; }
+.custom-service-card .custom-title {font-size:40px;font-weight:700;letter-spacing:-1px;line-height:1.32;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.custom-service-card .custom-mark {font-size:30px;font-weight:400;color:#77a48f}
+.custom-service-card .custom-intro {font-size:14px;line-height:1.8;color:#6c8075;margin:13px 0 22px;max-width:265px}
+.custom-service-card .custom-detail {border-top:1px solid #dce7e0;padding-top:20px;flex:1}
+.custom-service-card .custom-lead {font-size:13px;color:#476958;font-weight:600}
+.custom-service-card .steps {list-style:none;margin:23px 0 27px;padding:0;display:grid;gap:23px}
+.custom-service-card .steps li {display:flex;align-items:flex-start;gap:14px}
+.custom-service-card .step-number {font-size:12px;font-variant-numeric:tabular-nums;color:#618672;border:1px solid #d4e3da;border-radius:50%;width:29px;height:29px;display:grid;place-items:center;flex:none}
+.custom-service-card .steps h3 {font-size:14px;font-weight:600;line-height:1.6}
+.custom-service-card .steps p {font-size:12px;line-height:1.6;color:#7c8e83;margin-top:3px}
+.custom-service-card .contact-button {background:#eaf4ef;color:#28795c;display:flex;align-items:center;justify-content:center;gap:9px}
+.custom-service-card .contact-button:hover {background:#20684e;color:#fff}
+.custom-service-card .contact-button span {font-size:19px;font-weight:400}
+#subscriptionModal.custom-service-modal {border:0;border-radius:24px;padding:28px 36px 0;width:440px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:auto;color:#202122;background:#fff;box-shadow:0 24px 100px #142a2424}
+#subscriptionModal.custom-service-modal::backdrop {background:#19241f61;backdrop-filter:blur(4px)}
+#subscriptionModal.custom-service-modal .dialog-heading {display:flex;justify-content:space-between;align-items:center;margin-bottom:21px}
+#subscriptionModal.custom-service-modal .dialog-eyebrow {display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#eaf4ef;font-size:12px;font-weight:400;line-height:1.5;color:#278467}
+#subscriptionModal.custom-service-modal .close-button {width:30px;height:30px;border-radius:50%;background:#f4f5f4;color:#858d87;font-size:24px;line-height:1}
+#subscriptionModal.custom-service-modal .close-button:hover {background:#e8ede9}
+#subscriptionModal.custom-service-modal h2 {font-size:25px;letter-spacing:-.4px}
+#subscriptionModal.custom-service-modal #customDialogDescription {font-size:13px;line-height:1.8;color:#797b80;margin:10px 0 23px}
+#subscriptionModal.custom-service-modal .contact-panel {background:transparent;border:0;border-radius:16px;text-align:center;padding:22px 20px 20px}
+#subscriptionModal.custom-service-modal .contact-qr {width:216px;max-width:100%;box-sizing:border-box;margin:auto;padding:12px;border-radius:20px;background:#fff;border:1px solid #eceeed}
+#subscriptionModal.custom-service-modal .contact-qr img {display:block;width:100%;height:auto}
+#subscriptionModal.custom-service-modal .wechat-id {font-size:17px;line-height:1.5;font-weight:600;color:var(--am-text,#202122);margin-top:16px}
+#subscriptionModal.custom-service-modal .scan-caption {font-size:12px;line-height:1.7;font-weight:400;color:var(--am-muted,#797b80);margin-top:6px}
+#subscriptionModal.custom-service-modal #customDialogDescription {font-weight:400}
+#subscriptionModal.custom-service-modal .contact-tip {font-size:12px;font-weight:400;color:var(--am-muted,#797b80);line-height:1.8;text-align:center;margin:18px 0}
+.custom-service-card .steps h3 { margin:0; font-size:14px; line-height:1.6; font-weight:600; }
+.custom-service-card .contact-button { width:100%; min-height:46px; border:0; border-radius:13px; font-size:15px; font-weight:650; cursor:pointer; transition:background .15s,color .15s; }
+.custom-service-card .contact-button:focus-visible { outline:3px solid #67ad95; outline-offset:4px; }
+#subscriptionModal.custom-service-modal .dialog-eyebrow i { width:6px; height:6px; display:inline-block; border-radius:50%; background:#278467; }
+#subscriptionModal.custom-service-modal .close-button:focus-visible { outline:3px solid #67ad95; outline-offset:4px; }
+@media(max-width:1400px){.custom-service-card .custom-title{font-size:34px;}}
+@media(max-width:1300px){.custom-service-card .custom-title{font-size:40px;}}
+@media(max-width:600px){.custom-service-card{min-height:530px;}#subscriptionModal.custom-service-modal{padding:22px 24px 0;}#subscriptionModal.custom-service-modal h2{font-size:23px;}#subscriptionModal.custom-service-modal .contact-panel{padding:20px;}#subscriptionModal.custom-service-modal .desktop-break{display:none;}}
+@media(prefers-reduced-motion:reduce){.custom-service-card .contact-button{transition:none;}}
+
+/* Platform-backed optional discounts and neutral standard-plan labels. */
+.plan-card:not(.custom-service-card) .plan-tier-tag { background:var(--am-control); color:var(--am-text); }
+.plan-card .discount-pricing { font-variant-numeric:tabular-nums; }
+.plan-card .original-price-row { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px; min-height:25px; }
+.plan-card .original-price { font-size:13px; color:#94969b; }
+.plan-card .original-price del { text-decoration-thickness:1px; }
+.plan-card .discount-badge { display:inline-flex; align-items:center; padding:4px 9px; background:#fbefe6; color:#b9692b; border-radius:6px; font-size:12px; line-height:1.4; font-weight:650; }
+.plan-card .discount-pricing .price .sale-label { color:#94969b; font-size:12px; margin-left:8px; font-weight:400; letter-spacing:0; }
+.plan-card .discount-pricing .price { gap:4px; flex-wrap:wrap; }
+@media(max-width:1400px) and (min-width:1301px){.plan-card .discount-pricing .price b{font-size:40px;}}
+
+/* Redemption uses the existing purchase dialog and normal-weight form copy. */
+#subscriptionModal .redeem-label { display: block; margin: 16px 0 8px; font-weight: 400; }
+#subscriptionModal .redeem-input { box-sizing: border-box; font-weight: 400; }
+#subscriptionModal .redeem-benefits { padding-left: 20px; font-size: 14px; line-height: 1.8; font-weight: 400; }
+#subscriptionModal .payment-methods label:last-child:nth-child(3) { grid-column: 1 / -1; }
+#subscriptionModal.redemption-modal .notice strong { font-weight: 400; }
+#subscriptionModal #subRedeemError { color: #a64520; font-weight: 400; overflow-wrap: anywhere; }
+
+/* Success receipt: amount first, benefits second, settlement details last. */
+#subscriptionModal .payment-success-amount { display:flex; align-items:baseline; justify-content:center; flex-wrap:wrap; gap:8px; margin:0 0 16px; color:var(--am-text); font-size:18px; font-weight:600; line-height:1.3; }
+#subscriptionModal .payment-success-amount strong { font-size:32px; font-weight:700; font-variant-numeric:tabular-nums; }
+#subscriptionModal .payment-success-benefit { margin:0 0 14px; color:var(--am-text); font-size:15px; font-weight:400; }
+#subscriptionModal .payment-success-period { margin:0 0 6px; font-size:12px; }
+#subscriptionModal .payment-success-note { margin:0; font-size:12px; }
+#subscriptionModal .payment-success > button { margin-top:24px; }
+
+/* Native payment shares the existing account dialog typography and actions. */
+.native-payment-qr { display:block; width:224px; height:224px; max-width:100%; margin:20px auto; background:#fff; }
+.native-payment-placeholder { min-height:144px; display:grid; place-items:center; color:var(--am-text-secondary, #6e6e73); }
+.native-payment-message { min-height:24px; overflow-wrap:anywhere; }
+.native-payment p { overflow-wrap:anywhere; }
+
+/* Account overview and independent list dialogs. */
+.account-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.account-orders { flex-shrink:0; }
+.summary { row-gap:20px; }
+.summary dd { display:flex; align-items:center; gap:12px; }
+.summary .account-subscribe { min-height:30px; padding:4px 12px; font-size:13px; font-weight:500; }
+#accountListModal { box-sizing:border-box; border:0; color:var(--am-text); background:var(--am-panel); padding:28px 32px; }
+#accountListModal::backdrop { background:rgba(0,0,0,.35); }
+#accountListModal.account-plans-modal { width:100vw; height:100dvh; max-width:none; max-height:none; margin:0; border-radius:0; background:var(--am-bg,#f5f5f7); }
+#accountListModal.account-orders-modal { width:1200px; max-width:calc(100vw - 32px); max-height:calc(100dvh - 48px); border-radius:18px; }
+#accountListModal>.modal-head { margin-bottom:28px; }
+#accountListModal .account-list-body { min-width:0; }
+.account-orders-modal .section-head h2 { display:none; }
+.account-orders-modal .section-head { justify-content:flex-end; }
+@media(max-width:700px) {
+  .summary>div:nth-child(odd) { padding-left:0; border-left:0; }
+  .summary>div:first-child { grid-column:1 / -1; }
+  #accountListModal { padding:24px 18px; }
+  .summary dd { flex-wrap:wrap; }
+}
+
+/* Content-sized order dialog; shared close-control feedback. */
+.summary .account-subscribe { background:#000; color:#fff; }
+.summary .account-subscribe:hover { background:#222; color:#fff; }
+
+.points-expiry { margin-top:24px; padding-top:20px; border-top:1px solid var(--am-line-soft); }
+.points-expiry h2 { margin:0 0 8px; font-size:15px; font-weight:600; }
+.points-expiry p { margin:0 0 12px; color:var(--am-muted); font-size:13px; line-height:1.6; }
+.points-expiry ul { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.points-expiry li { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 20px; font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.points-expiry li>span:first-child { flex:1 1 120px; }
+.points-expiry li>strong { font-weight:600; font-variant-numeric:tabular-nums; }
+.points-expiry li>span:last-child { color:var(--am-muted); font-variant-numeric:tabular-nums; }
+#accountListModal .am-modal-dismiss:hover,
+#accountListModal .am-modal-dismiss:focus-visible { background:var(--am-soft-2); }
+#accountListModal.account-orders-modal { height:fit-content; overflow:hidden; }
+#accountListModal.account-orders-modal[open] { display:flex; flex-direction:column; }
+#accountListModal.account-orders-modal>.modal-head { flex:none; }
+#accountListModal.account-orders-modal>.account-list-body { flex:0 1 auto; min-height:0; overflow:auto; scrollbar-gutter:stable; }

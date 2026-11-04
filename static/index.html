@@ -1,0 +1,2315 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>墨鱼新媒体工作台 ·  MoFish</title>
+    <link rel="icon" type="image/png" href="/static/images/mofish-logo.png?v=20261020-no-headphones" />
+    <link rel="stylesheet" href="/ui-design-standard/apple-minimal.css?v=20261103-workbench-standard" />
+    <link rel="stylesheet" href="/static/writing-assistants.css?v=20261023-switch-agent-v1" />
+    <link rel="stylesheet" href="/static/styles.css?v=20261102-breakdown-button-size" />
+    <link rel="stylesheet" href="/static/breakdown-rewrite.css?v=20261102-v1" />
+    <link rel="stylesheet" href="/static/breakdown-results.css?v=20261017-author-actions-v1" />
+    <link rel="stylesheet" href="/static/subscription.css?v=20261031-ledger-refresh-weight" />
+    <link rel="stylesheet" href="/static/updates.css?v=20261102-login-update-dot-v3" />
+    <link rel="stylesheet" href="/static/onboarding.css?v=20261024-content-sources-v1" />
+    <link rel="stylesheet" href="/static/plugin-management.css?v=20261026-restart-no-shadow" />
+    <link rel="stylesheet" href="/static/trial-gift.css?v=20261030-card-copy-5" />
+    <link rel="stylesheet" href="/static/home-dashboard.css?v=20261019-home-heading-v2" />
+    <link rel="stylesheet" href="/static/overlay-scroll.css?v=20261019-v1" />
+    <link rel="stylesheet" href="/static/radar-layout.css?v=20261031-detail-actions-v2" />
+    <link rel="stylesheet" href="/static/topic-entry-modal.css?v=20261102-chevron-v4" />
+    <link rel="stylesheet" href="/static/page-headers.css?v=20261031-plugin-stage-insets" />
+    <link rel="stylesheet" href="/static/creation-layout.css?v=20261031-split-panels" />
+    <script src="/static/focus-policy.js?v=20261031-shared-focus" defer></script>
+    <script src="/static/date-time-picker.js?v=20261031-1" defer></script>
+    <script src="/static/overlay-scroll.js?v=20261019-v1" defer></script>
+    <link rel="stylesheet" href="/static/legal-documents.css?v=20261102-legal-v6" />
+  </head>
+  <body class="is-app-loading">
+    <div class="am-page">
+      <div id="toast" class="am-toast" popover="manual" role="status" aria-live="polite"></div>
+
+      <main class="tool-shell">
+        <section id="workspaceGate" class="workspace-gate" aria-labelledby="workspaceGateTitle" aria-busy="true">
+          <img src="/static/images/mofish-logo.png?v=20261020-no-headphones" width="64" height="64" alt="" />
+          <h1 id="workspaceGateTitle">正在读取工作台…</h1>
+          <p id="workspaceGateDescription">请稍候，即将准备就绪。</p>
+          <button id="workspaceGateCreate" class="am-primary-action" type="button" hidden>新建工作台</button>
+          <button id="workspaceGateRetry" class="am-primary-action" type="button" hidden>重新读取</button>
+        </section>
+        <div class="tool-layout" hidden inert>
+          <aside id="accountSidebar" class="account-sidebar" aria-label="工作台导航">
+            <div class="account-switcher-head">
+              <button id="accountSwitcherButton" class="account-switcher-button" type="button" aria-expanded="false" aria-controls="accountSwitcherPopover">
+                <img id="currentAccountAvatar" class="workspace-brand-logo" src="/static/images/mofish-logo.png?v=20261020-no-headphones" width="42" height="42" alt="" aria-hidden="true" />
+                <span class="account-switcher-copy"><strong id="currentAccountName">读取账号…</strong><small id="currentAccountPlatform"></small></span>
+              </button>
+            </div>
+            <nav class="workspace-navigation" aria-label="工作台功能">
+              <button type="button" data-workspace-module="today" title="工作概况"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="10" rx="1.5"/><rect x="14" y="3" width="7" height="6" rx="1.5"/><rect x="14" y="13" width="7" height="8" rx="1.5"/><rect x="3" y="17" width="7" height="4" rx="1.5"/></svg></span><span class="navigation-label">工作概况</span></button>
+              <button type="button" data-workspace-module="radar" title="内容采集"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10m-4-4 4 4 4-4"/><path d="M5 10 3 15v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-5l-2-5"/><path d="M3 15h5l2 3h4l2-3h5"/></svg></span><span class="navigation-label">内容采集</span></button>
+              <button type="button" data-workspace-module="monitor" title="对标监控"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M6 11h3l2-4 3 7 2-3h2"/></svg></span><span class="navigation-label">对标监控</span></button>
+              <button type="button" data-workspace-module="split" title="拆解视频"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4m-11-6 4 3-4 3Z"/></svg></span><span class="navigation-label">拆解视频</span></button>
+              <button type="button" data-workspace-module="topics" title="本周选题"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 9-9 9-9-9Z"/><path d="m12 8 4 4"/></svg></span><span class="navigation-label">本周选题</span></button>
+              <button type="button" data-workspace-module="create" title="创作助手"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5h15"/><path d="m16.5 4.5 3 3L9 18H6v-3Z"/></svg></span><span class="navigation-label">创作助手</span></button>
+              <button type="button" data-workspace-module="scripts" title="内容发布"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></span><span class="navigation-label">内容发布</span></button>
+              <button type="button" data-workspace-module="review" title="数据复盘"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16M8 16v-5M13 16V7M18 16v-8"/></svg></span><span class="navigation-label">数据复盘</span></button>
+            </nav>
+            <div class="sidebar-footer account-footer">
+              <div id="accountIdentity" class="identity"></div>
+              <button id="toggleAccountSidebar" class="sidebar-icon-button" type="button" aria-label="收起账号栏" title="收起账号栏"><span aria-hidden="true"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></span></button>
+            </div>
+          </aside>
+
+          <section id="modulePlaceholder" class="module-placeholder" hidden><h2 id="modulePlaceholderTitle" class="am-section-title"></h2></section>
+          <section id="homeContent" class="home-content home-redesign" aria-label="账号运营首页" hidden>
+          <section class="home-panel home-overview" aria-label="账号运营概览">
+          <header class="home-header">
+          <div class="home-header-copy">
+          <h2 id="homeTitle" class="am-section-title">工作概况</h2>
+          <p id="homeDate" class="home-subtitle">读取中…</p>
+          </div>
+          <div class="home-header-actions">
+          <button id="homeBreakdownButton" class="am-secondary-action home-breakdown-button" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="16" rx="2"/>
+          <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4m-7-6 4 3-4 3Z"/>
+          </svg>
+          <span>拆解视频</span>
+          </button>
+          <button id="homeNewScriptButton" class="am-primary-action" type="button">
+          <svg class="home-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+          <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>新建脚本</span>
+          </button>
+          </div>
+          </header>
+          <section class="home-stats-panel" aria-label="账号内容统计">
+          <div id="homeStatsList" class="home-stats-list" role="list">
+          </div>
+          <p id="homeStatsMessage" class="home-message" hidden>
+          </p>
+          </section>
+          </section>
+          <section id="homeOnboarding" class="home-panel" aria-label="账号起步引导" hidden>
+          </section>
+          <div class="home-feature-grid">
+          <section class="home-focus">
+          <div id="homeTodayFocus" class="home-focus-page" tabindex="-1">
+          <p class="home-focus-eyebrow">
+          <span>
+          </span> TODAY’S FOCUS · 今日重点</p>
+          <h3 id="homeFocusTitle">正在整理今日工作…</h3>
+          <p id="homeFocusDescription">
+          </p>
+          <div class="home-focus-actions">
+          <button id="homeFocusAction" type="button">处理今日待办 ↗</button>
+          <button id="homeFocusOverdue" type="button">查看逾期安排 →</button>
+          </div>
+          </div>
+          <div id="trialGiftPanel" class="home-focus-page" hidden>
+            <p class="home-focus-eyebrow"><span></span> 创作体验 · 注册账号专享</p>
+            <h3 id="trialGiftTitle"></h3>
+            <p id="trialGiftDescription" class="trial-gift-description">添加微信联系管理员，领取一次创作体验积分。
+新老注册账号均可参与。</p>
+            <div class="home-focus-actions"><button id="trialGiftOpen" type="button">立即领取积分</button></div>
+          </div>
+          <svg class="trial-gift-ticket" viewBox="0 0 260 180" fill="none" aria-hidden="true" focusable="false">
+            <path d="M26 14H234Q246 14 246 26V66C218 66 218 114 246 114V154Q246 166 234 166H26Q14 166 14 154V114C42 114 42 66 14 66V26Q14 14 26 14Z" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M184 29V151" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 7"/>
+            <path d="M64 70H146M64 90H126M64 110H108" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <button id="trialGiftRotationControl" class="trial-gift-rotation-control" type="button" aria-pressed="false" hidden>暂停自动切换</button>
+          <div id="trialGiftTabs" class="trial-gift-tabs" role="group" aria-label="首页重点切换" hidden>
+            <button id="trialGiftOfferTab" type="button" aria-controls="trialGiftPanel" aria-label="体验积分" aria-pressed="false"><span aria-hidden="true"></span></button>
+            <button id="trialGiftTodayTab" type="button" aria-controls="homeTodayFocus" aria-label="今日重点" aria-pressed="true"><span aria-hidden="true"></span></button>
+          </div>
+          </section>
+          <section class="home-panel home-week-panel" aria-label="本周进度">
+          <div class="home-panel-head">
+          <h3 class="home-panel-title">本周发布节奏</h3>
+          <button id="homeWeekPlanButton" class="home-link-button" type="button">查看计划 ↗</button>
+          </div>
+          <div class="home-week-body">
+          <div id="homeWeekRing" class="home-week-ring">
+          <div>
+          <strong id="homeWeekProgress">—</strong>
+          <small>已发布 / 周目标</small>
+          <span id="homeWeekPercent" class="home-sr-only">
+          </span>
+          </div>
+          </div>
+          <div class="home-week-copy">
+          <strong id="homeWeekHeadline">
+          </strong>
+          <p id="homeWeekRange">
+          </p>
+          <div id="homeWeekDays" class="home-week-days">
+          </div>
+          </div>
+          </div>
+          <div class="home-week-track" hidden>
+          <span id="homeWeekBar" class="home-week-fill">
+          </span>
+          </div>
+          <ul id="homeWeekMeta" class="home-week-meta" hidden>
+          </ul>
+          <p id="homeWeekMessage" class="home-message" hidden>
+          </p>
+          </section>
+          </div>
+          <div class="home-layout">
+          <div class="home-column home-column-main">
+          <section id="homeTaskPanel" class="home-panel" aria-label="今日任务">
+          <div class="home-panel-head">
+          <div class="home-panel-title-row">
+          <h3 class="home-panel-title">今日待推进</h3>
+          <span id="homeTaskCount" class="home-panel-count">
+          </span>
+          </div>
+          <button id="homeAddTaskButton" class="am-secondary-action home-compact-action" type="button">＋ 添加任务</button>
+          </div>
+          <div class="home-due-tabs" role="group" aria-label="待办筛选">
+          <button id="homeDueAll" type="button" aria-pressed="true">全部待办</button>
+          <button id="homeDueOverdue" type="button" aria-pressed="false">逾期事项</button>
+          </div>
+          <ul id="homeTaskList" class="home-task-list">
+          </ul>
+          <p id="homeTaskEmpty" class="home-empty" hidden>今天没有待办，安排一个新任务吧。</p>
+          <p id="homeTaskMessage" class="home-message" hidden>
+          </p>
+          <div class="home-due-footer">
+          <button id="homeTaskMoreButton" class="home-link-button" type="button">查看全部任务 →</button>
+          <div class="home-due-pages">
+          <span id="homeDuePage">
+          </span>
+          <button id="homeDuePrev" type="button" aria-label="上一页待办"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+          <button id="homeDueNext" type="button" aria-label="下一页待办"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
+          </div>
+          </div>
+          </section>
+          </div>
+          <div class="home-column home-column-side">
+          <section id="homeInspirationPanel" class="home-panel" aria-label="灵感速记">
+          <div class="home-panel-head">
+          <h3 class="home-panel-title">
+          <span class="home-idea-mark" aria-hidden="true">✳</span> 灵感，先记下来</h3>
+          <button id="homeInspirationMoreButton" class="home-link-button" type="button">查看全部 →</button>
+          </div>
+          <textarea id="homeInspirationInput" class="am-textarea home-inspiration-input" maxlength="2000" placeholder="刚刷到一个好选题？记下一句话，稍后再展开。"></textarea>
+          <div class="home-inspiration-row">
+          <input id="homeInspirationSourceInput" class="am-input" type="text" maxlength="500" placeholder="来源或参考链接（选填）" autocomplete="off" />
+          <button id="homeInspirationSaveButton" class="am-primary-action" type="button">保存灵感</button>
+          </div>
+          <p id="homeInspirationMessage" class="home-message" hidden>
+          </p>
+          <p id="homeIdeaPending" class="home-idea-pending" hidden>
+          </p>
+          <div class="home-list-block">
+          <p id="homeInspirationRecentLabel" class="home-list-label" hidden>最近记录</p>
+          <ul id="homeInspirationList" class="home-inspiration-list">
+          </ul>
+          <p id="homeInspirationEmpty" class="home-empty" hidden>还没有记录，随手记下第一条想法。</p>
+          </div>
+          </section>
+          <section id="homeAdvicePanel" class="home-panel home-advice-panel" aria-label="账号下一步建议" hidden>
+          <h3 class="home-panel-title">账号下一步建议</h3>
+          <p class="home-advice-hint">读取账号建议…</p>
+          </section>
+          </div>
+          </div>
+          <div class="home-bottom-grid">
+          <section class="home-panel home-discovery">
+          <div class="home-panel-head">
+          <h3 class="home-panel-title">为下一条内容找方向</h3>
+          <span class="home-discovery-caption">发现 → 拆解 → 创作</span>
+          </div>
+          <div class="home-discovery-entries">
+          <button class="home-discovery-entry" type="button" data-home-navigation="radar">
+          <span class="home-discovery-symbol">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 3h8a1 1 0 0 1 1 1v7H7V4a1 1 0 0 1 1-1Z"/>
+          <path d="M10 6h4M10 8.5h3M5 10l-2 5v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-5l-2-5"/>
+          <path d="M3 15h5l2 3h4l2-3h5"/>
+          </svg>
+          </span>
+          <span>
+          <strong>内容采集</strong>
+          <small>收集值得参考的内容</small>
+          </span>
+          </button>
+          <button class="home-discovery-entry" type="button" data-home-navigation="monitor">
+          <span class="home-discovery-symbol">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="13" rx="2"/>
+          <path d="M8 21h8M12 17v4M6 12h3l2-4 3 6 2-3h2"/>
+          </svg>
+          </span>
+          <span>
+          <strong>对标监控</strong>
+          <small>看看对标账号的新动态</small>
+          </span>
+          </button>
+          <button class="home-discovery-entry" type="button" data-home-navigation="topics">
+          <span class="home-discovery-symbol">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="16" rx="2"/>
+          <path d="M8 3v4M16 3v4M4 10h16m-12 5 2.5 2.5L16 12"/>
+          </svg>
+          </span>
+          <span>
+          <strong>本周选题</strong>
+          <small>把灵感安排进计划</small>
+          </span>
+          </button>
+          </div>
+          </section>
+          <section class="home-review-entry">
+          <div>
+          <h3 class="home-panel-title">发布之后，回来看看</h3>
+          <p>进入数据复盘，找到下一条内容的改进方向。</p>
+          </div>
+          <button type="button" data-home-navigation="review" aria-label="进入数据复盘">↗</button>
+          </section>
+          </div>
+          </section>
+          <!-- 拆解视频 -->
+
+          <section id="breakdownContent" class="breakdown-content" aria-label="拆解视频" hidden>
+            <div class="breakdown-layout">
+              <aside class="breakdown-panel breakdown-sidebar" aria-label="拆解记录">
+                <div class="breakdown-panel-head">
+                  <h3 class="breakdown-panel-title">拆解记录</h3>
+                  <p id="breakdownCount" class="list-subtitle">共 0 条拆解记录</p>
+                </div>
+                <p id="breakdownEmpty" class="breakdown-empty" hidden>还没有拆解记录，粘贴一条分享链接开始。</p>
+                <ul id="breakdownList" class="breakdown-list"></ul>
+              </aside>
+
+              <div class="breakdown-main">
+                <header id="breakdownIntro" class="breakdown-intro">
+                  <h2 class="am-section-title">拆解视频</h2>
+                  <p>粘贴视频链接，获取文案并分析内容结构</p>
+                  <ol class="breakdown-guide" aria-label="创作步骤引导">
+                    <li><span>1</span>输入链接</li><li><span>2</span>查看拆解</li><li><span>3</span>加入选题</li><li><span>4</span>创作脚本</li>
+                  </ol>
+                </header>
+                <section id="breakdownResult" class="breakdown-result" aria-label="拆解结果" hidden>
+                  <header class="section-head split-stage-header">
+                    <div id="breakdownResultHeading" class="breakdown-result-heading">
+                      <h3 id="breakdownResultTitle" class="am-section-title">脚本文案</h3>
+                      <p id="breakdownResultMeta" class="stage-description">视频、文案与拆解分析都在这一张卡片里</p>
+                      <p id="breakdownResultFees" class="breakdown-result-fees" hidden></p>
+                    </div>
+                    <div class="breakdown-result-actions">
+                      <div class="breakdown-result-buttons">
+                        <button id="breakdownNewButton" class="am-primary-action workspace-create-script" type="button">新建拆解</button>
+                        <button id="breakdownRewriteButton" class="script-move-button" type="button" disabled>仿写脚本</button>
+                        <div id="breakdownActionsControl" class="script-actions-control">
+                          <button id="breakdownActionsButton" class="script-move-button" type="button" aria-expanded="false" aria-controls="breakdownActionsPanel" disabled>操作<svg class="cover-ratio-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                          <div id="breakdownActionsPanel" class="script-actions-panel" role="group" aria-label="拆解操作" hidden>
+                            <button id="breakdownCollectCopyButton" class="script-actions-item" type="button" disabled>加入爆款文案</button>
+                            <button id="breakdownAddTopicButton" class="script-actions-item" type="button" disabled>加入选题</button>
+                            <button id="breakdownDeleteButton" class="script-delete-action" type="button" disabled>删除</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </header>
+                  <div id="breakdownWorkbench" class="workbench" data-visible-panels="video content">
+                    <section id="breakdownContentPanel" class="panel source-panel" data-id="content" aria-label="拆解结果">
+                      <div id="breakdownPanelTabs" hidden><button id="breakdownTranscriptTab" type="button">完整文案</button><button id="breakdownAnalysisTab" type="button">拆解分析</button></div>
+                      <div id="breakdownAnalysisBody" class="breakdown-analysis-body" hidden></div>
+                      <div id="breakdownAnalysisState" class="breakdown-analysis-state" hidden>
+                        <p id="breakdownAnalysisEmpty" class="write-panel-hint" role="status" aria-live="polite"></p>
+                        <button id="breakdownAnalyzeButton" class="am-secondary-action" type="button" hidden>开始分析</button>
+                      </div>
+                    </section>
+                    <aside id="breakdownVideoPanel" class="panel video-panel" data-id="video">
+                      <h2 class="breakdown-media-heading">原视频</h2>
+                      <div class="video">
+                        <video id="breakdownVideo" controls playsinline preload="metadata" hidden></video>
+                        <button id="breakdownPlaybackToggle" class="play" type="button" aria-label="播放视频" aria-pressed="false" hidden></button>
+                        <span class="duration" hidden>00:00 / 00:00</span>
+                        <p id="breakdownMediaEmpty" hidden>原视频不可用，可查看完整文案。</p>
+                      </div>
+                      <h2 class="breakdown-media-heading breakdown-transcript-heading">完整文案</h2>
+                      <div class="breakdown-transcript-tools">
+                        <button id="breakdownCopyTranscript" type="button">复制全文</button>
+                        <button id="breakdownDownloadSrt" type="button">下载 SRT</button>
+                        <label><input id="breakdownFollowPlayback" type="checkbox" checked />跟随播放</label>
+                      </div>
+                      <div id="breakdownTranscript" class="transcript" hidden></div>
+                      <p id="breakdownTranscriptEmpty" class="write-panel-hint">暂无视频文案。</p>
+                    </aside>
+                  </div>
+                  <section id="breakdownTimeline" class="timeline">
+                    <div id="breakdownTrack" class="track" hidden aria-label="音轨时间线">
+                      <strong class="clock">00:00</strong>
+                      <div class="ticks" aria-hidden="true"></div>
+                      <div id="breakdownWaveform" class="wave" aria-hidden="true"></div>
+                      <div id="breakdownPlayhead" class="playhead" aria-hidden="true"><span>00:00</span></div>
+                    </div>
+                  </section>
+                  <p id="breakdownHint" class="hint">点击字幕或拖动定位线：视频、SRT 高亮和音轨位置保持同步。</p>
+                </section>
+
+                <p id="breakdownRecordLoading" class="stage-description" role="status" hidden>正在读取拆解记录…</p>
+                <form id="breakdownForm" class="breakdown-panel breakdown-form" novalidate>
+                    <textarea id="breakdownShareInput" class="am-textarea breakdown-share" placeholder="粘贴抖音或视频号的视频分享链接地址" aria-label="视频分享链接" autocomplete="off"></textarea>
+                  <div class="breakdown-form-footer">
+                    <p id="breakdownFeeCap" class="breakdown-fee-cap" hidden></p>
+                  <div class="breakdown-form-actions">
+                    <button id="breakdownPasteButton" class="am-secondary-action" type="button">粘贴</button>
+                    <button id="breakdownChooseMediaButton" class="am-secondary-action" type="button" hidden>选择本地音视频</button>
+                    <button id="breakdownClearButton" class="am-secondary-action" type="button">清空</button>
+                    <button id="breakdownSubmitButton" class="am-primary-action" type="submit">开始拆解</button>
+                  </div>
+                  </div>
+                  <input id="breakdownMediaInput" class="breakdown-media-input" type="file" accept="video/*,audio/*,.mp4,.mov,.mkv,.webm,.avi,.m4a,.mp3,.wav,.aac,.flac" hidden />
+                  <p id="breakdownMediaState" class="breakdown-media-state" hidden></p>
+                  <p id="breakdownFormMessage" class="breakdown-form-message" role="status" hidden></p>
+
+                </form>
+                <section id="breakdownTaskState" class="breakdown-task-state breakdown-panel" aria-label="拆解进度" hidden>
+                  <header class="breakdown-task-header">
+                    <div id="breakdownTaskCopy" class="breakdown-task-copy">
+                      <h3 id="breakdownTaskTitle" class="breakdown-task-heading">正在拆解视频</h3>
+                      <p id="breakdownTaskMessage" class="breakdown-task-message" role="status" aria-live="polite"></p>
+                    </div>
+                    <div class="breakdown-task-header-actions">
+                      <button id="breakdownTaskNewButton" class="am-primary-action workspace-create-script" type="button">新建拆解</button>
+                    </div>
+                  </header>
+                  <span id="breakdownTaskIndicator" class="task-status-indicator" aria-hidden="true"></span>
+                  <div class="breakdown-task-body">
+                    <ol id="breakdownProgress" class="breakdown-progress" aria-label="处理阶段" aria-live="polite"></ol>
+                    <footer class="breakdown-task-footer">
+                      <div id="breakdownStageSummary" class="breakdown-stage-summary" aria-label="解析与转写两段结算" hidden></div>
+                      <p id="breakdownTaskDiagnostic" class="breakdown-task-diagnostic" hidden></p>
+                      <div id="breakdownTaskActions" class="breakdown-task-actions" hidden>
+                        <button id="breakdownRetryButton" class="am-primary-action" type="button" hidden>重新拆解</button>
+                        <button id="breakdownFailedDelete" class="am-secondary-action" type="button" hidden>删除</button>
+                      </div>
+                    </footer>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </section>
+
+          <!-- 字段沿用「监控 → 加入选题」的 home-field 规范，两处弹窗不再各写一套样式。 -->
+          <div id="breakdownTopicModal" class="prompt-modal breakdown-topic-modal topic-entry-modal" hidden>
+            <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="breakdownTopicModalTitle">
+              <header class="modal-header"><h2 id="breakdownTopicModalTitle" class="modal-title">加入到选题</h2></header>
+              <div class="modal-content">
+                <p class="home-modal-hint">保存到当前账号的选题库，之后可在「本周选题」里继续编辑。</p>
+                <label class="home-field" for="breakdownTopicTitleInput">
+                  <span class="home-field-label">选题标题</span>
+                  <textarea id="breakdownTopicTitleInput" class="am-input topic-entry-title" rows="1" maxlength="160" autocomplete="off"></textarea>
+                </label>
+                <div class="home-field" data-breakdown-picker="week">
+                  <span class="home-field-label">计划周</span>
+                  <div class="topics-select-control"></div>
+                  <input id="breakdownTopicWeekSelect" type="hidden" value="" />
+                </div>
+                <!-- 周选择保留整宽：它显示「起始 ~ 结束」的完整日期，收进两列会被截断。 -->
+                <div class="home-field-row">
+                  <div class="home-field" data-breakdown-picker="category">
+                    <span class="home-field-label">选题分类</span>
+                    <div class="topics-select-control"></div>
+                    <input id="breakdownTopicCategorySelect" type="hidden" value="highlight" />
+                  </div>
+                  <div class="home-field" data-breakdown-picker="format">
+                    <span class="home-field-label">内容形式</span>
+                    <div class="topics-select-control"></div>
+                    <input id="breakdownTopicFormatSelect" type="hidden" value="video" />
+                  </div>
+                  <label class="home-field" for="breakdownTopicDateInput">
+                    <span class="home-field-label">计划发布（选填）</span>
+                    <input id="breakdownTopicDateInput" class="am-input" type="date" />
+                  </label>
+                </div>
+                <label class="home-field" for="breakdownTopicOutlineInput">
+                  <span class="home-field-label">一句话大纲（选填）</span>
+                  <textarea id="breakdownTopicOutlineInput" class="am-textarea topics-outline topic-entry-outline" maxlength="2000" placeholder="例如：分享 3 个实用方法，帮助新手解决一个常见问题。"></textarea>
+                </label>
+                <p id="breakdownTopicModalMessage" class="home-message home-message-error" role="alert" hidden></p>
+              </div>
+              <footer class="modal-actions">
+                <button id="cancelBreakdownTopicButton" class="am-secondary-action" type="button">取消</button>
+                <button id="confirmBreakdownTopicButton" class="am-primary-action" type="button">加入选题</button>
+              </footer>
+            </section>
+          </div>
+
+          <div id="breakdownDeleteModal" class="prompt-modal breakdown-delete-modal" hidden>
+            <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="breakdownDeleteModalTitle" aria-describedby="breakdownDeleteModalDescription">
+              <header class="modal-header"><h2 id="breakdownDeleteModalTitle" class="modal-title">删除拆解记录？</h2></header>
+              <div class="modal-content"><p id="breakdownDeleteModalDescription" class="breakdown-delete-modal-copy"></p></div>
+              <footer class="modal-actions">
+                <button id="cancelBreakdownDeleteButton" class="am-secondary-action" type="button">取消</button>
+                <button id="confirmBreakdownDeleteButton" class="am-primary-action topic-delete-confirm" type="button">删除记录</button>
+              </footer>
+            </section>
+          </div>
+          <section id="topicsContent" class="topics-content" aria-label="每周选题计划" hidden>
+            <div class="topics-plan-grid">
+              <form id="topicForm" class="topics-panel topics-form-panel" novalidate>
+                <div id="topicAdviceDraftNotice" class="home-advice-topic" hidden><span>来自账号下一步建议，确认后保存</span><button id="topicAdviceDraftCancel" class="home-link-button" type="button">取消本次预填</button></div>
+                <div class="topics-panel-head">
+                  <div class="radar-header-copy">
+                    <h2 class="am-section-title">添加本周选题</h2>
+                    <p class="radar-subtitle">安排这一周要做的内容</p>
+                  </div>
+                  <div class="topics-week-control">
+                    <button id="topicsPreviousWeekButton" class="topics-week-arrow" type="button" aria-label="上一周"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+                    <span id="topicsWeekRange" class="topics-week-range">读取中…</span>
+                    <button id="topicsNextWeekButton" class="topics-week-arrow" type="button" aria-label="下一周"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
+                    <button id="topicsCurrentWeekButton" class="am-secondary-action topics-week-today" type="button">本周</button>
+                  </div>
+                </div>
+                <label class="am-field topics-field" for="topicTitleInput">
+                  <span class="topics-label">选题标题 <em class="topics-required" aria-hidden="true">*</em></span>
+                  <input id="topicTitleInput" class="am-input" type="text" maxlength="160" placeholder="一句话写下你想做的选题" autocomplete="off" />
+                </label>
+                <label class="am-field topics-field" for="topicOutlineInput">
+                  <span class="topics-label">一句话大纲（选填）</span>
+                  <textarea id="topicOutlineInput" class="am-textarea topics-outline" maxlength="2000" placeholder="这条内容讲什么，给观众什么收获"></textarea>
+                </label>
+                <div class="topics-field-row">
+                  <div class="am-field topics-field" data-topic-picker="category">
+                    <span class="topics-label">选题分类</span>
+                    <div class="topics-select-control"></div>
+                    <input id="topicCategorySelect" type="hidden" value="highlight" />
+                  </div>
+                  <div class="am-field topics-field" data-topic-picker="format">
+                    <span class="topics-label">内容形式</span>
+                    <div class="topics-select-control"></div>
+                    <input id="topicFormatSelect" type="hidden" value="video" />
+                  </div>
+                  <label class="am-field topics-field" for="topicPublishDateInput">
+                    <span class="topics-label">计划发布（选填）</span>
+                    <input id="topicPublishDateInput" class="am-input" type="date" />
+                  </label>
+                </div>
+                <label class="am-field topics-field" for="topicMaterialsInput">
+                  <span class="topics-label">选题来源（选填）</span>
+                  <input id="topicMaterialsInput" class="am-input" type="text" maxlength="2000" placeholder="来源或参考链接" autocomplete="off" />
+                </label>
+                <div class="topics-form-actions">
+                  <button id="topicSubmitButton" class="am-primary-action" type="submit">加入本周计划</button>
+                  <button id="topicResetButton" class="am-secondary-action" type="button">清空</button>
+                </div>
+              </form>
+
+              <aside class="topics-panel topics-summary-panel" aria-label="本周计划">
+                <div class="topics-panel-head">
+                  <h3 class="topics-panel-title">本周计划</h3>
+                  <button id="topicTargetsButton" class="topics-link-button" type="button">设置目标</button>
+                </div>
+                <p class="topics-summary-count"><strong id="topicsSummaryCount">0 / 0</strong><span>条</span></p>
+                <p id="topicsSummaryHint" class="topics-panel-hint"></p>
+                <ul id="topicProgressList" class="topics-progress-list"></ul>
+                <button id="topicConfirmButton" class="am-secondary-action topics-confirm-button" type="button">确认本周计划</button>
+                <p id="topicConfirmState" class="topics-confirm-state" role="status" aria-live="polite"></p>
+              </aside>
+            </div>
+
+            <section class="topics-panel topics-list-panel" aria-label="本周选题">
+              <div class="topics-panel-head">
+                <h3 class="topics-panel-title">本周选题</h3>
+                <span id="topicsListCount" class="topics-count"></span>
+              </div>
+              <div id="topicCategoryTabs" class="topics-tabs" role="tablist" aria-label="按分类筛选选题"></div>
+              <div id="topicsTableWrap" class="topics-table-wrap">
+                <table class="topics-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">选题</th>
+                      <th scope="col">分类</th>
+                      <th scope="col">形式</th>
+                      <th scope="col">计划发布</th>
+                      <th scope="col">状态</th>
+                      <th scope="col">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="topicsTableBody"></tbody>
+                </table>
+              </div>
+              <p id="topicsEmptyState" class="topics-empty" hidden></p>
+            </section>
+          </section>
+
+
+          <section id="monitorContent" class="monitor-content" aria-label="博主监控" hidden>
+            <header class="monitor-panel monitor-header">
+              <div class="monitor-head-row">
+                <div class="monitor-header-copy">
+                  <h2 class="am-section-title">对标监控</h2>
+                  <p class="monitor-subtitle">关注博主的新作品，结合账号定位找出今天值得做的选题</p>
+                </div>
+                <div class="monitor-head-actions">
+                  <button id="monitorSettingsButton" class="am-secondary-action" type="button">监控设置</button>
+                  <button id="monitorAddBloggerButton" class="am-primary-action" type="button">＋ 添加博主</button>
+                </div>
+              </div>
+              <div id="monitorStats" class="monitor-stats"></div>
+            </header>
+
+            <div class="monitor-lower">
+              <section class="monitor-panel monitor-bloggers" aria-label="关注的博主">
+                <div class="monitor-panel-head">
+                  <div class="monitor-panel-title-row">
+                    <h3 class="monitor-panel-title">关注的博主</h3>
+                    <span class="monitor-tag">共享采集</span>
+                  </div>
+                </div>
+                <label class="monitor-search" for="monitorBloggerSearch">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+                  <input id="monitorBloggerSearch" type="search" placeholder="搜索博主" autocomplete="off" />
+                </label>
+                <div id="monitorBloggerTabs" class="monitor-tabs" role="tablist" aria-label="博主筛选"></div>
+                <div id="monitorBloggerList" class="monitor-blogger-list" role="list"></div>
+                <div id="monitorBloggerLoadStatus" class="monitor-hint" role="status" hidden></div>
+                <p id="monitorBloggerMessage" class="monitor-message" hidden></p>
+                <footer class="monitor-list-foot">
+                  <span class="monitor-hint">同一博主共享采集，各账号独立关注</span>
+                </footer>
+              </section>
+
+              <section class="monitor-panel monitor-feed" aria-label="作品动态">
+                <div class="monitor-panel-head">
+                  <div class="monitor-panel-title-row">
+                    <h3 class="monitor-panel-title">作品动态</h3>
+                    <div id="monitorFeedTabs" class="monitor-tabs" role="tablist" aria-label="作品筛选"></div>
+                  </div>
+                  <div class="monitor-feed-actions">
+                    <div class="monitor-date-control" data-monitor-picker="workDate">
+                      <div class="topics-select-control"></div>
+                      <input id="monitorDateSelect" type="hidden" value="all" />
+                    </div>
+                    <button id="monitorSyncButton" class="am-secondary-action" type="button">
+                      <span class="monitor-spinner" aria-hidden="true"></span><span id="monitorSyncLabel">立即同步</span>
+                    </button>
+                  </div>
+                </div>
+                <div id="monitorWorkList" class="monitor-work-list" role="list"></div>
+                <p id="monitorWorkMessage" class="monitor-message" hidden></p>
+                <footer class="monitor-list-foot">
+                  <span id="monitorWorkSummary" class="monitor-hint"></span>
+                  <div id="monitorWorkPager" class="monitor-pager"></div>
+                </footer>
+              </section>
+            </div>
+          </section>
+
+          <section id="radarContent" class="radar-content is-initial-loading" aria-label="内容采集" aria-busy="true" hidden>
+            <div id="radarLoadingState" class="radar-loading-state" role="status"><span class="radar-loading-spinner" aria-hidden="true"></span><span>正在加载内容…</span></div>
+            <header class="radar-panel radar-header">
+              <div class="radar-head-row">
+                <div class="radar-header-copy"><h2 class="am-section-title">内容采集</h2><p class="radar-subtitle">按关键词持续采集，发现值得参考的内容。</p></div>
+                <div class="radar-head-actions">
+                  <button id="radarSettingsButton" class="am-secondary-action" type="button">采集设置</button>
+                  <button id="radarSyncButton" class="am-primary-action" type="button"><span class="radar-spinner" aria-hidden="true"></span><span id="radarSyncLabel">立即更新</span></button>
+                </div>
+              </div>
+              <div class="radar-status-row"><div id="radarStatusText" class="radar-stats" aria-label="内容采集概览"></div></div>
+              <p id="radarNotice" class="radar-notice" hidden></p>
+            </header>
+            <section class="radar-panel radar-directions" aria-labelledby="radarDirectionHeading">
+              <div class="radar-panel-head"><h3 id="radarDirectionHeading" class="radar-panel-title">内容筛选</h3><div class="radar-filter-tools"><button id="radarManageKeywordsButton" class="radar-text-button" type="button">管理关键词</button><button id="radarResetFiltersButton" class="radar-text-button" type="button">重置筛选</button></div></div>
+              <div class="radar-filter-row"><span class="radar-filter-label" id="radarTypeLabel">类型</span><div id="radarTabs" class="radar-seg" role="tablist" aria-labelledby="radarTypeLabel"></div></div>
+              <div class="radar-filter-row"><span class="radar-filter-label" id="radarDayLabel">时间</span><div id="radarDayTabs" class="radar-seg" role="group" aria-labelledby="radarDayLabel"></div></div>
+              <div class="radar-filter-row"><span class="radar-filter-label" id="radarLikesLabel">点赞数</span><div id="radarLikesTabs" class="radar-seg" role="group" aria-labelledby="radarLikesLabel"></div></div>
+              <div class="radar-filter-row"><span class="radar-filter-label" id="radarStateLabel">状态</span><div id="radarFilterTabs" class="radar-seg" role="group" aria-labelledby="radarStateLabel"></div></div>
+              <div class="radar-filter-row"><span class="radar-filter-label" id="radarKeywordsLabel">关键词</span><div class="radar-keyword-controls"><div id="radarKeywordFilters" class="radar-keyword-filters" role="group" aria-labelledby="radarKeywordsLabel"></div><button id="radarAddKeywordButton" class="am-primary-action" type="button">＋ 添加关键词</button></div></div>
+              <div id="radarSuggestionRow" class="radar-suggest" hidden><span class="radar-suggest-label">联想推荐：</span><div id="radarSuggestionList" class="radar-suggest-list"></div></div>
+            </section>
+            <section class="radar-panel radar-feed" aria-label="视频列表">
+              <div class="radar-panel-head"><div class="radar-panel-title-row"><h3 class="radar-panel-title">视频列表</h3><span id="radarWorkCount" class="radar-panel-meta"></span></div><div class="radar-feed-actions"><button id="radarTrendsButton" class="radar-text-button" type="button">热度飙升 ↗</button><div id="radarViewTabs" class="radar-seg" role="group" aria-label="显示模式"></div></div></div>
+              <p id="radarFeedHint" class="radar-hint"></p>
+              <div id="radarWorkList" class="radar-work-list" role="list"></div>
+              <p id="radarFeedMessage" class="radar-message" role="status" hidden></p>
+              <footer id="radarLoadMoreFooter" class="radar-list-foot" aria-label="视频加载状态"><button id="radarLoadMoreButton" class="radar-text-button" type="button">加载更多</button><span id="radarFeedTotal" class="radar-hint" role="status" aria-live="polite"></span></footer>
+            </section>
+          </section>
+
+          <section id="reviewContent" class="review-content" aria-label="作品复盘" hidden>
+            <p id="reviewNotice" class="review-notice" hidden></p>
+
+            <section class="review-panel review-summary-panel" aria-label="作品表现概览">
+              <header class="review-header review-panel-head">
+                <div class="review-header-copy">
+                  <div class="review-title-row">
+                    <h2 class="am-section-title">数据复盘</h2>
+                    <div id="reviewAccount" class="review-account">
+                      <button id="reviewAccountToggle" class="review-account-toggle" type="button" aria-expanded="false" aria-controls="reviewAccountDetails">
+                        <span id="reviewAccountPlatform" class="review-account-platform" hidden>抖音 ·</span>
+                        <span id="reviewAccountName" class="review-account-name">未选择账号</span>
+                      </button>
+                      <div id="reviewAccountDetails" class="review-account-details" hidden>
+                        <p id="reviewAccountTip"></p>
+                        <p id="reviewAccountUpdated" class="review-account-meta" role="status"></p>
+                        <div class="review-account-actions">
+                          <button id="reviewAccountRefresh" class="am-secondary-action" type="button">刷新账号信息</button>
+                          <button id="reviewAccountLogin" class="am-secondary-action review-account-login" type="button" hidden>授权帐号</button>
+                        </div>
+                        <p id="reviewAccountLoginStatus" class="review-account-meta review-account-login-status" role="status" aria-live="polite" hidden></p>
+                      </div>
+                    </div>
+                  </div>
+                  <p id="reviewSubtitle" class="review-subtitle">从作品表现，找到下一条内容的方向</p>
+                </div>
+                <div class="review-header-actions">
+                  <span id="reviewSyncState" class="review-sync-state" role="status" aria-live="polite"></span>
+                  <button id="reviewConfigButton" class="am-secondary-action" type="button">采集设置</button>
+                  <button id="reviewSyncButton" class="am-primary-action" type="button">立即同步</button>
+                </div>
+              </header>
+              <div id="reviewSummaryList" class="review-summary-list" role="list"></div>
+              <p id="reviewSummaryHint" class="review-panel-hint"></p>
+            </section>
+
+            <section id="reviewTrendPanel" class="review-panel review-analytics-panel" aria-label="每日播放与吸粉趋势">
+              <div class="review-panel-head review-analytics-head">
+                <div class="review-analytics-copy">
+                  <h3 class="review-panel-title">每日播放与吸粉趋势 <span class="review-new-tag">新增</span></h3>
+                  <p id="reviewTrendSubtitle" class="review-panel-hint"></p>
+                </div>
+                <div class="review-analytics-controls">
+                  <div id="reviewTrendScope" class="review-seg" role="tablist" aria-label="趋势口径"></div>
+                  <div id="reviewTrendRange" class="review-seg" role="tablist" aria-label="趋势时间范围"></div>
+                </div>
+              </div>
+              <div id="reviewTrendSummary" class="review-trend-summary"></div>
+              <div class="review-chart-labels">
+                <span><i class="review-legend review-legend-play"></i>播放量 · 左轴</span>
+                <span><i class="review-legend review-legend-fans"></i>吸粉量 · 右轴（人）</span>
+              </div>
+              <div id="reviewTrendChart" class="review-chart"></div>
+              <div class="review-chart-foot">
+                <span id="reviewTrendFootNote" class="review-panel-hint"></span>
+                <span id="reviewTrendHint" class="review-panel-hint">悬停查看某一天，点击查看这天的作品贡献</span>
+              </div>
+              <div id="reviewTrendDetail" class="review-day-detail" hidden></div>
+              <p id="reviewTrendMessage" class="review-message" hidden></p>
+            </section>
+
+            <section id="reviewFactorPanel" class="review-panel review-analytics-panel" aria-label="内容因子分析">
+              <div class="review-panel-head review-analytics-head">
+                <div class="review-analytics-copy">
+                  <h3 class="review-panel-title">哪些内容因子表现更好 <span class="review-new-tag">新增</span></h3>
+                  <p id="reviewFactorSubtitle" class="review-panel-hint"></p>
+                </div>
+                <div class="review-analytics-controls">
+                  <button id="reviewFactorPendingButton" class="am-secondary-action" type="button">补全作品因子</button>
+                  <div class="review-factor-metric-picker" data-review-picker="factorMetric">
+                    <div class="topics-select-control"></div>
+                    <input id="reviewFactorMetricInput" type="hidden" value="median" />
+                  </div>
+                </div>
+              </div>
+              <div class="review-factor-controls">
+                <div id="reviewFactorTabs" class="review-factor-tabs" role="tablist" aria-label="内容因子维度"></div>
+                <div id="reviewFactorRange" class="review-seg" role="tablist" aria-label="作品发布日期范围"></div>
+              </div>
+              <div class="review-factor-layout">
+                <div class="review-factor-main">
+                  <div class="review-factor-head">
+                    <span>分类 / 有效作品数</span>
+                    <span id="reviewFactorMetricCaption"></span>
+                  </div>
+                  <div id="reviewFactorBars" class="review-factor-bars"></div>
+                  <p id="reviewFactorCoverage" class="review-panel-hint"></p>
+                </div>
+                <aside class="review-factor-insight">
+                  <p class="review-factor-insight-label">如何读这组数据</p>
+                  <h4 id="reviewFactorInsightTitle"></h4>
+                  <p id="reviewFactorInsightText"></p>
+                  <div class="review-factor-insight-rule"></div>
+                  <p id="reviewFactorInsightNote"></p>
+                </aside>
+              </div>
+              <div id="reviewFactorWorks" class="review-factor-works" hidden></div>
+              <p id="reviewFactorMessage" class="review-message" hidden></p>
+            </section>
+
+            <div class="review-layout">
+              <section class="review-panel review-list-panel" aria-label="已发布作品">
+                <div class="review-list-head">
+                  <div id="reviewFilters" class="review-filters" role="tablist" aria-label="按复盘状态筛选"></div>
+                  <input id="reviewSearchInput" class="am-input review-search" type="search" placeholder="搜索作品标题" aria-label="搜索作品标题" autocomplete="off" />
+                </div>
+                <div class="review-table-head" aria-hidden="true">
+                  <span>作品 · 按发布时间</span>
+                  <span>播放量</span>
+                  <span>完播率</span>
+                  <span>吸粉量</span>
+                </div>
+                <div id="reviewWorkList" class="review-work-list" role="list"></div>
+                <p id="reviewEmptyState" class="review-empty" hidden></p>
+                <p id="reviewListMessage" class="review-panel-hint review-list-message"></p>
+              </section>
+
+              <section id="reviewDetail" class="review-panel review-detail-panel" aria-label="单条作品复盘"></section>
+            </div>
+          </section>
+
+          <section id="settingsContent" class="project-settings" aria-label="记忆管理" hidden>
+            <section class="project-settings-card">
+              <header class="project-settings-head">
+                <h2 class="am-section-title">记忆管理</h2>
+                <p class="project-settings-subtitle">管理当前工作台的记忆存储与写作记忆</p>
+                <button id="projectSettingsOpenPositioning" class="am-secondary-action" type="button">账号定位</button>
+              </header>
+
+              <div id="projectSettingsPanelMemory" class="project-settings-panel">
+                <section class="project-settings-service project-settings-memory-storage" aria-labelledby="projectSettingsMemoryStoreTitle">
+                  <div class="project-settings-service-head">
+                    <h3 id="projectSettingsMemoryStoreTitle" class="project-settings-service-title">记忆存储</h3>
+                    <span id="projectSettingsMemoryWorkspace" class="project-settings-scope">当前工作台</span>
+                  </div>
+                  <p class="project-settings-service-note">每个工作台独立保存记忆，仅用于当前工作台的内容生成。</p>
+                  <label class="project-settings-field-label" for="projectSettingsMemoryPath">记忆目录</label>
+                  <div class="project-settings-input-shell project-settings-path-shell">
+                    <textarea id="projectSettingsMemoryPath" class="project-settings-input" rows="1" autocomplete="off" spellcheck="false" aria-label="当前工作台记忆目录" placeholder="当前工作台的完整文件夹路径"></textarea>
+                    <button id="projectSettingsMemoryChoose" class="project-settings-path-action" type="button">选择文件夹</button>
+                  </div>
+                  <p id="projectSettingsMemoryWarnings" class="project-settings-hint" role="status" hidden></p>
+                  <div class="project-settings-actions project-settings-memory-actions-row">
+                    <div class="project-settings-memory-links">
+                      <span id="projectSettingsMemoryStatus" class="project-settings-memory-status" role="status">正在读取目录…</span>
+                      <button id="projectSettingsMemoryOpenFolder" class="project-settings-link" type="button"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.5 6V4.5h5l2 2h8V16h-15V6Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" /></svg>打开文件夹</button>
+                    </div>
+                    <button id="projectSettingsMemorySave" class="am-primary-action" type="button" disabled>保存目录</button>
+                  </div>
+                  <p class="project-settings-hint project-settings-memory-note">记忆以 Markdown 文件保存，可用任意文本编辑器修改；下次生成时会读取最新内容。</p>
+                </section>
+
+                <section class="project-settings-service" aria-labelledby="projectSettingsMemoryListTitle">
+                  <div class="project-settings-service-head">
+                    <div class="project-settings-service-title-row">
+                      <h3 id="projectSettingsMemoryListTitle" class="project-settings-service-title">我的记忆</h3>
+                    </div>
+                  </div>
+                  <p id="projectSettingsMemoryCounts" class="project-settings-service-note">共 0 条 · 已启用 0 条 · 当前账号</p>
+                  <div class="project-settings-memory-bar">
+                    <div id="projectSettingsMemoryFilters" class="project-settings-memory-filters" role="group" aria-label="按类别筛选">
+                      <button class="project-settings-filter is-active" type="button" data-memory-filter="all" aria-pressed="true">全部</button>
+                      <button class="project-settings-filter" type="button" data-memory-filter="preference" aria-pressed="false">写作偏好</button>
+                      <button class="project-settings-filter" type="button" data-memory-filter="reference_copy" aria-pressed="false">爆款文案</button>
+                    </div>
+                    <button id="projectSettingsMemoryRefresh" class="am-secondary-action" type="button">刷新</button>
+                  </div>
+                  <p id="projectSettingsMemoryEmpty" class="project-settings-hint" hidden>当前账号还没有记忆。</p>
+                  <ul id="projectSettingsMemoryList" class="project-settings-memory-list"></ul>
+                  <nav id="projectSettingsMemoryPager" class="project-settings-memory-pager" aria-label="记忆分页" hidden></nav>
+                  <p id="projectSettingsMemoryMessage" class="project-settings-message" role="status" hidden></p>
+                  <p class="project-settings-hint">已启用的写作偏好自动用于生成，爆款文案按篇选择参考。记忆按「写作偏好」「爆款文案」分目录保存；新建 Markdown 文件后刷新，按所在目录识别分类。</p>
+                </section>
+              </div>
+            </section>
+          </section>
+
+          <section id="pluginsContent" class="plugin-management" aria-label="插件管理" hidden></section>
+
+          <section id="accountContent" class="account-page" aria-label="账户与订阅" hidden></section>
+
+          <aside id="scriptSidebar" class="script-sidebar" aria-label="当前账号的脚本">
+            <div class="sidebar-card-head">
+              <div>
+                <div id="scriptStatusFilterControl" class="script-status-control">
+                  <button id="scriptStatusFilterButton" class="script-status-button" type="button" aria-haspopup="menu" aria-expanded="false"><span id="scriptStatusFilterLabel">脚本 · 全部</span><svg class="cover-ratio-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                  <div id="scriptStatusFilterMenu" class="script-status-menu cover-ratio-menu" role="menu" aria-label="筛选脚本状态" hidden>
+                    <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-script-status-filter="all" aria-checked="true">全部</button>
+                    <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-script-status-filter="pending" aria-checked="false"><span class="script-status-option-dot is-pending" aria-hidden="true"></span>待处理</button>
+                    <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-script-status-filter="editing" aria-checked="false"><span class="script-status-option-dot is-editing" aria-hidden="true"></span>待拍摄</button>
+                    <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-script-status-filter="ready_to_publish" aria-checked="false"><span class="script-status-option-dot is-ready-to-publish" aria-hidden="true"></span>待发布</button>
+                    <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-script-status-filter="published" aria-checked="false"><span class="script-status-option-dot is-published" aria-hidden="true"></span>已发布</button>
+                  </div>
+                </div>
+                <p id="scriptListSubtitle" class="list-subtitle" aria-live="polite"></p>
+              </div>
+            </div>
+            <div id="scriptList" class="script-list" aria-live="polite">
+              <div id="historyList" class="history-list">
+                <p class="history-empty">正在读取记录…</p>
+              </div>
+            </div>
+            <button id="newTaskButton" class="legacy-new-task" type="button" aria-hidden="true" tabindex="-1">新建下载任务</button>
+          </aside>
+
+          <section id="workspaceContent" class="workspace-content" aria-busy="false">
+            <div id="workspaceLoading" class="workspace-loading" role="status" aria-live="polite" hidden>
+              <div class="workspace-loading-card">
+                <span class="workspace-loading-indicator" aria-hidden="true"></span>
+                <p>正在切换账号…</p>
+              </div>
+            </div>
+            <section class="am-dashboard">
+            <header class="section-head workspace-stage-header" id="workspaceStageHeader">
+              <div class="workspace-header-copy">
+                <h2 class="am-section-title">内容工作台</h2>
+                <p class="workspace-subtitle">编辑脚本内容，完善标题与封面，准备发布。</p>
+              </div>
+              <div class="workspace-script-actions">
+                <button id="newScriptButton" class="am-primary-action workspace-create-script" type="button">新建脚本</button>
+                <button id="workspacePluginManagementButton" class="script-move-button" type="button" data-workspace-module="plugins">插件管理</button>
+                <div id="scriptActionsControl" class="script-actions-control">
+                  <button id="scriptActionsButton" class="script-move-button" type="button" aria-expanded="false" aria-controls="scriptActionsPanel" disabled>操作<svg class="cover-ratio-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                  <div id="scriptActionsPanel" class="script-actions-panel" role="group" aria-label="脚本操作" hidden>
+                    <div id="scriptWorkflowStatusControl" class="script-status-control">
+                      <button id="scriptWorkflowStatusButton" class="script-workflow-status-button" type="button" aria-haspopup="menu" aria-expanded="false"><span>脚本状态</span><span id="scriptWorkflowStatusLabel" class="script-actions-current-status">待处理</span><svg class="cover-ratio-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                      <div id="scriptWorkflowStatusMenu" class="script-status-menu script-workflow-status-menu cover-ratio-menu" role="menu" aria-label="修改脚本运营状态" hidden>
+                        <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-workflow-status="pending" aria-checked="true"><span class="script-status-option-dot is-pending" aria-hidden="true"></span>待处理</button>
+                        <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-workflow-status="editing" aria-checked="false"><span class="script-status-option-dot is-editing" aria-hidden="true"></span>待拍摄</button>
+                        <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-workflow-status="ready_to_publish" aria-checked="false"><span class="script-status-option-dot is-ready-to-publish" aria-hidden="true"></span>待发布</button>
+                        <button class="script-status-option cover-ratio-option" type="button" role="menuitemradio" data-workflow-status="published" aria-checked="false"><span class="script-status-option-dot is-published" aria-hidden="true"></span>已发布</button>
+                      </div>
+                    </div>
+                    <div id="scriptMoveControl" class="script-status-control script-move-control">
+                      <button id="scriptMoveButton" class="script-move-button" type="button" aria-haspopup="menu" aria-expanded="false"><span>移动</span><span id="scriptMoveAccountLabel" class="script-actions-current-status script-move-current-account"></span><svg class="cover-ratio-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                      <div id="scriptMoveMenu" class="script-status-menu script-move-menu cover-ratio-menu" role="menu" aria-label="移动脚本到账号" hidden></div>
+                    </div>
+                    <button id="deleteScriptButton" class="script-delete-action" type="button">删除</button>
+                  </div>
+                </div>
+              </div>
+              <div class="workspace-stage-toolbar">
+                <nav id="stageNavigator" class="stage-navigator" aria-label="脚本创作阶段">
+                  <button id="editStageButton" type="button" data-stage="edit">编辑</button>
+                  <span id="editStageSeparator" aria-hidden="true"></span>
+                  <button id="splitStageButton" type="button" data-stage="split" hidden>拆片</button>
+                  <span id="splitStageSeparator" aria-hidden="true" hidden></span>
+                  <button id="writeStageButton" type="button" data-stage="write" hidden>编写</button>
+                  <span id="writeStageSeparator" aria-hidden="true" hidden></span>
+                  <button id="titleStageButton" type="button" data-stage="title">标题</button>
+                  <span aria-hidden="true"></span>
+                  <button id="coverStageButton" type="button" data-stage="cover">封面</button>
+                  <span aria-hidden="true"></span>
+                  <button id="publishStageButton" type="button" data-stage="publish">发布</button>
+                </nav>
+
+              </div>
+            </header>
+
+            <section id="downloadForm" class="am-form-panel tool-panel draft-panel" aria-label="脚本创作助手">
+              <section id="draftDirectPanel" class="draft-direct-panel" aria-label="直接创建">
+                <div class="draft-input-panel">
+              <div class="draft-panel-head">
+                <div class="draft-panel-title-row">
+                  <div class="radar-header-copy">
+                    <h2 class="am-section-title">脚本创作助手</h2>
+                    <p class="radar-subtitle">从灵感到脚本，让创作更轻松</p>
+                  </div>
+                </div>
+              </div>
+                <section class="draft-settings" aria-label="创作设置">
+                  <div class="draft-field">
+                    <span class="draft-field-label">从选题库选择（可选）</span>
+                    <div class="draft-field-row">
+                      <div class="draft-picker topics-select-control" id="draftTopicPicker">
+                        <input id="draftTopicSelect" type="hidden" value="" />
+                      </div>
+                      <button id="draftTopicApplyButton" class="am-secondary-action" type="button">带入选题</button>
+                    </div>
+                  </div>
+
+                  <label class="draft-field">
+                    <span class="draft-field-label">主题 / 想讲什么</span>
+                    <input id="draftTopicInput" class="am-input" type="text" autocomplete="off" placeholder="比如：如何用 AI 整理一周的工作资料" />
+                  </label>
+
+                  <div class="draft-field-row draft-field-row-three">
+                    <div class="draft-field">
+                      <span class="draft-field-label">内容形式</span>
+                      <div class="draft-picker topics-select-control" id="draftFormatPicker">
+                        <input id="draftFormatSelect" type="hidden" value="video" />
+                      </div>
+                    </div>
+                    <div class="draft-field">
+                      <span class="draft-field-label">发布平台</span>
+                      <div class="draft-picker topics-select-control" id="draftPlatformPicker">
+                        <input id="draftPlatformSelect" type="hidden" value="" />
+                      </div>
+                    </div>
+                    <div class="draft-field">
+                      <span class="draft-field-label">目标时长</span>
+                      <div class="draft-picker topics-select-control" id="draftDurationPicker">
+                        <input id="draftDurationSelect" type="hidden" value="60-90秒" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <label class="draft-field">
+                    <span class="draft-field-label">必须包含的要点 / 真实经历</span>
+                    <span class="draft-points-control">
+                      <textarea id="draftPointsInput" class="am-textarea draft-points" placeholder="写下具体案例、步骤、数据或你的观点" aria-label="必须包含的要点" aria-describedby="draftPointsCount"></textarea>
+                      <span id="draftPointsCount" class="draft-points-count">0 / 500</span>
+                    </span>
+                  </label>
+
+                  <div class="draft-field draft-scheme-row">
+                    <span class="draft-field-label draft-section-label">创作方案</span>
+                    <div id="draftSelectionSummary" class="draft-selection-summary"></div>
+                  </div>
+
+                  <section class="draft-field draft-preferences" aria-labelledby="draftPreferencesSummary">
+                    <div class="draft-preferences-head">
+                      <span id="draftPreferencesSummary" class="draft-field-label draft-section-label" role="status">写作偏好 · <span class="draft-selection-hint">正在读取…</span></span>
+                      <button id="draftPreferencesView" class="draft-link-button" type="button" aria-expanded="false" aria-controls="draftPreferencesList" disabled>展开</button>
+                      <button id="draftPreferencesManage" class="draft-link-button" type="button">管理</button>
+                    </div>
+                    <p id="draftPreferencesHint" class="draft-field-hint" hidden></p>
+                    <ul id="draftPreferencesList" class="draft-preferences-list" hidden></ul>
+                  </section>
+
+                  <div class="draft-field draft-references">
+                    <div class="draft-references-head">
+                      <span class="draft-field-label draft-section-label">参考爆款文案 · <span id="draftReferenceCopyCount" class="draft-selection-hint" role="status">已选 0 / 0 篇</span></span>
+                      <button id="draftReferenceCopyView" class="draft-link-button" type="button" aria-expanded="false" aria-controls="draftReferenceCopyPanel">展开</button>
+                      <button id="draftReferenceCopyManage" class="draft-link-button" type="button">管理</button>
+                    </div>
+                    <div id="draftReferenceCopyPanel" class="draft-reference-panel" hidden>
+                    <div id="draftReferenceCopyList" class="draft-experience-list" role="group" aria-label="本篇参考的爆款文案"></div>
+                    <p id="draftReferenceCopyEmpty" class="draft-field-hint" hidden>当前账号还没有启用的爆款文案，可在拆解详情中收藏。</p>
+                    </div>
+                  </div>
+
+                  <section id="draftAdvanced" class="draft-field draft-advanced" aria-labelledby="draftAdvancedLabel">
+                    <div class="draft-advanced-head">
+                      <span id="draftAdvancedLabel" class="draft-field-label draft-section-label">高级设置 · <span class="draft-selection-hint">语气与补充要求</span></span>
+                      <button id="draftAdvancedView" class="draft-link-button" type="button" aria-expanded="false" aria-controls="draftAdvancedInput">展开</button>
+                    </div>
+                    <textarea id="draftAdvancedInput" class="am-textarea" placeholder="比如：少用专业词、不要用反问句、结尾给一个明确动作" aria-label="补充要求" hidden></textarea>
+                  </section>
+
+                  <div class="draft-actions">
+                    <button id="draftAgentButton" class="am-primary-action" type="button">待配置Agent</button>
+                    <button id="draftManualButton" class="am-secondary-action" type="button">直接手写</button>
+                    <button id="draftClearButton" class="am-secondary-action" type="button">清空</button>
+                    <button id="draftSwitchAgentButton" class="assistant-configure" type="button" data-configure-assistant>切换 Agent</button>
+                    <button id="draftPromptButton" class="draft-link-button" type="button">查看生成指令</button>
+                    <button id="draftPendingButton" class="draft-link-button" type="button" aria-haspopup="dialog" disabled hidden>待确认经验</button>
+                  </div>
+                  <p id="draftActionHint" class="draft-action-hint">可先查看指令，再生成初稿。</p>
+                </section>
+
+                </div>
+
+                <section class="draft-library" aria-label="脚本模板">
+                  <header class="draft-library-toolbar">
+                    <div id="draftLibraryTabs" class="draft-library-tabs project-settings-tabs" role="tablist" aria-label="创作素材类型">
+                      <button id="draftHookTab" class="draft-library-tab project-settings-tab is-active" type="button" role="tab" data-library-tab="hook" aria-selected="true" aria-controls="draftHookList">开头钩子</button>
+                      <button id="draftStructureTab" class="draft-library-tab project-settings-tab" type="button" role="tab" data-library-tab="structure" aria-selected="false" aria-controls="draftStructureList">结构模板</button>
+                      <button id="draftEndingTab" class="draft-library-tab project-settings-tab" type="button" role="tab" data-library-tab="ending" aria-selected="false" aria-controls="draftEndingList">结尾引导</button>
+                    </div>
+                    <button id="draftAddAssetButton" class="am-secondary-action draft-add-asset" type="button">＋ 添加</button>
+                  </header>
+                  <div id="draftHookListPanel" class="draft-library-body" role="tabpanel" aria-labelledby="draftHookTab">
+                    <div id="draftHookList" class="asset-grid"></div>
+                    <p id="draftHookEmpty" class="draft-library-empty" hidden></p>
+                    <p id="draftHookFooter" class="draft-library-footer"></p>
+                  </div>
+                  <div id="draftStructureListPanel" class="draft-library-body" role="tabpanel" aria-labelledby="draftStructureTab" hidden>
+                    <div id="draftStructureList" class="structure-list"></div>
+                    <p id="draftStructureEmpty" class="draft-library-empty" hidden></p>
+                    <p id="draftStructureFooter" class="draft-library-footer"></p>
+                  </div>
+                  <div id="draftEndingListPanel" class="draft-library-body" role="tabpanel" aria-labelledby="draftEndingTab" hidden>
+                    <div id="draftEndingList" class="asset-grid"></div>
+                    <p id="draftEndingEmpty" class="draft-library-empty" hidden></p>
+                    <p id="draftEndingFooter" class="draft-library-footer"></p>
+                  </div>
+                </section>
+              </section>
+            </section>
+
+              <section id="taskWorkspace" class="task-workspace" hidden aria-label="视频脚本工作区">
+            <div id="taskStatusBar" class="task-status-bar" hidden>
+              <span id="taskStatusIndicator" class="task-status-indicator" aria-hidden="true"></span>
+              <div class="task-status-content">
+                <div class="task-status-copy">
+                <h2 id="taskStatusTitle">正在下载视频与音频</h2>
+                <p id="taskStatusDescription">正在通过创作服务获取视频文案并保存到本地任务目录。</p>
+                </div>
+                <p id="taskStatusText" class="task-status-live" role="status" aria-live="polite">正在下载视频与音频…</p>
+                <div id="taskStatusActions" class="task-status-actions" hidden>
+                  <button id="retryTaskButton" class="am-primary-action" type="button">重试</button>
+                  <button id="deleteTaskButton" class="am-secondary-action" type="button">删除当前任务</button>
+                </div>
+              </div>
+            </div>
+
+
+            <section id="rewriteStage" class="workflow-stage rewrite-stage">
+              <header class="section-head workspace-stage-header">
+                <div class="workspace-title-editor">
+                  <h3 id="workspaceTitle" class="am-section-title">仿写脚本</h3>
+                  <input id="workspaceTitleInput" class="workspace-title-input" type="text" aria-label="脚本标题" hidden>
+                  <div class="workspace-meta-row">
+                    <p id="workspaceMeta" class="stage-description">创建时间：未知</p>
+                    <button id="editorPendingExperiencesButton" class="workspace-text-action" type="button" aria-haspopup="dialog" disabled hidden>待确认经验</button>
+                  </div>
+                  <div class="editor-content-actions">
+                    <button id="generateRewritesButton" class="am-primary-action" type="button">生成仿写稿</button>
+                  </div>
+                </div>
+              </header>
+              <p id="rewriteWarning" class="rewrite-warning" role="status" hidden></p>
+              <div class="script-editor-grid">
+                <article class="script-editor-panel">
+                  <h4>原脚本文案</h4>
+                  <textarea id="sourceTranscript" class="am-textarea" readonly aria-label="原脚本文案">这是一段示例原始口播稿，用于展示脚本拆解工作流。</textarea>
+                </article>
+                <button
+                  id="scrollSyncButton"
+                  class="scroll-sync-button is-locked"
+                  type="button"
+                  aria-pressed="true"
+                  aria-label="已绑定双栏滚动，点击取消绑定"
+                  title="已绑定双栏滚动"
+                >
+                  <svg class="scroll-sync-icon scroll-sync-icon-locked" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M10.5 13.5a4 4 0 0 0 5.66.06l2-2a4 4 0 0 0-5.66-5.66l-1.15 1.15"></path>
+                    <path d="M13.5 10.5a4 4 0 0 0-5.66-.06l-2 2a4 4 0 0 0 5.66 5.66l1.15-1.15"></path>
+                  </svg>
+                  <svg class="scroll-sync-icon scroll-sync-icon-unlocked" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="m4 4 16 16"></path>
+                    <path d="m14.4 9.6 1.76-1.76a4 4 0 0 1 5.66 5.66l-2 2a4 4 0 0 1-5.66 0"></path>
+                    <path d="m9.6 14.4-1.76 1.76a4 4 0 0 1-5.66-5.66l2-2a4 4 0 0 1 5.66 0"></path>
+                  </svg>
+                </button>
+                <article class="script-editor-panel rewrite-editor-panel">
+                  <div class="script-editor-header">
+                    <h4>仿写脚本</h4>
+                  </div>
+                  <textarea id="rewriteDraft" class="am-textarea" aria-label="仿写脚本">开场用一个反常识问题，快速建立悬念。</textarea>
+                  <span id="saveRewriteDraftStatus" class="script-editor-save-state">等待保存</span>
+                </article>
+              </div>
+            </section>
+
+            <section id="splitStage" class="workflow-stage editor" hidden aria-label="拆片工作台">
+              <header class="section-head split-stage-header">
+                <div>
+                  <h3 class="am-section-title">脚本文案</h3>
+                  <p class="stage-description">视频、字幕可独立显示</p>
+                </div>
+                <div id="splitWorkbenchControls" class="visibility-controls" role="group" aria-label="显示模块">
+                  <button id="toggleSplitVideo" class="visibility-toggle" data-panel="video" type="button" aria-pressed="true" aria-label="隐藏原视频" title="隐藏原视频">
+                    <span class="glyph" aria-hidden="true"><i class="active"></i><i></i><i></i></span>
+                  </button>
+                  <button id="toggleSplitTranscript" class="visibility-toggle" data-panel="source" type="button" aria-pressed="true" aria-label="隐藏视频文案" title="隐藏视频文案">
+                    <span class="glyph" aria-hidden="true"><i></i><i class="active"></i><i></i></span>
+                  </button>
+                </div>
+              </header>
+              <div id="splitWorkbench" class="workbench" data-visible-panels="video transcript" tabindex="0" aria-label="拆片面板，窄屏时可水平滚动">
+                <section id="splitVideoPanel" class="panel video-panel" data-id="video">
+                  <header class="panel-head">
+                    <h2 aria-hidden="true"></h2>
+                  </header>
+                  <div class="video">
+                    <span class="badge">镜头预览</span>
+                    <video id="splitVideo" playsinline preload="metadata" hidden></video>
+                    <button id="splitPlaybackToggle" class="play" type="button" aria-label="播放视频" aria-pressed="false" hidden></button>
+                    <button id="splitFullscreenToggle" class="split-fullscreen-toggle" type="button" aria-label="全屏播放" title="全屏播放" aria-pressed="false" hidden>
+                      <svg class="fullscreen-enter-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3H3V8M16 3H21V8M3 16V21H8M21 16V21H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                      <svg class="fullscreen-exit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 8H8V3M21 8H16V3M8 21V16H3M16 21V16H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </button>
+                    <span class="duration">00:00 / 00:00</span>
+                  </div>
+                </section>
+
+                <section id="splitTranscriptPanel" class="panel source-panel" data-id="source">
+                  <header class="panel-head split-panel-head">
+                    <div id="splitPanelTabs" class="split-panel-tabs" role="tablist" aria-label="拆片面板内容">
+                      <button id="splitTranscriptTab" class="split-panel-tab" type="button" role="tab" aria-selected="true" tabindex="0" data-split-panel-tab="transcript">视频文案</button>
+                      <button id="splitStructureTab" class="split-panel-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-split-panel-tab="structure">脚本结构</button>
+                    </div>
+                    <span id="splitTranscriptMeta">SRT 时间轴</span>
+                    <div id="splitStructureActions" class="draft-actions" hidden>
+                      <button id="splitStructurePromptButton" class="draft-action draft-icon-action" type="button" aria-label="配置脚本结构提示词" title="配置脚本结构提示词">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M8 14v6"/></svg>
+                      </button>
+                      <button id="splitStructureMemoryButton" class="draft-action" type="button" disabled>沉淀</button>
+                      <button id="splitStructureGenerateButton" class="draft-action" type="button">生成</button>
+                    </div>
+                  </header>
+                  <div id="splitTranscript" class="transcript" hidden></div>
+                  <div id="splitStructureBody" class="transcript write-structure" hidden></div>
+                  <p id="splitStructureEmpty" class="write-panel-hint" hidden>还没有脚本结构，点击右上角「生成」开始拆解爆款结构。</p>
+                </section>
+              </div>
+              <section class="timeline">
+                <div id="splitTrack" class="track" hidden aria-label="音轨时间线">
+                  <strong class="clock">00:00</strong>
+                  <div class="ticks" aria-hidden="true">
+                    <span>00:00</span><span>00:10</span><span>00:20</span><span>00:30</span><span>00:40</span><span>00:50</span><span>00:58</span>
+                  </div>
+                  <div id="splitWaveform" class="wave" aria-hidden="true"></div>
+                  <div id="splitPlayhead" class="playhead" aria-hidden="true"><span>00:00</span></div>
+                </div>
+              </section>
+              <p class="hint">点击字幕或拖动定位线：视频、SRT 高亮和音轨位置保持同步。</p>
+            </section>
+
+            <section id="writeStage" class="workflow-stage editor write-stage" hidden aria-label="编写工作台">
+              <header class="section-head split-stage-header">
+                <div>
+                  <h3 class="am-section-title">编写</h3>
+                  <p class="stage-description">先拆解爆款的脚本结构，再按结构写出可直接录制的短视频脚本</p>
+                </div>
+                <div id="writeWorkbenchControls" class="visibility-controls" role="group" aria-label="显示模块">
+                  <button id="pendingExperiencesButton" class="draft-action" type="button" aria-haspopup="dialog" disabled>待确认经验</button>
+                  <button id="toggleWriteStructure" class="visibility-toggle" data-panel="structure" type="button" aria-pressed="true" aria-label="隐藏脚本结构" title="隐藏脚本结构">
+                    <span class="glyph" aria-hidden="true"><i class="active"></i><i></i><i></i></span>
+                  </button>
+                  <button id="toggleWriteContent" class="visibility-toggle" data-panel="content" type="button" aria-pressed="true" aria-label="隐藏脚本内容" title="隐藏脚本内容">
+                    <span class="glyph" aria-hidden="true"><i></i><i></i><i class="active"></i></span>
+                  </button>
+                </div>
+              </header>
+              <div id="writeWorkbench" class="workbench write-workbench" data-visible-panels="structure content" aria-label="编写面板">
+                <section id="writeStructurePanel" class="panel source-panel" data-id="structure">
+                  <header class="panel-head">
+                    <h2>脚本结构</h2>
+                    <div class="draft-actions">
+                      <button id="writeStructurePromptButton" class="draft-action draft-icon-action" type="button" aria-label="配置脚本结构提示词" title="配置脚本结构提示词">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M8 14v6"/></svg>
+                      </button>
+                      <button id="writeStructureMemoryButton" class="draft-action" type="button" disabled>沉淀</button>
+                      <button id="writeStructureGenerateButton" class="draft-action" type="button">生成</button>
+                    </div>
+                  </header>
+                  <div id="writeStructure" class="transcript write-structure" hidden></div>
+                  <p id="writeStructureEmpty" class="write-panel-hint">还没有脚本结构，点击右上角「生成」开始拆解爆款结构。</p>
+                </section>
+                <section id="writeContentPanel" class="panel draft-panel" data-id="content">
+                  <header class="panel-head">
+                    <h2>脚本内容</h2>
+                    <div class="draft-actions">
+                      <button id="writeContentPromptButton" class="draft-action draft-icon-action" type="button" aria-label="配置脚本内容提示词" title="配置脚本内容提示词">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M8 14v6"/></svg>
+                      </button>
+                      <button id="writeContentMemoryButton" class="draft-action" type="button" disabled>沉淀</button>
+                      <button id="writeContentGenerateButton" class="draft-action" type="button">生成</button>
+                      <button id="writeContentAgentButton" class="draft-action" type="button" disabled title="在所选助手中预填上下文，由你手动发送">待配置Agent</button><button class="assistant-configure" type="button" data-configure-assistant>配置助手</button>
+                      <button id="writeReferenceCopiesButton" class="draft-action" type="button" aria-haspopup="dialog" disabled title="选择本篇要参考的爆款文案">参考爆款文案</button>
+                    </div>
+                  </header>
+                  <div class="draft-field">
+                    <textarea id="writeContentDraft" class="draft" aria-label="编写脚本内容" placeholder="按左侧脚本结构写出完整口播脚本"></textarea>
+                    <p id="writeContentGenerating" class="rewrite-generating" role="status" aria-live="polite" hidden>脚本生成中...</p>
+                    <span id="writeContentSaveState" class="draft-save-state" hidden></span>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section id="titleStage" class="workflow-stage title-stage" hidden aria-label="标题创作">
+              <header class="section-head title-stage-heading">
+                <div>
+                  <h3 class="am-section-title">标题</h3>
+                  <p class="stage-description">基于脚本内容生成并选择发布标题与话题。</p>
+                </div>
+                <div class="title-stage-actions">
+                  <button id="titleGenerateButton" class="am-secondary-action" type="button">生成标题</button>
+                  <button id="titlePromptSettingsButton" class="workspace-text-action" type="button" hidden>配置提示词</button>
+                </div>
+              </header>
+              <p id="titleGenerationHint" class="title-generation-hint" role="status"></p>
+              <section id="titleContentPanel" class="title-source-panel" aria-label="标题候选">
+                <section id="titleSourceDetails">
+                  <p id="titleSourceName" class="title-source-name"></p>
+                  <p id="titleSourceTopics" class="title-source-topics"></p>
+                </section>
+                <div class="title-platform-groups">
+                  <section id="douyinTitleGroup" class="title-platform-group" aria-labelledby="douyinTitleCandidatesHeading">
+                    <div class="title-platform-heading"><h5 id="douyinTitleCandidatesHeading">抖音</h5><span id="douyinTitleCandidateCount"></span></div>
+                    <div id="douyinTitleCandidateList" class="title-candidate-list" role="radiogroup" aria-label="选择抖音标题候选"></div>
+                  </section>
+                  <section id="channelsTitleGroup" class="title-platform-group" aria-labelledby="channelsTitleCandidatesHeading">
+                    <div class="title-platform-heading"><h5 id="channelsTitleCandidatesHeading">视频号</h5><span id="channelsTitleCandidateCount"></span></div>
+                    <div id="channelsTitleCandidateList" class="title-candidate-list" role="radiogroup" aria-label="选择视频号标题候选"></div>
+                  </section>
+                </div>
+              </section>
+            </section>
+
+            <section id="coverStage" class="workflow-stage cover-stage" hidden aria-label="封面创作">
+              <header class="section-head">
+                <div>
+                  <h3 class="am-section-title">封面</h3>
+                  <p class="stage-description">整理提示词和参考图，生成 3:4 / 4:3 封面方案。</p>
+                </div>
+              </header>
+
+              <div class="cover-demo-grid">
+                <section id="coverCreationRegion" class="cover-region cover-creation-region" aria-label="封面创建">
+                  <div class="cover-input-grid">
+                    <div class="cover-upload-block">
+                      <input id="coverFileInput" type="file" accept="image/*" multiple hidden />
+                      <div class="cover-upload-head">
+                        <button id="coverUploadRemove" class="cover-text-action" type="button" hidden>移除参考图</button>
+                      </div>
+                      <button id="coverUploadArea" class="cover-upload-area" type="button" aria-label="上传参考图片" data-drop-message="松开以上传参考图">
+                        <span class="cover-upload-placeholder">
+                          <span aria-hidden="true">＋</span>
+                          <span>上传参考图</span>
+                        </span>
+                        <span id="coverUploadPreview" class="cover-upload-preview" hidden>
+                          <img id="coverUploadPreviewImage" class="cover-upload-preview-image" alt="当前参考图" hidden />
+                          <span id="coverUploadThumbs" class="cover-upload-thumbs" aria-live="polite"></span>
+                          <span id="coverUploadLabel">已上传参考图</span>
+                        </span>
+                      </button>
+                    </div>
+
+                    <div class="cover-input-main">
+                      <div class="cover-field cover-prompt-shell">
+                        <div id="coverPromptInput" class="am-textarea cover-prompt-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="封面提示词" data-placeholder="描述封面的主体、场景、文字与视觉风格"></div>
+                        <div id="coverMentionPopup" class="cover-mention-popup" hidden role="listbox" aria-label="已上传图片">
+                          <div id="coverMentionList" class="cover-mention-list"></div>
+                        </div>
+                        <div class="cover-prompt-actions">
+                          <div class="cover-prompt-secondary-actions">
+                            <div id="coverRatioControl" class="cover-ratio-control">
+                              <button id="coverRatioButton" class="am-secondary-action cover-ratio-button" type="button" aria-haspopup="menu" aria-expanded="false">
+                                <span id="coverRatioLabel">同时生成</span>
+                                <svg class="cover-ratio-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false">
+                                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                              </button>
+                              <div id="coverRatioMenu" class="cover-ratio-menu" hidden role="menu" aria-label="生成比例">
+                                <button class="cover-ratio-option" type="button" role="menuitemradio" data-cover-ratio="portrait" aria-checked="false">生成3:4</button>
+                                <button class="cover-ratio-option" type="button" role="menuitemradio" data-cover-ratio="landscape" aria-checked="false">生成4:3</button>
+                                <button class="cover-ratio-option" type="button" role="menuitemradio" data-cover-ratio="both" aria-checked="true">同时生成</button>
+                              </div>
+                            </div>
+                            <button id="coverTitleGenerateButton" class="am-secondary-action" type="button">生成标题</button>
+                            <button id="coverReferencePicker" class="am-secondary-action" type="button" aria-haspopup="dialog" aria-expanded="false">选择模板</button>
+                            <button id="coverSaveTemplateButton" class="am-secondary-action" type="button" aria-haspopup="dialog" aria-expanded="false">保存模板</button>
+                          </div>
+                          <button id="coverGenerateButton" class="am-primary-action" type="button">生成两张封面</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section id="coverResultsRegion" class="cover-region cover-results-region" aria-labelledby="coverResultsTitle" hidden>
+                  <div class="cover-region-heading">
+                    <div>
+                      <h4 id="coverResultsTitle">封面预览</h4>
+                      <div class="cover-generation-actions">
+                        <span id="coverGenerationStatus" class="cover-generation-status" role="status" aria-live="polite" hidden></span>
+
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="coverResultList" class="cover-result-list" aria-live="polite">
+                    <div class="cover-empty-state">
+                      <span aria-hidden="true">✦</span>
+                      <p>填写提示词后生成封面；上传参考图可按参考图风格生成。</p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section id="publishStage" class="workflow-stage publish-stage" hidden aria-label="发布设置">
+              <header class="section-head">
+                <div>
+                  <h3 class="am-section-title">发布</h3>
+                  <p class="stage-description">准备视频、封面和文案，上传到平台后确认发布。</p>
+                </div>
+                <p id="publishAssetsStatus" class="publish-assets-sync-status" role="status" aria-live="polite" hidden></p>
+
+              </header>
+              <div class="publish-workbench">
+                <section class="publish-assets-panel" aria-labelledby="publishMaterialsHeading">
+                  <h4 id="publishMaterialsHeading" class="publish-materials-heading">发布素材</h4>
+                  <div class="publish-assets-grid">
+                    <div id="publishVideoDropZone" class="publish-asset-item publish-video-asset" data-publish-asset-kind="video" data-drop-message="松开以上传并替换视频">
+                      <button type="button" class="publish-asset-thumbnail" data-publish-preview="video" aria-label="预览发布视频" disabled><span class="publish-preview-placeholder" aria-hidden="true"><svg class="publish-placeholder-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="6" width="24" height="20" rx="3.5"/><path d="m14 11.5 7 4.5-7 4.5Z"/></svg></span></button><div class="publish-asset-copy"><strong>发布视频</strong><span id="publishVideoStatus">请选择本地视频</span></div>
+                      <label class="am-secondary-action publish-file-action" for="publishVideoInput">选择视频<input id="publishVideoInput" type="file" accept="video/mp4,video/quicktime,video/x-m4v,video/webm" /></label>
+                    </div>
+                    <div class="publish-cover-assets">
+                      <div id="publishPortraitCoverDropZone" class="publish-asset-item" data-publish-asset-kind="portrait" data-drop-message="松开以上传并替换 3:4 封面">
+                        <button type="button" class="publish-asset-thumbnail" data-publish-preview="portrait" aria-label="预览3:4 封面" disabled><span class="publish-preview-placeholder" aria-hidden="true"><svg class="publish-placeholder-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="7" y="4" width="18" height="24" rx="3"/><circle cx="18.5" cy="11" r="2"/><path d="m8 23 5-5 4 4 3-3 4 4"/></svg></span></button><div class="publish-asset-copy"><strong>3:4 封面</strong><span id="publishPortraitCoverStatus">请选择封面图片</span></div>
+                        <label class="am-secondary-action publish-file-action" for="publishPortraitCoverInput"><span id="publishPortraitCoverActionText">上传</span><input id="publishPortraitCoverInput" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+                      </div>
+                      <div id="publishLandscapeCoverDropZone" class="publish-asset-item" data-publish-asset-kind="landscape" data-drop-message="松开以上传并替换 4:3 封面">
+                        <button type="button" class="publish-asset-thumbnail" data-publish-preview="landscape" aria-label="预览4:3 封面" disabled><span class="publish-preview-placeholder" aria-hidden="true"><svg class="publish-placeholder-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="4" y="7" width="24" height="18" rx="3"/><circle cx="21" cy="12.5" r="2"/><path d="m5 22 7-7 6 6 4-4 5 5"/></svg></span></button><div class="publish-asset-copy"><strong>4:3 封面</strong><span id="publishLandscapeCoverStatus">请选择封面图片</span></div>
+                        <label class="am-secondary-action publish-file-action" for="publishLandscapeCoverInput"><span id="publishLandscapeCoverActionText">上传</span><input id="publishLandscapeCoverInput" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+                <div class="draft-mode-tabs publish-draft-tabs" role="tablist" aria-label="发布文案平台">
+                  <button id="publishDouyinDraftTab" class="draft-mode-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="publishDouyinDraftPanel">抖音</button>
+                  <button id="publishChannelsDraftTab" class="draft-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="publishChannelsDraftPanel">视频号</button>
+                </div>
+                <div class="publish-draft-panels">
+                  <section id="publishDouyinDraftPanel" class="publish-draft-editor" role="tabpanel" aria-labelledby="publishDouyinDraftTab">
+                    <label class="am-field" for="publishDouyinTitleInput"><span>标题</span><span class="publish-title-input-shell"><input id="publishDouyinTitleInput" class="am-input" type="text" maxlength="30" placeholder="30 字以内" /><span id="publishDouyinTitleCount" class="publish-title-count" aria-hidden="true">0/30</span></span></label>
+                    <label class="am-field" for="publishDouyinDescriptionInput"><span>作品描述</span><textarea id="publishDouyinDescriptionInput" class="am-textarea" maxlength="2000" placeholder="自动填入话题，如：#话题1 #话题2；可手动补充描述"></textarea></label>
+                    <div class="publish-platform-automation">
+                      <div class="publish-platform-status"><span id="douyinPublishStatus" role="status" aria-live="polite">正在检查登录…</span><button id="saveDouyinPublishDraftButton" class="am-secondary-action publish-save-action" type="button" hidden>重试保存</button></div>
+                      <div class="publish-draft-actions"><button id="restoreDouyinSelectedTitleButton" class="am-secondary-action publish-restore-action" type="button" hidden>恢复为已选标题</button><button id="startDouyinPublishFillButton" class="am-primary-action publish-fill-action" type="button" disabled>上传并填写发布信息</button></div>
+                      <p class="publish-confirm-hint">完成后，请在平台检查并确认发布。</p>
+                      <div class="publish-task-region"><p id="douyinPublishTaskStatus" role="status" aria-live="polite" hidden></p></div>
+                    </div>
+                  </section>
+                  <section id="publishChannelsDraftPanel" class="publish-draft-editor" role="tabpanel" aria-labelledby="publishChannelsDraftTab" hidden>
+                    <label class="am-field" for="publishChannelsShortTitleInput"><span>短标题</span><span class="publish-title-input-shell"><input id="publishChannelsShortTitleInput" class="am-input" type="text" maxlength="16" placeholder="16 字以内" /><span id="publishChannelsShortTitleCount" class="publish-title-count" aria-hidden="true">0/16</span></span></label>
+                    <label class="am-field" for="publishChannelsDescriptionInput"><span>视频描述</span><textarea id="publishChannelsDescriptionInput" class="am-textarea" maxlength="2000" placeholder="补充视频描述，话题写在末尾，如：#话题1 #话题2"></textarea></label>
+                    <div class="publish-platform-automation">
+                      <div class="publish-platform-status"><span id="channelsPublishStatus" role="status" aria-live="polite">正在检查登录…</span><button id="saveChannelsPublishDraftButton" class="am-secondary-action publish-save-action" type="button" hidden>重试保存</button></div>
+                      <div class="publish-draft-actions"><button id="restoreChannelsSelectedTitleButton" class="am-secondary-action publish-restore-action" type="button" hidden>恢复为已选标题</button><button id="startChannelsPublishFillButton" class="am-primary-action publish-fill-action" type="button" disabled>上传并填写发布信息</button></div>
+                      <p class="publish-confirm-hint">完成后，请在平台检查并确认发布。</p>
+                      <div class="publish-task-region"><p id="channelsPublishTaskStatus" role="status" aria-live="polite" hidden></p></div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </section>
+              </section>
+            </section>
+
+            <section id="workspaceEmpty" class="workspace-empty" hidden aria-label="脚本空态">
+              <h2 id="workspaceEmptyTitle" class="am-section-title">还没有脚本</h2>
+              <p id="workspaceEmptyHint" class="workspace-empty-hint">去「创作」写下主题和要点，生成这个账号的第一条脚本。</p>
+              <button id="workspaceEmptyCreateButton" class="am-primary-action" type="button">去创作</button>
+            </section>
+          </section>
+        </div>
+
+      </main>
+
+      <div id="promptModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="promptModalTitle">
+          <header class="modal-header">
+            <h2 id="promptModalTitle" class="modal-title">配置提示词</h2>
+          </header>
+          <div class="modal-content">
+            <div id="rewritePromptTemplateTabs" class="rewrite-prompt-template-tabs" role="tablist" aria-label="仿写提示词模板">
+              <button class="rewrite-prompt-template-tab is-active" type="button" role="tab" aria-selected="true" tabindex="0" data-rewrite-prompt-template="general">通用仿写</button>
+              <button class="rewrite-prompt-template-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-rewrite-prompt-template="retention">高留存口播</button>
+              <button class="rewrite-prompt-template-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-rewrite-prompt-template="story">故事化表达</button>
+            </div>
+            <label class="am-field" for="promptModalInput">
+              <span>系统提示词</span>
+              <textarea id="promptModalInput" class="am-textarea" aria-label="系统提示词">请根据原脚本文案，生成一份主题相同、表达方式不同的视频仿写脚本。</textarea>
+            </label>
+          </div>
+          <footer class="modal-actions">
+            <button id="cancelPromptButton" class="am-secondary-action" type="button">取消</button>
+            <button id="savePromptButton" class="am-primary-action" type="button">保存</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="titlePromptModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="titlePromptModalTitle">
+          <header class="modal-header">
+            <h2 id="titlePromptModalTitle" class="modal-title">配置标题提示词</h2>
+            <button id="closeTitlePromptButton" class="am-modal-dismiss" type="button" aria-label="关闭标题提示词配置"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </header>
+          <div class="modal-content">
+            <label class="am-field" for="titlePromptModalInput"><span>标题系统提示词</span><textarea id="titlePromptModalInput" class="am-textarea" aria-label="标题系统提示词"></textarea></label>
+          </div>
+          <footer class="modal-actions">
+            <button id="cancelTitlePromptButton" class="am-secondary-action" type="button">取消</button>
+            <button id="saveTitlePromptButton" class="am-primary-action" type="button">保存</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="writePromptModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="writePromptModalTitle">
+          <header class="modal-header"><h2 id="writePromptModalTitle" class="modal-title">重新生成脚本结构</h2></header>
+          <div class="modal-content">
+            <div class="write-prompt-context">
+              <p class="write-prompt-context-title">提交给模型的组装内容</p>
+              <ul id="writePromptContextList" class="write-prompt-context-list"></ul>
+            </div>
+            <label id="writePromptAntiSimilarityRow" class="write-prompt-toggle" for="writePromptAntiSimilarityInput" hidden>
+              <input id="writePromptAntiSimilarityInput" type="checkbox" checked />
+              <span class="write-prompt-toggle-copy">
+                <span class="write-prompt-toggle-title">去同质化改写</span>
+                <span class="write-prompt-toggle-hint">开启后要求模型用自己的话重写原视频的信息点，不照抄原句；关闭后允许直接复用原视频的金句，成品更容易和原脚本雷同。</span>
+              </span>
+            </label>
+            <label class="am-field" for="writePromptModalInput"><span id="writePromptModalFieldLabel">脚本结构提示词</span><textarea id="writePromptModalInput" class="am-textarea" aria-label="编写提示词"></textarea></label>
+            <p id="writePromptModalHint" class="write-panel-hint">该提示词按「账号 + 环节」保存，下次生成会自动沿用。</p>
+          </div>
+          <footer class="modal-actions">
+            <button id="cancelWritePromptButton" class="am-secondary-action" type="button">取消</button>
+            <button id="saveWritePromptButton" class="am-primary-action" type="button">保存并生成</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="coverTemplateModal" class="prompt-modal cover-template-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="coverTemplateModalTitle">
+          <header class="modal-header">
+            <h2 id="coverTemplateModalTitle" class="modal-title">模板库</h2>
+            <button id="coverTemplateCloseButton" class="cover-modal-close am-modal-dismiss" type="button" aria-label="关闭模板选择"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </header>
+          <div class="modal-content cover-template-content">
+            <p class="cover-template-lead">选择已保存模板后，会自动载入参考图和提示词。</p>
+            <section class="cover-template-library" aria-label="已保存模板">
+              <div id="coverTemplateGrid" class="cover-template-grid" aria-label="已保存模板"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <div id="coverTemplateNameModal" class="prompt-modal cover-template-name-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="coverTemplateNameModalTitle">
+          <header class="modal-header"><h2 id="coverTemplateNameModalTitle" class="modal-title">保存模板</h2></header>
+          <div class="modal-content">
+            <label class="am-field" for="coverTemplateNameInput"><span>模板名称</span><input id="coverTemplateNameInput" class="am-input" type="text" maxlength="80" placeholder="例如：夏日冰饮" autocomplete="off" /></label>
+          </div>
+          <footer class="modal-actions">
+            <button id="cancelCoverTemplateSaveButton" class="am-secondary-action" type="button">取消</button>
+            <button id="confirmCoverTemplateSaveButton" class="am-primary-action" type="button">保存模板</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="accountSwitcherPopover" class="account-switcher-popover" role="region" aria-label="切换工作台" aria-describedby="accountSwitcherHint" hidden>
+        <div class="account-switcher-heading">
+          <p class="sidebar-eyebrow">切换工作台</p>
+          <p id="accountSwitcherHint" class="account-switcher-hint">长按 5 秒显示编辑/删除</p>
+        </div>
+        <div id="accountList" class="account-list" aria-live="polite"></div>
+        <button id="newAccountButton" class="sidebar-create-button" type="button">＋ 新建工作台</button>
+      </div>
+
+      <div id="accountCreateModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="accountCreateModalTitle">
+          <header class="modal-header">
+            <h2 id="accountCreateModalTitle" class="modal-title">创建工作台</h2>
+            <button id="closeAccountCreateButton" class="account-create-close am-modal-dismiss" type="button" aria-label="关闭创建工作台"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </header>
+          <div class="modal-content">
+            <label class="am-field" for="accountNameInput"><span>工作台名称</span><input id="accountNameInput" class="am-input" type="text" maxlength="80" placeholder="输入工作台名称" autocomplete="off" /></label>
+            <fieldset class="account-create-stage">
+              <legend>当前阶段</legend>
+              <div class="onboarding-account-choice">
+                <label><input type="radio" name="onboardingStage" value="existing" checked /><span>已有账号在运营<small>连接账号，同步已有作品</small></span></label>
+                <label><input type="radio" name="onboardingStage" value="new" /><span>准备从零开始<small>先完善定位，再开始创作</small></span></label>
+              </div>
+            </fieldset>
+          </div>
+          <footer class="modal-actions"><button id="cancelAccountCreateButton" class="am-secondary-action" type="button">取消</button><button id="saveAccountCreateButton" class="am-primary-action" type="button">创建工作台</button></footer>
+        </section>
+      </div>
+
+      <div id="accountDeleteModal" class="prompt-modal account-delete-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="accountDeleteModalTitle" aria-describedby="accountDeleteModalDescription">
+          <header class="modal-header"><h2 id="accountDeleteModalTitle" class="modal-title">删除工作台？</h2></header>
+          <div class="modal-content">
+            <p id="accountDeleteModalDescription" class="account-delete-modal-copy"></p>
+          </div>
+          <footer class="modal-actions"><button id="cancelAccountDeleteButton" class="am-secondary-action" type="button">取消</button><button id="confirmAccountDeleteButton" class="am-primary-action account-delete-confirm" type="button">删除工作台</button></footer>
+        </section>
+      </div>
+
+      <div id="accountEditModal" class="prompt-modal account-edit-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="accountEditModalTitle">
+          <header class="modal-header"><h2 id="accountEditModalTitle" class="modal-title">编辑工作台名称</h2></header>
+          <div class="modal-content">
+            <label class="am-field" for="accountEditNameInput"><span>工作台名称</span><input id="accountEditNameInput" class="am-input" type="text" maxlength="80" placeholder="输入工作台名称" autocomplete="off" /></label>
+          </div>
+          <footer class="modal-actions"><button id="cancelAccountEditButton" class="am-secondary-action" type="button">取消</button><button id="saveAccountEditButton" class="am-primary-action" type="button">保存</button></footer>
+        </section>
+      </div>
+    </div>
+
+      <div id="topicEditModal" class="prompt-modal topic-edit-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="topicEditModalTitle">
+          <header class="modal-header"><h2 id="topicEditModalTitle" class="modal-title">编辑选题</h2></header>
+          <div class="modal-content">
+            <label class="am-field" for="topicEditTitleInput"><span>选题标题 *</span><input id="topicEditTitleInput" class="am-input" type="text" maxlength="160" autocomplete="off" /></label>
+            <label class="am-field" for="topicEditOutlineInput"><span>一句话大纲</span><textarea id="topicEditOutlineInput" class="am-textarea topics-outline" maxlength="2000"></textarea></label>
+            <div class="topics-field-row">
+              <div class="am-field" data-topic-picker="editCategory">
+                <span>选题分类</span>
+                <div class="topics-select-control"></div>
+                <input id="topicEditCategorySelect" type="hidden" value="highlight" />
+              </div>
+              <div class="am-field" data-topic-picker="editFormat">
+                <span>内容形式</span>
+                <div class="topics-select-control"></div>
+                <input id="topicEditFormatSelect" type="hidden" value="video" />
+              </div>
+              <label class="am-field" for="topicEditWeekInput"><span>所属周</span><input id="topicEditWeekInput" data-date-time-clearable="false" class="am-input" type="date" /></label>
+              <label class="am-field" for="topicEditPublishDateInput"><span>计划发布</span><input id="topicEditPublishDateInput" class="am-input" type="date" /></label>
+            </div>
+            <p id="topicEditWeekHint" class="topics-panel-hint"></p>
+            <label class="am-field" for="topicEditMaterialsInput"><span>准备素材</span><input id="topicEditMaterialsInput" class="am-input" type="text" maxlength="2000" placeholder="参考链接、录屏、截图或其他素材" autocomplete="off" /></label>
+          </div>
+          <footer class="modal-actions"><button id="cancelTopicEditButton" class="am-secondary-action" type="button">取消</button><button id="saveTopicEditButton" class="am-primary-action" type="button">保存</button></footer>
+        </section>
+      </div>
+
+      <div id="topicTargetsModal" class="prompt-modal topic-targets-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="topicTargetsModalTitle">
+          <header class="modal-header"><h2 id="topicTargetsModalTitle" class="modal-title">设置本周目标</h2></header>
+          <div class="modal-content">
+            <p class="topics-panel-hint">填写每个分类计划安排的数量，不打算安排的分类填 0。</p>
+            <div class="topics-target-grid">
+              <label class="am-field" for="topicTargetHighlightInput"><span>重点</span><input id="topicTargetHighlightInput" class="am-input" type="number" min="0" max="50" step="1" /></label>
+              <label class="am-field" for="topicTargetDailyInput"><span>日常</span><input id="topicTargetDailyInput" class="am-input" type="number" min="0" max="50" step="1" /></label>
+              <label class="am-field" for="topicTargetSeriesInput"><span>系列</span><input id="topicTargetSeriesInput" class="am-input" type="number" min="0" max="50" step="1" /></label>
+              <label class="am-field" for="topicTargetTestInput"><span>测试</span><input id="topicTargetTestInput" class="am-input" type="number" min="0" max="50" step="1" /></label>
+            </div>
+            <p id="topicTargetsTotal" class="topics-panel-hint"></p>
+          </div>
+          <footer class="modal-actions"><button id="cancelTopicTargetsButton" class="am-secondary-action" type="button">取消</button><button id="saveTopicTargetsButton" class="am-primary-action" type="button">保存目标</button></footer>
+        </section>
+      </div>
+
+      <div id="topicDeleteModal" class="prompt-modal topic-delete-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="topicDeleteModalTitle" aria-describedby="topicDeleteModalDescription">
+          <header class="modal-header"><h2 id="topicDeleteModalTitle" class="modal-title">删除选题？</h2></header>
+          <div class="modal-content"><p id="topicDeleteModalDescription" class="topic-delete-modal-copy"></p></div>
+          <footer class="modal-actions"><button id="cancelTopicDeleteButton" class="am-secondary-action" type="button">取消</button><button id="confirmTopicDeleteButton" class="am-primary-action topic-delete-confirm" type="button">删除选题</button></footer>
+        </section>
+      </div>
+
+      <div id="topicRowMenu" class="topics-row-menu" role="menu" aria-label="选题操作" hidden></div>
+
+
+
+      <div id="reviewConfigModal" class="prompt-modal review-config-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reviewConfigModalTitle">
+          <header class="modal-header"><h2 id="reviewConfigModalTitle" class="modal-title">自动采集</h2></header>
+          <div class="modal-content">
+            <p class="review-config-copy">查找用当前账号在「脚本 → 发布」里的抖音专用浏览器和登录状态，不使用你的日常浏览器，也不会打开或关闭正在发布的页面。</p>
+            <label class="settings-switch-row" for="reviewEnabledInput">
+              <span>定时采集</span>
+              <input id="reviewEnabledInput" class="settings-switch" type="checkbox" role="switch" />
+            </label>
+            <div class="review-config-row" data-review-picker="mode">
+              <span>采集方式</span>
+              <div class="topics-select-control review-config-control"></div>
+              <input id="reviewModeInput" type="hidden" value="interval" />
+            </div>
+            <div class="review-config-row" data-review-picker="interval">
+              <span>采集间隔</span>
+              <div class="topics-select-control review-config-control"></div>
+              <input id="reviewIntervalInput" type="hidden" value="60" />
+            </div>
+            <label class="review-config-row" for="reviewDailyTimeInput">
+              <span>每天采集时间</span>
+              <input id="reviewDailyTimeInput" class="am-input review-config-select" type="time" value="12:30" />
+            </label>
+            <div class="review-config-row" data-review-picker="scope">
+              <span>日常更新范围</span>
+              <div class="topics-select-control review-config-control"></div>
+              <input id="reviewScopeInput" type="hidden" value="recent30" />
+            </div>
+            <p id="reviewConfigHint" class="review-config-hint"></p>
+            <p id="reviewConfigMessage" class="review-message" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="reviewConfigCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="reviewConfigSaveButton" class="am-primary-action" type="button">保存设置</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="reviewFactorModal" class="prompt-modal review-factor-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reviewFactorModalTitle">
+          <header class="modal-header"><h2 id="reviewFactorModalTitle" class="modal-title">确认作品的内容因子</h2></header>
+          <div class="modal-content">
+            <p class="review-factor-modal-copy">分类以最终发布内容为准；参考链接的作品不继承参考视频的分类，先按自己的最终稿确认。</p>
+            <div class="review-config-row" data-review-picker="factorWork">
+              <span>选择作品</span>
+              <div class="topics-select-control review-config-control"></div>
+              <input id="reviewFactorWorkInput" type="hidden" value="" />
+            </div>
+            <p id="reviewFactorSource" class="review-factor-source"></p>
+            <div class="review-factor-form">
+              <div class="review-factor-field" data-review-picker="factorTopic">
+                <span>选题分类</span>
+                <div class="topics-select-control"></div>
+                <input id="reviewFactorTopicInput" type="hidden" value="" />
+              </div>
+              <div class="review-factor-field" data-review-picker="factorHook">
+                <span>钩子</span>
+                <div class="topics-select-control"></div>
+                <input id="reviewFactorHookInput" type="hidden" value="" />
+              </div>
+              <div class="review-factor-field review-factor-field-wide" data-review-picker="factorStructure">
+                <span>结构</span>
+                <div class="topics-select-control"></div>
+                <input id="reviewFactorStructureInput" type="hidden" value="" />
+              </div>
+            </div>
+            <p id="reviewFactorAttributes" class="review-factor-attributes"></p>
+            <p id="reviewFactorModalHint" class="review-config-hint"></p>
+            <p id="reviewFactorModalMessage" class="review-message" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="reviewFactorAiButton" class="am-secondary-action" type="button">AI 按最终稿建议</button>
+            <button id="reviewFactorCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="reviewFactorSaveButton" class="am-primary-action" type="button">确认并加入统计</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="draftAssetModal" class="prompt-modal draft-asset-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="draftAssetModalTitle">
+          <header class="modal-header"><h2 id="draftAssetModalTitle" class="modal-title">添加素材</h2></header>
+          <div class="modal-content">
+            <div class="draft-field">
+              <span class="draft-field-label">素材类型</span>
+              <div id="draftAssetKindTabs" class="draft-mode-tabs draft-asset-kind-tabs" role="tablist" aria-label="素材类型">
+                <button id="draftAssetKindHook" class="draft-mode-tab is-active" type="button" role="tab" data-asset-kind="hook" aria-selected="true">开头钩子</button>
+                <button id="draftAssetKindStructure" class="draft-mode-tab" type="button" role="tab" data-asset-kind="structure" aria-selected="false">结构模板</button>
+                <button id="draftAssetKindEnding" class="draft-mode-tab" type="button" role="tab" data-asset-kind="ending" aria-selected="false">结尾引导</button>
+              </div>
+            </div>
+            <label class="draft-field">
+              <span class="draft-field-label">名称</span>
+              <input id="draftAssetNameInput" class="am-input" type="text" maxlength="60" autocomplete="off" placeholder="比如：我常用的反差开头" />
+            </label>
+            <div id="draftAssetFormatField" class="draft-field" hidden>
+              <span class="draft-field-label">适用形式</span>
+              <div class="draft-picker topics-select-control" id="draftAssetFormatPicker">
+                <input id="draftAssetFormatSelect" type="hidden" value="video" />
+              </div>
+            </div>
+            <label class="draft-field">
+              <span id="draftAssetNoteLabel" class="draft-field-label">说明（AI 会参考这些要求设计开头）</span>
+              <textarea id="draftAssetNoteInput" class="am-textarea" rows="1" maxlength="400" placeholder="什么时候用这个素材"></textarea>
+            </label>
+            <label id="draftAssetContentField" class="draft-field" hidden>
+              <span class="draft-field-label">结构内容（AI 会参考这些环节和顺序组织正文）</span>
+              <textarea id="draftAssetContentInput" class="am-textarea" maxlength="2000" placeholder="钩子写完整的一句话；结构模板用 → 连接每个环节"></textarea>
+            </label>
+            <label id="draftAssetExampleField" class="draft-field">
+              <span id="draftAssetExampleLabel" class="draft-field-label">示例（选填，AI 会参考示例的句式和语气生成开头）</span>
+              <textarea id="draftAssetExampleInput" class="am-textarea" rows="1" maxlength="400" placeholder="一句可以直接参考的示例"></textarea>
+            </label>
+            <p id="draftAssetModalError" class="draft-asset-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="cancelDraftAssetButton" class="am-secondary-action" type="button">取消</button>
+            <button id="deleteDraftAssetButton" class="am-secondary-action draft-asset-delete-action" type="button" hidden>删除</button>
+            <button id="saveDraftAssetButton" class="am-primary-action" type="button">保存素材</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="draftPromptModal" class="prompt-modal draft-prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="draftPromptModalTitle">
+          <header class="modal-header"><h2 id="draftPromptModalTitle" class="modal-title">生成指令预览</h2></header>
+          <div class="modal-content">
+            <p class="draft-panel-subtitle">这是将要发给 Agent 的内容，还没有创建脚本，也没有打开 Codex。</p>
+            <textarea id="draftPromptModalInput" class="am-textarea draft-prompt-preview" readonly aria-label="生成指令"></textarea>
+          </div>
+          <footer class="modal-actions">
+            <button id="closeDraftPromptButton" class="am-secondary-action" type="button">关闭</button>
+            <button id="copyDraftPromptButton" class="am-primary-action" type="button">复制指令</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="homeTaskModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="homeTaskModalTitle">
+          <header class="modal-header"><h2 id="homeTaskModalTitle" class="modal-title">添加任务</h2></header>
+          <div class="modal-content">
+            <label class="home-field" for="homeTaskTitleInput">
+              <span class="home-field-label">任务内容</span>
+              <input id="homeTaskTitleInput" class="am-input" type="text" maxlength="160" autocomplete="off" placeholder="比如：补拍会议纪要的操作演示" />
+            </label>
+            <div class="home-field-row">
+              <label class="home-field" for="homeTaskDateInput">
+                <span class="home-field-label">什么时候做</span>
+                <input id="homeTaskDateInput" data-date-time-clearable="false" class="am-input" type="date" />
+              </label>
+              <div class="home-field" data-home-picker="link">
+                <span class="home-field-label">关联内容（选填）</span>
+                <div class="home-select-control topics-select-control"></div>
+                <input id="homeTaskLinkSelect" type="hidden" value="" />
+              </div>
+            </div>
+            <label class="home-field" for="homeTaskNoteInput">
+              <span class="home-field-label">备注（选填）</span>
+              <textarea id="homeTaskNoteInput" class="am-textarea home-note-input" placeholder="补充任务的具体要求、注意事项或参考信息，方便执行时查看"></textarea>
+            </label>
+            <p id="homeTaskModalError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="homeTaskCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="homeTaskDeleteButton" class="script-delete-action" type="button" hidden>删除</button>
+            <button id="homeTaskSaveButton" class="am-primary-action" type="button">保存任务</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="homeTaskListModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="homeTaskListModalTitle">
+          <header class="modal-header"><h2 id="homeTaskListModalTitle" class="modal-title">全部任务</h2></header>
+          <div class="modal-content">
+            <div id="homeTaskScopeTabs" class="home-modal-tabs" role="tablist" aria-label="任务状态">
+              <button type="button" role="tab" data-home-task-scope="pending" aria-selected="true">待办</button>
+              <button type="button" role="tab" data-home-task-scope="done" aria-selected="false">已完成</button>
+            </div>
+            <ul id="homeTaskModalList" class="home-task-list"></ul>
+            <p id="homeTaskModalEmpty" class="home-empty" hidden></p>
+            <div class="home-pagination">
+              <button id="homeTaskPrevButton" class="am-secondary-action home-page-button" type="button">上一页</button>
+              <span id="homeTaskPageLabel" class="home-page-label"></span>
+              <button id="homeTaskNextButton" class="am-secondary-action home-page-button" type="button">下一页</button>
+            </div>
+          </div>
+          <footer class="modal-actions"><button id="homeTaskListCloseButton" class="am-secondary-action" type="button">关闭</button></footer>
+        </section>
+      </div>
+
+      <div id="homeInspirationModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="homeInspirationModalTitle">
+          <header class="modal-header">
+            <h2 id="homeInspirationModalTitle" class="modal-title">全部灵感</h2>
+            <button id="homeInspirationCloseButton" class="am-modal-dismiss" type="button" aria-label="关闭全部灵感"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </header>
+          <div class="modal-content">
+            <ul id="homeInspirationModalList" class="home-inspiration-list"></ul>
+            <p id="homeInspirationModalEmpty" class="home-empty" hidden>还没有记录。</p>
+          </div>
+          <footer class="home-pagination" aria-label="灵感列表分页">
+            <button id="homeInspirationPrevButton" class="am-secondary-action home-page-button" type="button">上一页</button>
+            <span id="homeInspirationPageLabel" class="home-page-label" aria-live="polite"></span>
+            <button id="homeInspirationNextButton" class="am-secondary-action home-page-button" type="button">下一页</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="homeConvertModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="homeConvertModalTitle">
+          <header class="modal-header"><h2 id="homeConvertModalTitle" class="modal-title">转为选题</h2></header>
+          <div class="modal-content">
+            <p id="homeConvertHint" class="home-modal-hint">灵感内容会带入选题大纲，可以先调整再确认。</p>
+            <label class="home-field" for="homeConvertTitleInput">
+              <span class="home-field-label">选题标题</span>
+              <input id="homeConvertTitleInput" class="am-input" type="text" maxlength="160" autocomplete="off" />
+            </label>
+            <label class="home-field" for="homeConvertOutlineInput">
+              <span class="home-field-label">一句话大纲（选填）</span>
+              <textarea id="homeConvertOutlineInput" class="am-textarea topics-outline" maxlength="2000"></textarea>
+            </label>
+            <div class="home-field-row">
+              <div class="home-field" data-home-picker="category">
+                <span class="home-field-label">选题分类</span>
+                <div class="home-select-control topics-select-control"></div>
+                <input id="homeConvertCategorySelect" type="hidden" value="daily" />
+              </div>
+              <div class="home-field" data-home-picker="format">
+                <span class="home-field-label">内容形式</span>
+                <div class="home-select-control topics-select-control"></div>
+                <input id="homeConvertFormatSelect" type="hidden" value="video" />
+              </div>
+              <label class="home-field" for="homeConvertWeekInput">
+                <span class="home-field-label">所属周</span>
+                <input id="homeConvertWeekInput" data-date-time-clearable="false" class="am-input" type="date" />
+              </label>
+              <label class="home-field" for="homeConvertPublishDateInput">
+                <span class="home-field-label">计划发布（选填）</span>
+                <input id="homeConvertPublishDateInput" class="am-input" type="date" />
+              </label>
+            </div>
+            <p id="homeConvertError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="homeConvertCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="homeConvertConfirmButton" class="am-primary-action" type="button">加入选题库</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="homeRescheduleModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="homeRescheduleModalTitle">
+          <header class="modal-header"><h2 id="homeRescheduleModalTitle" class="modal-title">修改日期</h2></header>
+          <div class="modal-content">
+            <p id="homeRescheduleHint" class="home-modal-hint"></p>
+            <label class="home-field" for="homeRescheduleDateInput">
+              <span class="home-field-label">什么时候做</span>
+              <input id="homeRescheduleDateInput" data-date-time-clearable="false" class="am-input" type="date" />
+            </label>
+            <p id="homeRescheduleError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="homeRescheduleCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="homeRescheduleSaveButton" class="am-primary-action" type="button">保存日期</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="homeTaskRowMenu" class="topics-row-menu home-row-menu" role="menu" aria-label="任务操作" hidden></div>
+
+
+      <div id="pendingExperiencesModal" class="prompt-modal pending-experiences-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pendingExperiencesModalTitle">
+          <header class="modal-header">
+            <h2 id="pendingExperiencesModalTitle" class="modal-title">待确认经验</h2>
+            <button id="closePendingExperiencesButton" class="am-modal-dismiss" type="button" aria-label="关闭待确认经验"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          </header>
+          <div class="modal-content">
+            <p class="draft-panel-subtitle">这些是 Agent 回传时顺带记录的偏好，确认后才会进入该环节的提示词。</p>
+            <ul id="pendingExperiencesList" class="pending-experiences-list"></ul>
+            <p id="pendingExperiencesEmpty" class="draft-library-empty" hidden>当前没有待确认的经验。</p>
+          </div>
+        </section>
+      </div>
+
+      <div id="memoryModal" class="prompt-modal memory-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="memoryModalTitle">
+          <header class="modal-header"><h2 id="memoryModalTitle" class="modal-title">编辑记忆</h2></header>
+          <div class="modal-content">
+            <label id="memoryModalNameField" class="home-field" for="memoryModalName">
+              <span class="home-field-label">标题</span>
+              <input id="memoryModalName" class="am-input" type="text" maxlength="80" autocomplete="off" placeholder="例如：开头先讲具体场景" />
+            </label>
+            <label class="home-field" for="memoryModalBody">
+              <span class="home-field-label">记忆内容</span>
+              <textarea id="memoryModalBody" class="am-input memory-modal-body" rows="5" placeholder="写清楚这条偏好要求怎么写，或这段素材的内容。"></textarea>
+            </label>
+            <label class="project-settings-memory-toggle" for="memoryModalEnabled">
+              <input id="memoryModalEnabled" type="checkbox" checked />
+              <span class="project-settings-memory-switch" aria-hidden="true"></span>
+              <span>启用（暂停后不再进入生成）</span>
+            </label>
+            <p id="memoryModalSource" class="project-settings-hint" hidden></p>
+            <p id="memoryModalError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="memoryModalCancel" class="am-secondary-action" type="button">取消</button>
+            <button id="memoryModalSave" class="am-primary-action" type="button">保存记忆</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="writeReferenceCopiesModal" class="prompt-modal write-experiences-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="writeReferenceCopiesModalTitle">
+          <header class="modal-header"><h2 id="writeReferenceCopiesModalTitle" class="modal-title">本篇参考的爆款文案</h2></header>
+          <div class="modal-content">
+            <p class="draft-panel-subtitle">勾选后只参考这一篇的开头、结构、节奏和表达；在「记忆管理」里管理收藏。</p>
+            <div id="writeReferenceCopiesList" class="draft-experience-list" role="group" aria-label="本篇参考的爆款文案"></div>
+            <p id="writeReferenceCopiesEmpty" class="draft-library-empty" hidden>当前账号还没有启用的爆款文案，可在拆解详情中收藏。</p>
+            <p id="writeReferenceCopiesError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="writeReferenceCopiesCancel" class="am-secondary-action" type="button">取消</button>
+            <button id="writeReferenceCopiesSave" class="am-primary-action" type="button">保存选择</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="monitorAddBloggerModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="monitorAddBloggerTitle">
+          <header class="modal-header"><h2 id="monitorAddBloggerTitle" class="modal-title">添加监控博主</h2></header>
+          <div class="modal-content">
+            <p class="home-modal-hint">粘贴抖音博主主页链接；解析出来的是平台身份，不是昵称，同一博主在多个账号之间只采集一份。</p>
+            <label class="home-field" for="monitorAddShareInput">
+              <span class="home-field-label">博主主页链接</span>
+              <input id="monitorAddShareInput" class="am-input" type="text" maxlength="5000" placeholder="https://v.douyin.com/… 或 https://www.douyin.com/user/…" autocomplete="off" />
+            </label>
+            <div class="home-field-row">
+              <label class="home-field" for="monitorAddNoteInput">
+                <span class="home-field-label">备注名（选填）</span>
+                <input id="monitorAddNoteInput" class="am-input" type="text" maxlength="60" autocomplete="off" />
+              </label>
+              <div class="home-field" data-monitor-picker="addInterval">
+                <span class="home-field-label">检查频率</span>
+                <div class="topics-select-control"></div>
+                <input id="monitorAddIntervalSelect" type="hidden" value="360" />
+              </div>
+            </div>
+            <label class="monitor-check" for="monitorAddPriorityInput">
+              <input id="monitorAddPriorityInput" type="checkbox" />
+              <span>设为重点关注（可单独设置更短的检查频率）</span>
+            </label>
+            <p id="monitorAddError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="monitorAddCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="monitorAddConfirmButton" class="am-primary-action" type="button">添加并开始采集</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="monitorSettingsModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="monitorSettingsTitle">
+          <header class="modal-header"><h2 id="monitorSettingsTitle" class="modal-title">监控设置</h2></header>
+          <div class="modal-content">
+            <p class="home-modal-hint">监控通过创作服务平台读取公开数据：关闭自动采集后不会产生新的积分扣点。</p>
+            <label class="settings-switch-row" for="monitorSettingsCollectInput">
+              <span>自动采集博主作品</span>
+              <input id="monitorSettingsCollectInput" class="settings-switch" type="checkbox" role="switch" />
+            </label>
+            <div class="home-field" data-monitor-picker="settingsInterval">
+              <span class="home-field-label">默认检查频率</span>
+              <div class="topics-select-control"></div>
+              <input id="monitorSettingsIntervalSelect" type="hidden" value="360" />
+            </div>
+
+            <div class="monitor-usage">
+              <p id="monitorUsageLine" class="monitor-hint"></p>
+              <p id="monitorUsageNote" class="monitor-hint"></p>
+              <p id="monitorUsageBilling" class="monitor-hint"></p>
+              <p id="monitorKeyState" class="monitor-hint"></p>
+            </div>
+            <p id="monitorSettingsError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="monitorSettingsCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="monitorSettingsSaveButton" class="am-primary-action" type="button">保存设置</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="monitorBloggerModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="monitorBloggerTitle">
+          <header class="modal-header"><h2 id="monitorBloggerTitle" class="modal-title">博主设置</h2></header>
+          <div class="modal-content">
+            <div id="monitorBloggerSummary" class="monitor-blogger-summary"></div>
+            <label class="home-field" for="monitorBloggerNoteInput">
+              <span class="home-field-label">备注名（选填）</span>
+              <input id="monitorBloggerNoteInput" class="am-input" type="text" maxlength="60" autocomplete="off" />
+            </label>
+            <div class="home-field" data-monitor-picker="bloggerInterval">
+              <span class="home-field-label">检查频率</span>
+              <div class="topics-select-control"></div>
+              <input id="monitorBloggerIntervalSelect" type="hidden" value="360" />
+            </div>
+            <label class="monitor-check" for="monitorBloggerPriorityInput">
+              <input id="monitorBloggerPriorityInput" type="checkbox" />
+              <span>重点关注</span>
+            </label>
+            <label class="monitor-check" for="monitorBloggerEnabledInput">
+              <input id="monitorBloggerEnabledInput" type="checkbox" />
+              <span>启用这个博主的自动采集</span>
+            </label>
+            <p id="monitorBloggerError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="monitorBloggerUnfollowButton" class="am-secondary-action monitor-danger" type="button">取消关注</button>
+            <button id="monitorBloggerCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="monitorBloggerSaveButton" class="am-primary-action" type="button">保存</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="monitorWorkModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="monitorWorkTitle">
+          <header class="modal-header"><h2 id="monitorWorkTitle" class="modal-title">作品详情</h2></header>
+          <div class="modal-content">
+            <div id="monitorWorkBody" class="monitor-work-detail"></div>
+          </div>
+          <footer class="modal-actions recommendation-detail-actions">
+            <div id="monitorDetailVideoLinks" class="recommendation-detail-links"></div>
+            <button id="monitorWorkCloseButton" class="am-secondary-action" type="button">关闭</button>
+</footer>
+        </section>
+      </div>
+
+      <div id="monitorTopicModal" class="prompt-modal topic-entry-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="monitorTopicTitle">
+          <header class="modal-header"><h2 id="monitorTopicTitle" class="modal-title">加入选题</h2></header>
+          <div class="modal-content">
+            <p id="monitorTopicHint" class="home-modal-hint">保存到当前账号的选题库，之后可在「本周选题」里继续编辑。</p>
+            <label class="home-field" for="monitorTopicTitleInput">
+              <span class="home-field-label">选题标题</span>
+              <textarea id="monitorTopicTitleInput" class="am-input topic-entry-title" rows="1" maxlength="160" autocomplete="off"></textarea>
+            </label>
+            <div class="home-field-row">
+              <div class="home-field" data-monitor-picker="topicWeek">
+                <span class="home-field-label">计划安排</span>
+                <div class="topics-select-control"></div>
+                <input id="monitorTopicWeekSelect" type="hidden" value="current" />
+              </div>
+              <div class="home-field" data-monitor-picker="topicCategory">
+                <span class="home-field-label">选题分类</span>
+                <div class="topics-select-control"></div>
+                <input id="monitorTopicCategorySelect" type="hidden" value="highlight" />
+              </div>
+              <div class="home-field" data-monitor-picker="topicFormat">
+                <span class="home-field-label">内容形式</span>
+                <div class="topics-select-control"></div>
+                <input id="monitorTopicFormatSelect" type="hidden" value="video" />
+              </div>
+            </div>
+            <label class="home-field" for="monitorTopicOutlineInput">
+              <span class="home-field-label">一句话大纲（选填）</span>
+              <textarea id="monitorTopicOutlineInput" class="am-textarea topics-outline topic-entry-outline" maxlength="2000" placeholder="例如：分享 3 个实用方法，帮助新手解决一个常见问题。"></textarea>
+            </label>
+            <p id="monitorTopicError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="monitorTopicCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="monitorTopicConfirmButton" class="am-primary-action" type="button">确认加入</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="radarManageKeywordsModal" class="prompt-modal" hidden>
+        <section class="modal-card radar-manage-card" role="dialog" aria-modal="true" aria-labelledby="radarManageKeywordsTitle">
+          <header class="modal-header"><div><h2 id="radarManageKeywordsTitle" class="modal-title">管理关键词</h2><p id="radarKeywordMeta" class="radar-panel-meta"></p></div><button class="am-modal-dismiss" type="button" data-radar-panel-close aria-label="关闭"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+          <div class="modal-content"><div id="radarKeywordList" class="radar-keywords" role="list"></div><p id="radarKeywordMessage" class="radar-message" role="status" hidden></p><footer id="radarKeywordMoreFooter" class="radar-ai-foot" hidden><button id="radarKeywordMoreButton" class="radar-text-button" type="button" aria-expanded="false" aria-controls="radarKeywordList" hidden>展开更多 ↓</button></footer></div>
+        </section>
+      </div>
+      <div id="radarTrendsModal" class="prompt-modal" hidden>
+        <section class="modal-card radar-trends-card" role="dialog" aria-modal="true" aria-labelledby="radarTrendsTitle"><header class="modal-header"><div><h2 id="radarTrendsTitle" class="modal-title">热度飙升</h2><span id="radarTrendMeta" class="radar-panel-meta">近 24 小时</span></div><button class="am-modal-dismiss" type="button" data-radar-panel-close aria-label="关闭"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header><div class="modal-content"><div id="radarTrendList" class="radar-trend-list" role="list"></div><p id="radarTrendMessage" class="radar-message" role="status" hidden></p></div></section>
+      </div>
+      <div id="radarKeywordModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="radarKeywordModalTitle">
+          <header class="modal-header"><h2 id="radarKeywordModalTitle" class="modal-title">添加关键词</h2></header>
+          <div class="modal-content">
+            <p class="home-modal-hint">按行业关键词收集近期视频、低粉爆款和热度趋势；首次订阅会先导入最近七天的内容。</p>
+            <label class="home-field" for="radarKeywordInput">
+              <span class="home-field-label">关键词</span>
+              <input id="radarKeywordInput" class="am-input" type="text" maxlength="40" autocomplete="off" placeholder="例如：AI 编程、自动剪辑" />
+            </label>
+            <p id="radarKeywordModalError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="radarKeywordCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="radarKeywordConfirmButton" class="am-primary-action" type="button">添加并采集</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="radarTrendSubscribeModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="radarTrendSubscribeTitle" aria-describedby="radarTrendSubscribeDescription radarTrendSubscribeFee">
+          <header class="modal-header"><h2 id="radarTrendSubscribeTitle" class="modal-title">订阅话题</h2></header>
+          <div class="modal-content">
+            <p id="radarTrendSubscribeDescription" class="radar-subscribe-copy"></p>
+            <p id="radarTrendSubscribeFee" class="radar-subscribe-copy">确认后将立即采集相关视频，并按采集设置每日自动更新，<strong>会消耗积分</strong>。</p>
+            <p id="radarTrendSubscribeError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="radarTrendSubscribeCancel" class="am-secondary-action" type="button">取消</button>
+            <button id="radarTrendSubscribeConfirm" class="am-primary-action" type="button">确认订阅并采集</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="radarSettingsModal" class="prompt-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="radarSettingsModalTitle">
+          <header class="modal-header"><h2 id="radarSettingsModalTitle" class="modal-title">采集设置</h2></header>
+          <div class="modal-content">
+            <p class="home-modal-hint">定时采集由本地工作台后台执行，关闭页面也会继续。</p>
+            <label class="settings-switch-row" for="radarCollectEnabled">
+              <span>启用定时采集</span>
+              <input id="radarCollectEnabled" class="settings-switch" type="checkbox" role="switch" checked />
+            </label>
+            <label class="home-field" for="radarCollectTimeInput">
+              <span class="home-field-label">每天采集时间</span>
+              <input id="radarCollectTimeInput" class="am-input" type="text" data-date-time="time" maxlength="5" autocomplete="off" value="09:00" placeholder="HH:mm" required />
+            </label>
+            <p class="home-modal-hint">所有账号的关键词按此时间每天采集，使用本机时区。</p>
+            <p id="radarSettingsUsage" class="radar-hint"></p>
+            <p id="radarSettingsError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="radarSettingsCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="radarSettingsConfirmButton" class="am-primary-action" type="button">保存设置</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="monitorAnalysisModal" class="prompt-modal" hidden>
+        <section class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-labelledby="monitorAnalysisTitle">
+          <header class="modal-header"><h2 id="monitorAnalysisTitle" class="modal-title">本次选题分析依据</h2></header>
+          <div id="monitorAnalysisBody" class="modal-content"></div>
+          <footer class="modal-actions">
+            <button id="monitorAnalysisCloseButton" class="am-secondary-action" type="button">关闭</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="radarAnalysisModal" class="prompt-modal" hidden>
+        <section class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-labelledby="radarAnalysisTitle">
+          <header class="modal-header"><h2 id="radarAnalysisTitle" class="modal-title">本次选题分析依据</h2></header>
+          <div id="radarAnalysisBody" class="modal-content"></div>
+          <footer class="modal-actions">
+            <button id="radarAnalysisCloseButton" class="am-secondary-action" type="button">关闭</button>
+          </footer>
+        </section>
+      </div>
+
+      <div id="radarDetailModal" class="prompt-modal" hidden>
+        <section class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-labelledby="radarDetailTitle">
+          <header class="modal-header radar-detail-header">
+            <h2 id="radarDetailTitle" class="modal-title">视频详情</h2>
+            <button id="radarDetailCloseButton" class="am-modal-dismiss" type="button" aria-label="关闭"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+          </header>
+          <div id="radarDetailBody" class="modal-content"></div>
+          <footer class="modal-actions radar-detail-footer">
+            <span id="radarDetailMonitorHint" class="radar-hint" hidden>将自动查询博主信息，按平台规则扣除积分</span>
+            <div class="radar-detail-actions-row">
+              <div id="radarDetailVideoLinks" class="recommendation-detail-links"></div>
+              <button id="radarDetailMonitorButton" class="am-secondary-action" type="button">监控博主</button>
+              <button id="radarDetailTopicButton" class="am-secondary-action" type="button">加入选题</button>
+              <button id="radarDetailBreakdownButton" class="am-secondary-action" type="button">拆解视频</button>
+              <button id="radarDetailSaveButton" class="am-secondary-action" type="button">收藏</button>
+            </div>
+          </footer>
+        </section>
+      </div>
+
+      <div id="radarTopicModal" class="prompt-modal topic-entry-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="radarTopicModalTitle">
+          <header class="modal-header"><h2 id="radarTopicModalTitle" class="modal-title">加入选题</h2></header>
+          <div class="modal-content">
+            <p id="radarTopicHint" class="home-modal-hint">保存到当前账号的选题库，之后可在「本周选题」里继续编辑。</p>
+            <label class="home-field" for="radarTopicTitleInput">
+              <span class="home-field-label">选题标题</span>
+              <textarea id="radarTopicTitleInput" class="am-input topic-entry-title" rows="1" maxlength="160" autocomplete="off"></textarea>
+            </label>
+            <div class="home-field-row">
+              <div class="home-field" data-radar-picker="topicWeek">
+                <span class="home-field-label">计划安排</span>
+                <div class="topics-select-control"></div>
+                <input id="radarTopicWeekSelect" type="hidden" value="current" />
+              </div>
+              <div class="home-field" data-radar-picker="topicCategory">
+                <span class="home-field-label">选题分类</span>
+                <div class="topics-select-control"></div>
+                <input id="radarTopicCategorySelect" type="hidden" value="daily" />
+              </div>
+              <div class="home-field" data-radar-picker="topicFormat">
+                <span class="home-field-label">内容形式</span>
+                <div class="topics-select-control"></div>
+                <input id="radarTopicFormatSelect" type="hidden" value="video" />
+              </div>
+            </div>
+            <label class="home-field" for="radarTopicOutlineInput">
+              <span class="home-field-label">一句话大纲（选填）</span>
+              <textarea id="radarTopicOutlineInput" class="am-textarea topics-outline topic-entry-outline" maxlength="2000" placeholder="例如：分享 3 个实用方法，帮助新手解决一个常见问题。"></textarea>
+            </label>
+            <p id="radarTopicError" class="home-message home-message-error" role="alert" hidden></p>
+          </div>
+          <footer class="modal-actions">
+            <button id="radarTopicCancelButton" class="am-secondary-action" type="button">取消</button>
+            <button id="radarTopicConfirmButton" class="am-primary-action" type="button">确认加入</button>
+          </footer>
+        </section>
+    </div>
+
+
+    <dialog id="positioningModal" class="positioning-modal" aria-labelledby="positioningModalTitle">
+        <header class="positioning-modal-head"><h2 id="positioningModalTitle">账号定位</h2><button id="positioningModalClose" class="onboarding-close am-modal-dismiss" type="button" aria-label="关闭账号定位"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+        <p id="positioningModalScope" class="positioning-modal-scope"></p>
+              <div id="projectSettingsPanelPositioning" class="project-settings-panel">
+                <p id="projectSettingsPositioningEmpty" class="project-settings-hint" hidden>请先在左侧选择一个账号，再填写定位。</p>
+                <div class="project-settings-field">
+                  <label class="project-settings-field-label" for="projectSettingsBusinessPositioning">商业定位</label>
+                  <p class="project-settings-hint">你提供什么、解决什么问题、如何变现</p>
+                  <textarea id="projectSettingsBusinessPositioning" class="project-settings-textarea" rows="1" placeholder="填写产品或服务、差异化优势与商业目标…"></textarea>
+                </div>
+                <div class="project-settings-field">
+                  <label class="project-settings-field-label" for="projectSettingsAudience">面向人群</label>
+                  <p class="project-settings-hint">内容讲给谁听，他们需要什么</p>
+                  <textarea id="projectSettingsAudience" class="project-settings-textarea" rows="1" placeholder="填写用户身份、核心痛点与期望结果…"></textarea>
+                </div>
+                <footer class="project-settings-footer">
+                  <p id="projectSettingsPositioningMessage" class="project-settings-message" role="status" hidden></p>
+                  <span class="project-settings-hint">保存后应用于当前账号的后续 AI 生成。</span>
+                  <div class="project-settings-positioning-buttons">
+                    <button id="projectSettingsEnhancePositioning" class="am-secondary-action" type="button" disabled>Agent完善</button>
+                    <button id="projectSettingsSavePositioning" class="am-primary-action" type="button">保存定位</button>
+                  </div>
+                </footer>
+              </div>
+
+      </dialog>
+    <dialog id="onboardingModal" class="onboarding-modal" aria-label="账号准备"></dialog>
+    <!-- 先注册拆解模块，再初始化账号，避免首次加载新版本时错过账号通知。 -->
+    <script src="/static/breakdown.js?v=20261102-topic-entry-v2" defer></script>
+    <dialog id="breakdownRewriteDialog" class="assistant-dialog breakdown-rewrite-dialog" aria-labelledby="breakdownRewriteTitle" aria-describedby="breakdownRewriteDescription">
+      <header><h2 id="breakdownRewriteTitle">仿写脚本</h2><button class="assistant-close am-modal-dismiss" id="breakdownRewriteClose" type="button" aria-label="关闭"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+      <p id="breakdownRewriteDescription">将结合当前账号定位、拆解结构和原脚本文案进行仿写。</p>
+      <div class="breakdown-rewrite-field"><label for="breakdownRewriteRequirements">补充仿写要求 <span>（选填）</span></label><textarea id="breakdownRewriteRequirements" class="am-textarea" maxlength="2000" placeholder="例如：换成我的行业，保留开头的表达方式，控制在 60 秒以内。"></textarea></div>
+      <button id="breakdownRewritePreviewToggle" class="assistant-link breakdown-rewrite-preview-toggle" type="button" aria-expanded="false" aria-controls="breakdownRewritePreview"><span>查看将发送的内容</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+      <div id="breakdownRewritePreview" hidden><pre id="breakdownRewritePreviewText" aria-live="polite"></pre></div>
+      <p class="breakdown-rewrite-note">打开后会预填内容，由你检查并手动发送。</p>
+      <footer class="breakdown-rewrite-footer"><div class="breakdown-rewrite-agent"><span id="breakdownRewriteAgentName">未配置</span><span class="breakdown-rewrite-dot">·</span><button id="breakdownRewriteSwitch" class="assistant-configure" type="button">配置助手</button></div><button id="breakdownRewriteOpen" class="assistant-primary" type="button">配置助手</button></footer>
+    </dialog>
+    <script src="/static/breakdown-rewrite.js?v=20261102-v1" defer></script>
+    <dialog id="writingAssistantDialog" class="assistant-dialog" aria-labelledby="assistantDialogTitle" aria-describedby="assistantDialogDescription">
+      <header><h2 id="assistantDialogTitle">配置助手</h2><button class="assistant-close am-modal-dismiss" type="button" data-assistant-close aria-label="关闭"><svg class="am-modal-close-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+      <p id="assistantDialogDescription">选择创作助手，自动配置回传技能</p>
+      <p id="assistantScopeNote" class="assistant-scope-note" data-assistant-scope hidden></p>
+      <div class="assistant-section-head"><span>本地可用Agent</span><button class="assistant-link" type="button" data-assistant-refresh>重新检测</button></div>
+      <div data-assistant-rows role="group" aria-label="选择助手"></div>
+      <div class="assistant-tools">
+        <button class="assistant-link" type="button" data-assistant-manual hidden>手动填写应用路径</button>
+        <button class="assistant-link" type="button" data-assistant-test>测试当前助手回传</button>
+      </div>
+      <div data-assistant-path-area hidden><label class="assistant-path-label" for="assistantApplicationPath">所选助手的应用路径</label><div class="assistant-path-controls"><input id="assistantApplicationPath" type="text" data-assistant-path placeholder="应用的完整路径" autocomplete="off" spellcheck="false" /><button type="button" class="assistant-path-choose" data-assistant-choose>选择应用</button></div></div>
+      <p class="assistant-note">配置时会安装回传技能。参考文案通过本机文件读取；生成后需在助手中手动发送，确认定稿后再回传。</p>
+      <footer><button type="button" data-assistant-close>取消</button><button type="button" class="assistant-primary" data-assistant-save>使用并配置</button></footer>
+    </dialog>
+    <script src="/static/writing-assistants.js?v=20261102-rewrite-v1" defer></script>
+    <script src="/static/publish-previews.js?v=20261031-title-publish-ready" defer></script>
+    <script src="/static/script-navigation.js?v=20261101-native-scroll" defer></script>
+    <script src="/static/app.js?v=20261102-platform-boundary" defer></script>
+    <div id="accountPopover" popover="auto" aria-label="账号菜单">
+      <div class="account-popover-head" id="accountPopoverHead"></div>
+      <div class="account-popover-list">
+        <button id="projectSettingsButton" type="button" data-workspace-module="settings" aria-label="记忆管理" title="记忆管理"><span>记忆管理</span><span aria-hidden="true"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></span></button>
+        <button id="pluginManagementButton" type="button" data-workspace-module="plugins" aria-label="插件管理" title="插件管理"><span>插件管理</span><span aria-hidden="true"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></span></button>
+        <button id="accountSubscriptionButton" type="button" data-sub-action="open-account"><span>套餐积分</span><span aria-hidden="true"><svg class="wb-nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></span></button>
+        <button id="workbenchUpdateButton" type="button"><span>版本与更新</span><span id="workbenchVersionLabel">读取中…</span></button>
+      </div>
+      <div class="account-popover-footer" id="accountPopoverFooter" hidden></div>
+    </div>
+    <dialog id="trialGiftModal" aria-labelledby="trialGiftModalTitle" aria-describedby="trialGiftGuide">
+      <header class="modal-head"><h2 id="trialGiftModalTitle">领取体验积分</h2><button id="trialGiftClose" class="am-modal-dismiss" type="button" aria-label="关闭领取引导"><svg class="am-modal-close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+      <div class="trial-gift-qr-wrap"><img id="trialGiftQr" alt="添加管理员微信的二维码" /><p id="trialGiftImageStatus" role="status"></p><button id="trialGiftImageRetry" type="button" hidden>重新加载二维码</button></div>
+      <p id="trialGiftGuide"></p>
+      <label for="trialGiftUserId">创作服务用户 ID</label>
+      <div class="trial-gift-id-row"><input id="trialGiftUserId" readonly /><button id="trialGiftCopy" type="button">复制 ID</button></div>
+      <p>添加好友后，请把此 ID 发给管理员，便于定位账号。</p>
+      <p id="trialGiftCopyStatus" role="status"></p><p id="trialGiftStatus" role="status"></p>
+      <button id="trialGiftRefresh" type="button">刷新领取状态</button>
+    </dialog>
+    <dialog id="subscriptionModal" aria-label="订阅与积分"></dialog>
+    <script src="/static/legal-documents.js?v=20261102-legal-v6" defer></script>
+    <script src="/static/subscription.js?v=20261031-ledger-labels-v3" defer></script>
+    <script src="/static/return-feedback.js?v=20261026-native-return-sound-v2" defer></script>
+    <script src="/static/script-import-notifications.js?v=20261102-return-sync-v4" defer></script>
+    <script src="/static/writing-return-notifications.js?v=20261102-live-sync-v3" defer></script>
+    <script src="/static/draft-panel.js?v=20261102-live-return" defer></script>
+    <script src="/static/topics.js?v=20261030-outline-autogrow-v1" defer></script>
+    <script src="/static/home-advice.js?v=20261019-memory-positioning-v1" defer></script>
+    <script src="/static/trial-gift.js?v=20261030-card-copy-5" defer></script>
+    <script src="/static/home.js?v=20261030-task-note-autogrow-v2" defer></script>
+    <script src="/static/review-account.js?v=20261017-review-login-v1" defer></script>
+    <script src="/static/review.js?v=20261027-datetime-v1" defer></script>
+    <script src="/static/topic-entry-modal.js?v=20261031-v1" defer></script>
+    <script src="/static/monitor.js?v=20261102-monitor-scroll" defer></script>
+    <script src="/static/radar.js?v=20261102-collection-time" defer></script>
+    <script src="/static/settings.js?v=20261019-memory-pagination-v1" defer></script>
+    <script src="/static/onboarding.js?v=20261031-pause-recommendations" defer></script>
+    <script src="/static/workspace-navigation.js?v=20261031-pause-recommendations" defer></script>
+    <script src="/static/updates.js?v=20261102-update-dialog-v2" defer></script>
+    <script src="/static/restart.js?v=20261031-fast-restart" defer></script>
+    <script src="/static/plugin-host.js?v=20261031-preview-sticky" defer></script>
+    <script src="/static/schedule-cards.js?v=20261027-edit-card-status-v1" defer></script>
+  </body>
+</html>

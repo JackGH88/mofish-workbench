@@ -1,0 +1,23 @@
+/* Approved rewrite preparation dialog; shared assistant dialog supplies its shell. */
+.breakdown-rewrite-dialog { width:min(580px,calc(100vw - 36px)); padding:30px; }
+.breakdown-rewrite-dialog .assistant-close { display:grid; place-items:center; flex-shrink:0; }
+#breakdownRewriteDescription { margin:8px 0 24px; }
+.breakdown-rewrite-field label { display:block; margin:0 0 8px; color:var(--am-muted); font-size:13px; font-weight:400; }
+.breakdown-rewrite-field label span { color:var(--am-faint); }
+.breakdown-rewrite-dialog #breakdownRewriteRequirements { display:block; min-height:136px; height:136px; resize:none; overflow-y:hidden; padding:14px 16px; font-size:14px; line-height:1.65; }
+.breakdown-rewrite-dialog .breakdown-rewrite-preview-toggle { display:inline-flex; align-items:center; gap:7px; margin-top:12px; padding:6px 0; font-size:13px; }
+.breakdown-rewrite-preview-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
+#breakdownRewritePreview { margin-top:8px; background:var(--am-control); border-radius:14px; padding:16px; max-height:240px; overflow:auto; }
+#breakdownRewritePreviewText { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; font-family:inherit; font-size:12px; line-height:1.85; color:var(--am-muted); }
+.breakdown-rewrite-dialog .breakdown-rewrite-note { font-size:12px; margin:16px 0 24px; color:var(--am-muted); }
+.breakdown-rewrite-dialog .breakdown-rewrite-footer { justify-content:space-between; gap:16px; }
+.breakdown-rewrite-agent { display:flex; gap:8px; align-items:center; white-space:nowrap; font-size:13px; color:var(--am-muted); }
+.breakdown-rewrite-dot { color:var(--am-faint); }
+.breakdown-rewrite-dialog footer .assistant-configure { background:transparent; padding:0; min-height:36px; font-size:13px; font-weight:400; color:#6e6e73; }
+.breakdown-rewrite-dialog footer .assistant-configure:hover:not(:disabled) { background:transparent; color:#000; text-decoration:underline; }
+@media(max-width:520px) {
+  .breakdown-rewrite-dialog { padding:22px 20px; }
+  .breakdown-rewrite-dialog .breakdown-rewrite-footer { gap:10px; flex-wrap:wrap; }
+  .breakdown-rewrite-agent { gap:5px; }
+  .breakdown-rewrite-dialog footer .assistant-primary { padding:0 14px; }
+}

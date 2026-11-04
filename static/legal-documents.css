@@ -1,0 +1,23 @@
+/* Shared by production login and its static preview. */
+[data-legal-document]{cursor:pointer;text-decoration:none;}
+[data-legal-document]:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:3px;}
+#legalDocumentModal{box-sizing:border-box;width:min(760px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);padding:0;border:0;border-radius:22px;background:#fff;color:#252525;box-shadow:0 24px 80px #0003;overflow:hidden;}
+#legalDocumentModal[open]{display:flex;flex-direction:column;}
+#legalDocumentModal::backdrop{background:rgb(0 0 0 / 30%);}
+#legalDocumentModal .legal-document-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 28px 18px;border-bottom:1px solid #e8e8e8;flex:none;}
+#legalDocumentModal h2{margin:0;font-size:22px;line-height:1.4;}
+#legalDocumentModal .legal-document-head p{margin:8px 0 0;color:#6b6b70;font-size:12px;line-height:1.6;}
+#legalDocumentModal [data-legal-close]{flex:none;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;padding:0;background:#f5f5f7;color:#6b6b70;font-size:26px;line-height:1;cursor:pointer;}
+#legalDocumentModal [data-legal-close]:hover{background:var(--am-soft-2,#eeeef0);}
+#legalDocumentModal [data-legal-close]:focus-visible,#legalDocumentModal article:focus-visible{outline:2px solid #666;outline-offset:-3px;}
+#legalDocumentModal .legal-document-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 28px 28px;font-size:14px;line-height:1.85;overflow-wrap:anywhere;}
+#legalDocumentModal h3{margin:24px 0 10px;font-size:16px;line-height:1.6;}
+#legalDocumentModal p{margin:12px 0;}
+#legalDocumentModal strong{font-weight:650;}
+@media(max-width:480px){#legalDocumentModal .legal-document-head{padding:18px 18px 14px;}#legalDocumentModal .legal-document-body{padding:4px 18px 20px;}#legalDocumentModal h2{font-size:20px;}}
+
+#legalDocumentModal h4{margin:20px 0 8px;font-size:14px;line-height:1.6;}
+#legalDocumentModal table{width:100%;table-layout:fixed;border-collapse:collapse;margin:16px 0;font-size:13px;}
+#legalDocumentModal th,#legalDocumentModal td{border:1px solid #e8e8e8;padding:8px;vertical-align:top;text-align:left;overflow-wrap:anywhere;}
+#legalDocumentModal th{background:#f5f5f7;font-weight:650;}
+#legalDocumentModal td p,#legalDocumentModal th p{margin:0;}

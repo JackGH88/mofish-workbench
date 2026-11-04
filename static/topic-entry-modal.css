@@ -1,0 +1,46 @@
+/* Shared by collection and competitor monitoring topic dialogs. */
+.topic-entry-modal .modal-card {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+.topic-entry-modal .modal-header,
+.topic-entry-modal .modal-actions { flex-shrink: 0; }
+.topic-entry-modal .modal-content { min-height: 0; overflow-y: auto; }
+.topic-entry-modal textarea,
+.topic-entry-modal textarea.am-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  overflow: hidden;
+}
+.topic-entry-modal .topic-entry-title {
+  min-height: 44px;
+  padding: calc(21px - 0.8em) 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.topic-entry-modal .topic-entry-outline { min-height: 120px; }
+
+/* Match the weekly-topic picker chevron without intercepting button clicks. */
+.topic-entry-modal .topics-select-button > .topics-select-chevron {
+  display: none;
+}
+
+.topic-entry-modal .topics-select-button::after {
+  content: "";
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--am-muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  pointer-events: none;
+}
+
+/* Auto-growing fields have no inner scrolling. Let gestures reach the modal
+   body; its containment still prevents scrolling the page behind the dialog. */
+.prompt-modal.topic-entry-modal textarea { overscroll-behavior: auto; }

@@ -1,0 +1,64 @@
+/* Creation-only layout. Component appearance and all action bindings stay shared. */
+#downloadForm.draft-panel {
+  display: block;
+  min-height: 0;
+  height: calc(100dvh - var(--workspace-gap) * 2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#downloadForm .draft-direct-panel {
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+#downloadForm .draft-input-panel,
+#downloadForm .draft-library {
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: var(--am-radius-card);
+  background: var(--am-panel);
+  box-shadow: none;
+}
+#downloadForm .draft-input-panel {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  padding: var(--module-heading-inset-top) var(--module-heading-inset-inline) 20px;
+}
+#downloadForm .draft-panel-head { margin-bottom: 4.5px; }
+#downloadForm .draft-library {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+}
+#downloadForm .draft-library-toolbar {
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--module-heading-inset-top) var(--module-heading-inset-inline) 9px;
+}
+#downloadForm .draft-library-tabs { margin-right: auto; }
+#downloadForm .draft-library-body {
+  flex: 1;
+  min-height: 0;
+  align-content: start;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  padding: 0 var(--module-heading-inset-inline) 20px;
+}
+@media (max-width: 900px) {
+  #downloadForm.draft-panel { height: auto; }
+  #downloadForm .draft-direct-panel { height: auto; grid-template-columns: minmax(0, 1fr); }
+  #downloadForm .draft-input-panel,
+  #downloadForm .draft-library,
+  #downloadForm .draft-library-body { overflow: visible; scrollbar-gutter: auto; }
+}
