@@ -648,7 +648,7 @@
 
   function renderDurationOptions() {
     durationPicker.setOptions(DURATIONS.map((value) => ({ value, label: value })), {
-      selected: durationSelect.value || "60-90秒",
+      selected: durationSelect.value || "30-60秒",
     });
     renderDurationVisibility();
   }
@@ -750,7 +750,7 @@
     advancedInput.value = "";
     formatSelect.value = "video";
     platformSelect.value = "douyin";
-    durationSelect.value = "60-90秒";
+    durationSelect.value = "30-60秒";
     promptModal.hidden = true;
     promptModalInput.value = "";
     renderExperiences();
