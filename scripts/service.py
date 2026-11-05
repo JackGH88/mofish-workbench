@@ -94,6 +94,25 @@ def check_owner(owner, root, relocate=False):
         raise RuntimeError('后台服务属于其他目录：' + owner + '。请先在原项目停用并卸载注册；搬迁后原目录不存在时可使用 --relocate。')
 
 
+def port_owner_hint(port):
+    """Best-effort ownership hint; never stops or changes another process."""
+    try:
+        if sys.platform == 'win32':
+            script = (f'$pids=Get-NetTCPConnection -LocalPort {int(port)} -State Listen -ErrorAction Stop | '
+                      'Select-Object -ExpandProperty OwningProcess -Unique; '
+                      'Get-Process -Id $pids | Select-Object Id,Path | ConvertTo-Json -Compress')
+            result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
+                                    capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace')
+        else:
+            result = subprocess.run(['lsof', '-nP', f'-iTCP:{int(port)}', '-sTCP:LISTEN'],
+                                    capture_output=True, text=True, timeout=5, encoding='utf-8', errors='replace')
+        if result.returncode == 0 and result.stdout.strip():
+            return ' 占用进程：' + result.stdout.strip()[:1500]
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return ' 可用 lsof（macOS）或 Get-NetTCPConnection（Windows）查询占用进程。'
+
+
 def check_port(port):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -105,7 +124,7 @@ def check_port(port):
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind(('127.0.0.1', port))
     except OSError as exc:
-        raise RuntimeError(f'端口 {port} 已被占用，未停止占用它的程序。') from exc
+        raise RuntimeError(f'端口 {port} 已被占用，未停止占用它的程序。' + port_owner_hint(port)) from exc
 
 
 def page_accessible(port):
@@ -169,7 +188,7 @@ def mac_plist(root, logs, label=LABEL):
         'WorkingDirectory': str(root), 'RunAtLoad': True, 'KeepAlive': True,
         'ThrottleInterval': 15, 'ExitTimeOut': 30,
         # Runtime directs stdout/stderr to rotating logs. No unbounded launchd log.
-        'EnvironmentVariables': {'PYTHONUNBUFFERED': '1'},
+        'EnvironmentVariables': {'PYTHONUNBUFFERED': '1', 'PYTHONUTF8': '1', 'PYTHONDONTWRITEBYTECODE': '1'},
     })
 
 
@@ -210,7 +229,7 @@ def windows_xml(root, sid):
     actions = add(task, 'Actions', Context='CurrentUser')
     action = add(actions, 'Exec')
     add(action, 'Command', str(root / '.venv/Scripts/pythonw.exe'))
-    add(action, 'Arguments', subprocess.list2cmdline([str(root / 'scripts/service.py'), 'run']))
+    add(action, 'Arguments', subprocess.list2cmdline(['-B', '-X', 'utf8', str(root / 'scripts/service.py'), 'run']))
     add(action, 'WorkingDirectory', str(root))
     return ET.tostring(task, encoding='unicode')
 
@@ -404,7 +423,21 @@ class WindowsService:
                 '-File', str(ROOT / 'scripts/windows-service.ps1'), '-Action', action]
         if xml:
             args.extend(['-XmlPath', str(xml)])
-        result = command(args)
+        result = command(args, allow_failure=True)
+        if result.returncode:
+            try:
+                error = json.loads(result.stdout.lstrip('\ufeff').strip())
+            except ValueError:
+                error = {}
+            code = str(error.get('errorCode', '')).upper()
+            hint = {
+                '0X800706BE': 'RPC 调用被中断；可能是安全软件拦截计划任务创建，请检查拦截记录和任务计划程序状态。',
+                '0X80070005': '访问被拒绝；请检查当前用户权限、系统策略及安全软件记录，不要直接关闭防护。',
+            }.get(code, '请检查任务计划程序和安全软件记录。')
+            if action == 'install':
+                raise RuntimeError(f'后台任务注册失败（{code or "未知错误码"}）。{hint} '
+                                   '已保留依赖和数据；修复后运行 install.ps1 -RegisterOnly，无需重新安装依赖。')
+            raise RuntimeError(f'后台任务操作 {action} 失败（{code or "未知错误码"}）；请检查任务计划程序状态。')
         return json.loads(result.stdout.lstrip('\ufeff').strip() or '{}')
 
     def owner(self):
@@ -524,9 +557,13 @@ def run(root=ROOT, port=PORT):
             threading.Thread(target=watch_stop, daemon=True).start()
         write_json(state / 'runtime.json', {'pid': os.getpid(), 'project': str(root)})
         server.run()
-        return 0 if server.started else 1
+        code = 0 if server.started else 1
+        if code:
+            write_json(state / 'last-exit.json', {'time': time.time(), 'code': code})
+        return code
     except Exception:
         logger.exception('工作台启动或运行失败')
+        write_json(state / 'last-exit.json', {'time': time.time(), 'code': 1})
         return 1
     finally:
         ended.set()
@@ -539,10 +576,14 @@ def run(root=ROOT, port=PORT):
 
 
 def wait_ready(state, port=PORT):
+    started = time.time()
     deadline = time.monotonic() + 45
     while time.monotonic() < deadline:
         if runtime_locked(state) and page_accessible(port):
             return
+        failure = read_json(state / 'last-exit.json')
+        if failure.get('code') and failure.get('time', 0) >= started - 2:
+            raise RuntimeError(f'后台进程启动后已退出，请查看 {state / "logs/service.log"}；修复原因后重试服务启动，无需重新安装依赖。')
         time.sleep(.5)
     raise RuntimeError(f'服务未在 45 秒内就绪。请查看 {state / "logs/service.log"}；若日志不存在，请检查系统启动记录、解释器和项目磁盘访问权限。')
 

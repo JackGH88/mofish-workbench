@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 from .release_feed import REPOSITORY_URL
+from .tool_paths import resolve_tool
 from pathlib import Path
 
 VERSION_RE = re.compile(r'v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\Z')
@@ -31,7 +32,7 @@ class Repository:
         env = {**os.environ, 'GIT_TERMINAL_PROMPT': '0', 'GCM_INTERACTIVE': 'Never',
                'GIT_SSH_COMMAND': 'ssh -oBatchMode=yes -oConnectTimeout=15'}
         try:
-            result = subprocess.run(['git', '-C', str(self.root), *args], env=env,
+            result = subprocess.run([resolve_tool('git', root=self.root) or 'git', '-C', str(self.root), *args], env=env,
                                     capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=timeout)
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise VersionError('Git 不可用或操作超时，请检查 Git 安装、网络和仓库访问权限。') from exc

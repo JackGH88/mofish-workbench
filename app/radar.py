@@ -17,6 +17,7 @@ import hashlib
 import json
 import logging
 import re
+import secrets
 import threading
 import uuid
 from datetime import date, datetime, timedelta, timezone
@@ -497,7 +498,7 @@ def plan_collection(keyword: Mapping[str, Any], *, now: datetime | None = None) 
 
 
 def default_settings() -> dict[str, Any]:
-    return {"collectDailyTime": RADAR_DEFAULT_DAILY_TIME, "collectEnabled": True, "aiEnabled": True, "aiDailyTime": RADAR_DEFAULT_AI_TIME}
+    return {"collectDailyTime": RADAR_DEFAULT_DAILY_TIME, "collectDailyTimeSource": "legacy", "collectEnabled": True, "aiEnabled": True, "aiDailyTime": RADAR_DEFAULT_AI_TIME}
 
 
 def normalize_settings(values: Mapping[str, Any]) -> dict[str, Any]:
@@ -505,6 +506,7 @@ def normalize_settings(values: Mapping[str, Any]) -> dict[str, Any]:
     defaults = default_settings()
     return {
         "collectDailyTime": normalize_clock(source.get("collectDailyTime")),
+        "collectDailyTimeSource": source.get("collectDailyTimeSource") if source.get("collectDailyTimeSource") in {"auto", "manual", "legacy"} else "legacy",
         "collectEnabled": bool(source.get("collectEnabled", defaults["collectEnabled"])),
         "aiEnabled": bool(source.get("aiEnabled", defaults["aiEnabled"])),
         "aiDailyTime": normalize_clock(source.get("aiDailyTime"), fallback=defaults["aiDailyTime"]),
@@ -652,6 +654,10 @@ class RadarStore:
         for key in settings:
             if key in stored and stored[key] is not None:
                 settings[key] = stored[key]
+        if not isinstance(raw, dict):
+            minute = 7 * 60 + secrets.randbelow(300)
+            settings["collectDailyTime"] = f"{minute // 60:02d}:{minute % 60:02d}"
+            settings["collectDailyTimeSource"] = "auto"
         data = {
             "version": RADAR_DATA_VERSION,
             "originalRecommendationMigration": source.get("originalRecommendationMigration") or {},
@@ -680,6 +686,8 @@ class RadarStore:
         # Persist the one-time schedule migration so repeated reads cannot postpone it.
         if isinstance(raw, dict) and "collectDailyTime" not in stored:
             self._reschedule_collection(data, datetime.now(timezone.utc))
+            self._write(data)
+        if not isinstance(raw, dict) or "collectDailyTimeSource" not in stored:
             self._write(data)
         for keyword in data["keywords"].values():
             keyword["dailyTime"] = data["settings"]["collectDailyTime"]
@@ -745,6 +753,8 @@ class RadarStore:
         for key in ("collectEnabled", "collectDailyTime", "aiEnabled", "aiDailyTime"):
             if key in fields and fields.get(key) is not None:
                 merged[key] = fields.get(key)
+        if "collectDailyTime" in fields:
+            merged["collectDailyTimeSource"] = "manual"
         data["settings"] = normalize_settings(merged)
         if data["settings"]["collectDailyTime"] != previous_time:
             self._reschedule_collection(data, now or datetime.now(timezone.utc))

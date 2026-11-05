@@ -2986,6 +2986,13 @@ async def index() -> FileResponse:
     return FileResponse(PROJECT_ROOT / "static" / "index.html", headers={"Cache-Control": "no-store"})
 
 
+@app.get("/api/diagnostics/dependencies")
+async def dependency_diagnostics() -> dict:
+    # Slow executable probes are on-demand and off the ASGI event loop.
+    from .dependency_diagnostics import collect
+    return await asyncio.to_thread(collect, PROJECT_ROOT)
+
+
 @app.get("/api/health")
 async def health() -> dict:
     # plugins.ok=false 会让更新验证把“插件加载失败”判为更新失败，而不是静默成功。

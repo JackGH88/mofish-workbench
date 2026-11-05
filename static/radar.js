@@ -2034,7 +2034,7 @@
     const time = document.getElementById("radarAiTimeInput");
     if (collect) collect.checked = settings.collectEnabled !== false;
     const collectTime = document.getElementById("radarCollectTimeInput");
-    if (collectTime) collectTime.value = settings.collectDailyTime || "09:00";
+    if (collectTime) collectTime.value = settings.collectDailyTime || "";
     if (ai) ai.checked = settings.aiEnabled !== false;
     if (time) time.value = settings.aiDailyTime || "10:30";
     syncSettingsControls();

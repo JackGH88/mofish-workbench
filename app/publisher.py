@@ -2292,7 +2292,9 @@ def _default_browser_factory(profile_path: Path, *, headless: bool) -> _Playwrig
                 "--no-default-browser-check",
             ],
         )
-    except Exception:
+    except Exception as exc:
         playwright.stop()
+        if 'executable' in str(exc).lower() and any(word in str(exc).lower() for word in ('exist', 'not found', 'missing')):
+            raise PublisherError('browser_unavailable', '未找到工作台可用的 Chrome。请让安装 Agent 从 Google Chrome 官网补装，完成后运行安装入口的 Chrome 检查；无需重装工作台。') from exc
         raise
     return _PlaywrightSession(playwright, context)

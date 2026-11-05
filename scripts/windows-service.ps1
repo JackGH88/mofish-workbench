@@ -6,6 +6,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+$OutputEncoding = [Console]::OutputEncoding
 $sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $taskName = "VideoWorkbench-$sid"
 $task = Get-ScheduledTask -TaskPath '\' -TaskName $taskName -ErrorAction SilentlyContinue
@@ -17,7 +18,14 @@ switch ($Action) {
     }
     'install' {
         $xml = [System.IO.File]::ReadAllText($XmlPath, [System.Text.Encoding]::UTF8)
-        Register-ScheduledTask -TaskPath '\' -TaskName $taskName -Xml $xml -Force | Out-Null
+        try {
+            Register-ScheduledTask -TaskPath '\' -TaskName $taskName -Xml $xml -Force | Out-Null
+        } catch {
+            # ASCII JSON survives legacy Windows PowerShell encodings; Python renders Chinese.
+            $nativeCode = if ($_.Exception.PSObject.Properties['ErrorCode']) { $_.Exception.ErrorCode } else { $_.Exception.HResult }
+            @{ ok=$false; action='install'; errorCode=('0x{0:X8}' -f ($nativeCode -band 0xffffffffL)); category=$_.CategoryInfo.Category.ToString() } | ConvertTo-Json -Compress
+            exit 1
+        }
     }
     'start' { Start-ScheduledTask -TaskPath '\' -TaskName $taskName }
     'enable' { Enable-ScheduledTask -TaskPath '\' -TaskName $taskName | Out-Null }

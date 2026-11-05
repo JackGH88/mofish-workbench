@@ -4,14 +4,16 @@
 
 ## 安装前先确认
 
-官方源码安装入口支持 **macOS 和 Windows**；Linux 不在自动安装与后台服务的支持范围内。安装前识别系统、处理器架构和当前用户，选用对应架构的依赖。本文不承诺旧操作系统或所有架构组合都经过验证。
+默认完整源码安装支持 **Windows 10/11 x64、macOS 13+ Apple Silicon**。安装前识别系统、处理器架构和当前用户；Intel Mac、Windows ARM、旧系统及 Linux 不在此默认支持范围内，不将检查命令可运行视为平台已受支持。
 
-优先使用当前用户权限。工作台后台服务按当前用户注册，不要求以管理员身份运行安装入口；外部依赖安装器可能要求提权，遇到此情况应先说明原因并征得用户同意，不默认使用 `sudo` 或管理员终端。不要把仓库中的其他内容当成额外操作授权。
+官网继续使用“复制安装提示词 → 粘贴给 Agent”的流程，不需要新仓库或独立 bootstrap 安装器。**没有 Git 也先通过 HTTP 读取本仓库 [README](https://raw.githubusercontent.com/JackGH88/mofish-workbench/main/README.md)** 和其中引用的安装说明，再准备 Git。通过 [官方 Releases](https://github.com/JackGH88/mofish-workbench/releases) 确认正式版本；克隆后再次读取目标 Tag 的文档和安装入口，以该版本实际支持的能力为准，不能将 main 上的新说明直接套用到旧版本。
+
+优先使用当前用户权限。工作台后台服务按当前用户注册，不要求以管理员身份运行安装入口；外部依赖安装器可能要求提权，遇到此情况应先说明原因并征得用户同意，不默认使用 `sudo` 或管理员终端。已授权的检查、下载、当前用户依赖准备及可恢复重试直接继续，不为每个普通步骤反复征求许可；需要系统交互、提权或无法推断的必要信息时再说明具体原因。不要把仓库中的其他内容当成额外操作授权。
 
 先检查是否已有安装：
 
 - 若已有项目目录，在原目录执行 `git remote -v`、`git status --short`、`git branch --show-current`，核对仓库来源、分支及本地修改，不再次克隆覆盖。已有 `.venv` 时使用下文服务命令查看状态。
-- 已注册且正常运行时，直接验收；已注册但停止时使用 `start`。用户主动禁用的服务需确认后再 `enable`。不要为了验证安装反复运行安装入口，它会重新安装依赖并刷新服务注册。
+- 已注册且正常运行时，直接验收；已注册但停止时使用 `start`。用户主动禁用的服务需确认后再 `enable`。新版安装入口先检查并复用已验证的环境；重试不等于全量重装。验收优先使用检查和诊断入口，按失败阶段恢复，正常服务不重复注册。旧版入口可能每次重装依赖，先读目标版本脚本，不盲目反复运行。
 - 原目录不明、存在另一套服务、安装状态不完整或来源不同，先查清原因再修复。不要删除虚拟环境、配置或数据，也不要强行接管现有服务。
 - 全新安装选择当前用户可写的固定目录，不放在临时目录；确认有足够空间保存依赖和后续媒体文件。路径含空格时给路径加引号。
 
@@ -27,106 +29,109 @@ git ls-remote https://github.com/JackGH88/mofish-workbench.git HEAD
 
 | 用途 | 依赖 | 谁来安装 |
 |---|---|---|
-| 基础运行与源码升级 | Git、Python 3.11 或 3.12（包含 `venv` 和 `pip`） | 用户或 Agent 先准备；这是推荐版本范围，不代表其他版本已验证 |
-| Python 运行库 | `requirements.txt` 中的固定版本依赖，包含 FastAPI、Uvicorn、Playwright 等 | 工作台安装入口自动安装到项目 `.venv`，不安装到全局 Python |
-| 媒体功能 | FFmpeg 和 ffprobe；FFmpeg 需包含 `libmp3lame` 编码器 | 用户或 Agent 先准备；源码版不内置媒体工具，缺少时会影响音频提取、波形、视频首帧和媒体转换 |
-| 发布辅助、浏览器采集 | 稳定版 Google Chrome | 使用这些功能时安装；安装 Playwright Python 包不等于安装 Chrome |
+| 基础运行与源码升级 | Git、Python 3.11 或 3.12（包含 `venv` 和 `pip`） | 用户或 Agent 先准备；安装环境限定这两个版本，验证已有 .venv 后优先复用 |
+| Python 运行库 | `requirements.txt` 中的固定版本依赖，包含 FastAPI、Uvicorn、Playwright 等 | 安装到项目 `.venv`；已验证且依赖未变化时复用，不安装到全局 Python，不从源码编译 |
+| 媒体功能 | FFmpeg 和 ffprobe；FFmpeg 需包含 `libmp3lame` 编码器 | Agent 检查现有工具或准备适配的预编译包；缺少时会影响音频提取、波形、视频首帧和媒体转换 |
+| 发布辅助、浏览器采集 | 稳定版 Google Chrome | 默认完整安装必须准备并验收；安装 Playwright Python 包不等于安装 Chrome |
 | 外部助手 | Codex 或 WorkBuddy | 按需安装、登录和配置；基础页面启动不依赖它们 |
 | 助手剪辑预设 | Node.js 22+、FFmpeg、ffprobe 及对应助手 | 按需准备；HyperFrames 和逐词对齐能力由助手在任务工程中另行检查和准备 |
 
-要交付媒体功能可用的源码安装，应准备 FFmpeg/ffprobe；只启动基础服务时可暂不安装，但必须在结果中列为未就绪能力。基础运行不要求 Node.js、Docker 或应用打包工具，也不需要自行编译苹果安装包。
+默认交付包含 Python 依赖、FFmpeg/ffprobe 和 Chrome；仅启动基础服务属于未完成或明确选择的降级结果，缺失能力必须列明，不能当作完整安装完成。基础运行不要求 Node.js、Docker 或应用打包工具，也不需要自行编译苹果安装包。
 
-### macOS 准备
+### Git 先就绪，再克隆
 
-先检查现有工具；缺少命令时记录缺项，不把整段输出当作全部通过：
+macOS 先运行 `git --version` 验证实际可用性。仅发现 `/usr/bin/git` 不代表 Git 已安装，该路径可能只是触发 Command Line Tools（CLT）安装的系统入口。已有可用 Git 就复用；缺失时由 Agent 引导运行 `xcode-select --install`，说明系统对话框和用户必须完成的步骤，完成后重新验证。不要宣称 CLT 可以无人值守完成，也不要仅为安装 Git 引入整套包管理器。
 
-```bash
-uname -sm
-git --version
-command -v python3
-python3 -c 'import sys, venv, ensurepip; print(sys.executable); print(sys.version)'
-python3 -m pip --version
-ffmpeg -version
-ffprobe -version
-```
+Windows 先运行 `git --version`。缺失时从 [Git for Windows 官方下载入口](https://git-scm.com/downloads/win) 及其链接的官方 Release 获取匹配架构的 **PortableGit**，解压到当前用户可写的固定工具目录；验证来源及官方提供的校验信息，再用绝对路径执行 `git.exe --version`。将其 `cmd` 目录加入当前进程 PATH，必要时追加用户 PATH，保留原值，不改系统 PATH。不要假设电脑已有 Git 或管理员权限。
 
-已有 Homebrew 且缺少相应依赖时，可按 [Homebrew 安装说明](https://docs.brew.sh/Installation)、[Python 3.12 配方](https://formulae.brew.sh/formula/python@3.12) 和 [FFmpeg 配方](https://formulae.brew.sh/formula/ffmpeg)安装缺项。以下是一组完整示例，已有满足要求的工具无需重复安装：
+### Python 与媒体运行时
 
-```bash
-brew install git python@3.12 ffmpeg
-```
+安装入口已集成 `scripts/source_runtime.py` 的 `prepare_runtime` 与离线 wheel 安装逻辑；运行时包计划作为本仓库的 **Release assets** 提供，**目前尚未发布**，当前清单的平台条目为空。安装入口本身仍需可用的 Python 才能运行，当前由 Agent **先准备 Python 3.11/3.12 64 位**，再调用安装入口，不能依赖尚未发布的包解决首次 Python 缺失。Agent 必须检查目标正式 Release 的实际资源和适配架构，不能编造包名、下载地址、校验值或承诺已有一键下载能力。没有匹配发布条目时继续准备官方来源的依赖；已有条目的下载或校验失败应报告并修复，不能当作未发布而静默回退。不要求用户寻找一个不存在的安装包：
 
-未安装 Homebrew 时，不自动执行提权安装；可先说明选择，再按官方步骤准备 Homebrew，或从 [Python 官方下载页](https://www.python.org/downloads/macos/)、[Git 官方下载页](https://git-scm.com/downloads)、[FFmpeg 官方下载入口](https://ffmpeg.org/download.html)选择适合系统的发行包。FFmpeg 官网提供源码及预编译发行包链接，普通安装应选择含 `ffmpeg`、`ffprobe` 的可执行包，不要求用户自行编译。
+- Python：从 [macOS 官方下载页](https://www.python.org/downloads/macos/) 或 [Windows 官方下载页](https://www.python.org/downloads/windows/) 选择适配的 Python 3.11/3.12，包含 `venv`、`ensurepip` 和 pip。Windows 优先当前用户安装；嵌入式精简包不等于可用的 venv 环境。
+- FFmpeg：从 [FFmpeg 官方下载入口](https://ffmpeg.org/download.html) 链接的预编译发行来源获取适配的 FFmpeg 和 ffprobe，确认支持 `libmp3lame`。放在固定用户工具目录并让后台服务能够解析，不只检查当前终端 PATH。
+- 若已有 Homebrew，可复用其已安装工具；只有存在适配 bottle 时才采用预编译安装，不因为缺少 bottle 转为源码编译。无需为本任务新装 Homebrew。
 
-安装器实际调用 PATH 中的 `python3`，不是任意一个已安装的 Python。使用 Homebrew 的 Python 3.12 时，可只在当前终端选择它，再复查版本：
+先验证项目已有 `.venv` 的解释器和依赖。macOS 使用 `.venv/bin/python`，Windows 使用 `.\.venv\Scripts\python.exe`，检查版本为 3.11/3.12，运行 `-c "import sys, venv, ensurepip; print(sys.executable); print(sys.version)"` 和 `-m pip --version`。**普通安装复用通过验证的 .venv**，不因系统默认 Python 版本变化而重建。环境不完整时诊断具体缺项，保留原环境、配置和数据，不能直接删除 `.venv`。
 
-```bash
-export PATH="$(brew --prefix python@3.12)/libexec/bin:$PATH"
-python3 -c 'import sys; print(sys.executable); print(sys.version)'
-```
+没有可用环境时，Agent 验证候选解释器的绝对路径、版本和 venv/pip 能力，再按目标版本入口的选择规则创建环境。旧入口可能选择 PATH 中的 `python3` 或优先 `py -3`，不要仅凭 `python --version` 推断实际选择；Windows 可用 `py -0p` 列出候选，分别验证 `py -3.12` / `py -3.11`。不要替换系统 Python、全局安装项目依赖或改变其他项目环境。
 
-该命令仅适用于已经安装 Homebrew 的 `python@3.12`；不要更改系统 Python 或其他项目的默认环境。选择好解释器后，在同一终端运行安装命令。已有 `.venv` 时也要核对 `.venv/bin/python --version`，不要为切换版本直接删除已有环境。
+Python 依赖应使用匹配平台的预编译 wheel；缺少 wheel 或下载失败时报告具体包、解释器、架构和错误，不启动源码编译、不擅自升级固定版本。网络失败只恢复受影响的阶段，已有有效下载和通过验证的依赖继续复用。
 
-### Windows 准备（PowerShell）
+### 默认准备 Chrome；助手按需准备
 
-从 [Git 官方下载页](https://git-scm.com/downloads)、[Python Windows 下载页](https://www.python.org/downloads/windows/)准备对应架构的 Git 和 Python 3.11/3.12。按 [Python Windows 安装说明](https://docs.python.org/3.12/using/windows.html)优先选择当前用户安装，确保 Python、pip、venv 可用；不要把只用于嵌入的精简 Python 包当成完整安装环境。
-
-从 [FFmpeg 官方下载入口](https://ffmpeg.org/download.html)列出的 Windows 构建来源获取可执行包，解压到当前用户的固定工具目录，把同时包含 `ffmpeg.exe` 和 `ffprobe.exe` 的 `bin` 目录加入**用户 PATH**。不要覆盖整条 PATH，也不要随意修改系统 PATH。更改后重新打开 PowerShell，复查：
-
-```powershell
-git --version
-Get-Command py, python -ErrorAction SilentlyContinue
-if (Get-Command py -ErrorAction SilentlyContinue) {
-    py -3 -c "import sys, venv, ensurepip; print(sys.executable); print(sys.version)"
-    py -3 -m pip --version
-} else {
-    python -c "import sys, venv, ensurepip; print(sys.executable); print(sys.version)"
-    python -m pip --version
-}
-Get-Command ffmpeg, ffprobe
-ffmpeg -version
-ffprobe -version
-```
-
-`install.ps1` **优先调用 `py -3`**；只有找不到 `py` 时才使用 `python`。因此 `python --version` 正确不代表安装器会选中同一个解释器。传统 Python Launcher 可用 `py -0p` 查看版本；如果已安装 3.12，可按其官方配置在当前 PowerShell 设置并验证：
-
-```powershell
-$env:PY_PYTHON3 = '3.12'
-py -3 -c "import sys; print(sys.executable); print(sys.version)"
-```
-
-这不是安装 Python 的命令。不同版本的 Python 启动器或安装管理器可能使用不同配置；若 `py -3` 实际仍未选中目标版本，停止安装，按该启动器官方说明调整并再次验证。不要只提前创建 `.venv` 就认为安装器会沿用所选版本。若存在 `.venv`，先核对 `.\.venv\Scripts\python.exe --version`，保留原环境与数据。
-
-### 按需准备浏览器和助手
-
-Chrome 从 [Google Chrome 官网](https://www.google.com/chrome/)安装，完成后确认本机可以打开。工作台浏览器自动化使用 Chrome 渠道，不要把安装 Playwright 自带 Chromium 当成 Chrome 已就绪。
+Chrome 属于默认完整安装的验收项。缺少 Chrome 时，Agent 引导从 [Google Chrome 官网](https://www.google.com/chrome/)安装，说明必须由用户完成的系统交互，不保证无人值守安装。已安装时仅执行本地启动、打开本地测试页并关闭的冒烟检查，不访问第三方、不登录或发布。只有用户明确选择跳过时才使用 `--skip-chrome` / `-SkipChrome`，并报告“基础服务可用，完整安装未完成：浏览器能力未就绪”。需要系统交互时保留进度，待完成官方安装后用 Chrome 专项检查验收，不默认跳过。工作台浏览器自动化使用 Chrome 渠道，不要把安装 Playwright 自带 Chromium 当成 Chrome 已就绪。
 
 助手剪辑需要 Node.js 时，从 [Node.js 官方下载页](https://nodejs.org/en/download)选择满足 22+ 的受支持 LTS 版本，并检查 `node --version`。Codex 或 WorkBuddy 应由用户按各自官方方式安装和登录。不要为了验证工作台安装而启动付费生成、登录第三方账号或执行真实发布。
 
 ## 安装与配置
 
-仅在确认是全新安装后克隆：
+仅在确认是全新安装后克隆官方仓库。先通过 HTTP 核对官方正式 Release 的 Tag、提交和版本（不是桌面安装包版本，也不是 main 最新提交）。下面的 `vX.Y.Z` 必须替换为已核验的正式 Tag，不可直接照抄：
 
 ```bash
-git clone https://github.com/JackGH88/mofish-workbench.git
+git clone --no-checkout https://github.com/JackGH88/mofish-workbench.git
 cd mofish-workbench
+git fetch origin tag vX.Y.Z
+git rev-parse 'vX.Y.Z^{commit}'
+git show vX.Y.Z:VERSION
 ```
 
-已有安装在原目录操作；需要升级时按下文更新步骤处理。以下入口用于首次安装或已确认需要的依赖更新、安装修复，不是每次启动都要执行。
-
-macOS（使用前面选好的 `python3`）：
+将结果与官方发布信息核对后，仅在这个全新且没有本地修改的克隆中执行：
 
 ```bash
-./install.sh
+git switch -C main vX.Y.Z
+git branch --set-upstream-to=origin/main main
 ```
 
-Windows PowerShell：
+这样运行正式 Tag 的源码，同时保留本地 `main` 分支，兼容后续按正式 Tag 快进升级。不要停留在 detached HEAD，不使用浅克隆限制后续历史，也不要为了跟踪 `origin/main` 就拉取未发布提交。已有安装在原目录操作，不执行上述重建分支命令；更新遵循下文步骤。
+
+### 检查、安装与恢复
+
+先读取所选 Tag 的安装入口。下表是新版安装入口的参数约定；旧正式 Tag 若尚未提供这些参数或诊断模块，按该版本文档检查、修复并说明限制，**不要盲传新参数**。
+
+| 操作 | Windows PowerShell 参数 | macOS 参数 | 用途 |
+|---|---|---|---|
+| 仅检查 | `-Check` | `--check` | 查看环境和缺项，不作为完整安装成功的证明 |
+| 恢复 | `-Resume` | `--resume` | 从失败阶段继续，复用已验证的环境和下载 |
+| 仅注册服务 | `-RegisterOnly` | `--register-only` | 环境已就绪时修复后台注册，不重装运行依赖 |
+| 仅处理 Chrome | `-ChromeOnly` | `--chrome-only` | 检查浏览器，缺失时引导安装，不重装工作台 |
+| 跳过 Chrome | `-SkipChrome` | `--skip-chrome` | 仅用户明确选择时降级完成基础安装；不代表完整安装 |
+
+macOS 正常安装及可用时的检查、恢复示例（每次按目的选择一条）：
+
+```bash
+./install.sh --check
+./install.sh
+./install.sh --resume
+```
+
+Windows PowerShell 对应示例：
 
 ```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Check
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Resume
 ```
 
-安装创建 `.venv`、安装 `requirements.txt` 中的 Python 依赖、注册当前用户后台服务并启用登录后自启动。它**不会自动安装 Git、Python 本体、FFmpeg、Chrome、Node.js 或外部助手**。成功后关闭安装终端不影响后台运行。
+普通安装验证并复用 Python 3.11/3.12 的 `.venv`，只补齐需要的依赖，注册当前用户后台服务并启用登录后自启动；已有正常服务无需重复注册。重试不是全量重装：Python 环境有效就保留，只有服务注册失败时使用仅注册模式，只有 Chrome 缺失时处理 Chrome。Git、Python 本体、媒体工具和 Chrome 缺失时按前文由 Agent 准备或引导；不要将运行时资产计划描述为已发布的能力。成功后关闭安装终端不影响后台运行。
+
+已有 Python 依赖及 FFmpeg/ffprobe 均通过检查时，普通安装会跳过运行时准备，不要求重新下载 bundle。若已注册服务仍在运行且依赖需要变更，安装器会在下载和 pip 之前停止并保留原环境。Agent 等待任务空闲、保存编辑内容后，在本项目目录停止服务并确认状态，再续跑：
+
+```bash
+# macOS：确认任务空闲后
+./service.sh stop
+./service.sh status
+./install.sh --resume
+```
+
+```powershell
+# Windows：确认任务空闲后
+powershell -NoProfile -ExecutionPolicy Bypass -File .\service.ps1 stop
+powershell -NoProfile -ExecutionPolicy Bypass -File .\service.ps1 status
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Resume
+```
+
+只有确认 stop 成功且服务不再运行，才执行恢复命令；停止失败时先排查日志，不强杀未知进程、不删除环境。Windows 跨版本依赖变更仍按“更新”章节使用项目外 Python 做停机迁移，不能用普通续跑绕过自动更新保护。
 
 首次仅在 `.env` 不存在时复制公开配置模板，其中包括：
 
@@ -139,7 +144,7 @@ WORKBENCH_PLATFORM_MODE=live
 
 ## 安装后验收
 
-安装入口会等待后台进程和首页就绪，但 Agent 仍应逐项核验，不能只根据退出码或“安装完成”文字宣布全部功能正常。
+安装入口会等待后台进程和首页就绪，但 Agent 仍应逐项核验。当前入口在依赖报告为 `degraded` 时也可能返回 0，不能只根据退出码或“基础安装已完成”文字宣布完整安装完成。Chrome 与媒体检查必须读取实际报告。
 
 ### 1. 服务、页面和版本
 
@@ -167,7 +172,7 @@ Get-Content .\VERSION
 
 健康接口应返回 JSON：`status` 为 `ok`、`downloadDirWritable` 为 `true`、`runningVersion` 与当前目录 `VERSION` 一致、`plugins.ok` 为 `true`。无插件的新安装也应正常；若插件状态异常，保留失败明细排查，不擅自删除插件。仅收到 HTTP 200 不足以判定这些字段正常。
 
-### 2. 媒体工具和可选能力
+### 2. 媒体工具、Chrome 与按需助手
 
 在两个平台都检查：
 
@@ -179,25 +184,29 @@ ffmpeg -hide_banner -encoders
 
 编码器列表应包含 `libmp3lame`，它用于从视频提取 MP3 音频。macOS 可用 `ffmpeg -hide_banner -encoders | grep libmp3lame`；Windows PowerShell 可用 `ffmpeg -hide_banner -encoders | Select-String libmp3lame` 检查。
 
-还可在项目目录使用虚拟环境中的 Python，检查工作台自己的工具解析逻辑：
+在提供诊断能力的版本中，使用项目虚拟环境运行依赖诊断 CLI（即 `python -m app.dependency_diagnostics`）：
 
 ```bash
 # macOS
-.venv/bin/python -c 'import subprocess; from app.ffmpeg import ffmpeg_path, ffprobe_path; tools=(ffmpeg_path(), ffprobe_path()); print(tools); [subprocess.run([p, "-version"], check=True) for p in tools]'
+.venv/bin/python -m app.dependency_diagnostics --verify-media --verify-browser
+curl --noproxy '*' --fail --silent --show-error --max-time 10 http://127.0.0.1:8001/api/diagnostics/dependencies
 ```
 
 ```powershell
 # Windows
-.\.venv\Scripts\python.exe -c "import subprocess; from app.ffmpeg import ffmpeg_path, ffprobe_path; tools=(ffmpeg_path(), ffprobe_path()); print(tools); [subprocess.run([p, '-version'], check=True) for p in tools]"
+.\.venv\Scripts\python.exe -m app.dependency_diagnostics --verify-media --verify-browser
+curl.exe --noproxy "*" --fail --silent --show-error --max-time 10 http://127.0.0.1:8001/api/diagnostics/dependencies
 ```
 
-**这些命令只验证当前终端环境，不代表后台进程一定能找到工具。** macOS 源码运行会额外查找常见 Homebrew 目录 `/opt/homebrew/bin` 和 `/usr/local/bin`；其他位置及 Windows 依赖后台进程实际获得的 PATH。修改用户 PATH 后先重开终端，再在任务空闲时重启服务；Windows 计划任务仍使用旧环境时，可能需要用户保存工作并重新登录电脑，不要自动注销。
+CLI 的 `--verify-media --verify-browser` 使用临时本地素材和页面进行实际冒烟；只运行无参数 CLI 是依赖检测，不能替代冒烟。明确跳过 Chrome 时省略 `--verify-browser` 并报告降级。CLI 验证当前进程环境，`/api/diagnostics/dependencies` 检查实际后台进程的依赖状态；记录缺项与失败明细，不能只看 HTTP 200。旧 Tag 不提供这些入口时，明确报告限制，按该版本的工具解析和服务日志逐项核验，不将模块缺失或 404 判为整个安装损坏。
 
-`/api/health` 不检测 FFmpeg、Chrome 或助手依赖，也不验证付费平台调用。没有完成后台媒体处理验证时，应报告“基础服务可用，媒体功能仅完成终端依赖检查，后台执行未验证”。如需补充媒体验证，只使用用户同意的本地测试素材和不联网、不计费的本地处理；不要触发转写、生成或真实发布任务来证明安装成功。缺少 Chrome、Node.js 或助手时，列出受影响的可选能力。
+修改用户 PATH 后先重开终端，再在任务空闲时重启服务；Windows 计划任务仍使用旧环境时，可能需要用户保存工作并重新登录电脑，不要自动注销。终端工具可用不代表后台可用。
+
+`/api/health` 不替代依赖诊断，也不验证付费平台调用。Chrome 仅做本地启动/关闭检查；媒体测试仅用本地测试素材做不联网、不计费的处理，不触发转写、生成或真实发布。未完成后台媒体执行验证时明确报告验证范围；Chrome 缺失或本地冒烟失败意味着默认完整安装尚未完成；Node.js 或助手按需准备，缺少时列出受影响的助手能力。
 
 ### 3. 给用户的安装结果
 
-报告系统与安装目录、源码版本、访问地址、服务和健康检查结果、媒体依赖及可选能力的验证范围、配置与数据保留情况、日志位置，以及下文启动和停止命令。任何一步失败都应指出具体命令、错误及下一步需要的权限或信息，不把“页面能打开”表述为所有功能已验证，也不把密钥、登录态或个人数据贴入报告。
+报告系统与安装目录、源码版本、访问地址、服务和健康检查结果、媒体、Chrome 及按需助手的验证范围、配置与数据保留情况、日志位置，以及下文启动和停止命令。任何一步失败都应指出具体命令、错误及下一步需要的权限或信息，不把“页面能打开”表述为所有功能已验证，也不把密钥、登录态或个人数据贴入报告。
 
 ## 日常管理
 
@@ -210,7 +219,13 @@ Windows 使用 `powershell -NoProfile -ExecutionPolicy Bypass -File .\service.ps
 
 账号菜单中的“版本与更新”检测正式版本并提供升级步骤、可复制给 Agent 的升级指令。该指令包含精确目标 Tag 和提交，请保留 Git 仓库和 `main` 分支，不要删除 `.git` 或修改程序文件。
 
-升级前等任务结束、保存编辑内容并停止服务，备份 `.env`、`workspace/` 和 `downloads/`。按照界面给出的目标获取 Tag，校验其提交和 `VERSION` 后执行 Git 快进更新，再重新运行安装入口安装依赖并启动。不要强制重置本地改动。无法快进或校验失败时停止，保留数据与日志。
+升级前核对正式目标 Tag、提交、`VERSION`、本地修改及依赖差异，等待任务结束并备份 `.env`、`workspace/` 和 `downloads/`。不要强制重置本地改动；无法快进或校验失败时停止，保留数据与日志。
+
+**Windows 自动更新：依赖未变化时照常更新；依赖变化时会在修改代码、依赖环境或服务之前拒绝更新。** `scripts/update_workbench.py` 检查 requirements、约束文件及运行时清单等依赖变化；拒绝后会记录错误，但不会替换当前代码或停止原服务。不要通过反复点击更新、忽略提示或直接运行旧 `.venv` 中的 pip 绕过保护。
+
+Windows 依赖变更交给 Agent 做停机离线安全迁移：“离线”指退出工作台运行进程后操作，不承诺所有依赖已能断网获取。Agent 应先用**项目外**的 Python 3.11/3.12 64 位准备目标版本的预编译依赖，确认源码与依赖可用、备份空间和回退点；再等任务完成、停止服务及更新进程，备份原代码版本、`.venv`、配置与数据，在最终 `.venv` 路径创建并验证新环境，按已核验 Tag 快进更新后启动验收。不要将临时位置创建好的 venv 直接搬到最终目录（脚本可能含绝对路径），不要由待替换的 `.venv` 内 Python 执行迁移。失败时停止新服务并恢复原代码、原环境和必要的数据备份，再验证旧版本可用；保留失败日志与备份，不做破坏性清理。
+
+macOS 或不涉及依赖变化的 Agent 更新同样需校验正式目标，停止服务后按 Tag 快进；使用目标版本入口验证并复用环境，按需补齐依赖、启动并检查健康和能力报告。普通安装重试的环境复用，不等于 Windows 运行中依赖升级安全。
 
 此仓库拥有独立的正式发布历史，其他来源安装不可直接改远程地址后强行合并。不要通过下载 ZIP 覆盖现有运行目录来更新。
 
@@ -226,13 +241,15 @@ Windows 可将 `python3` 换为项目 `.venv\Scripts\python.exe`。插件通过�
 
 ## 数据与排错
 
+安装阶段、耗时、工具路径和验收报告记录在 `workspace/install/state.json`（位于 workspace 子目录内，适配数据目录 schema），不是 `workspace/install.json`。记录会被诊断工具读取；不要手动删除、覆盖或将旧路径内容盲目迁入。Chrome 专项检查会写入当前报告及最终状态：缺失时为 degraded 并提示安装；检查执行成功后按报告更新 complete/degraded 并清除旧错误。仍需区分专项验收与服务、媒体的完整验收范围。
+
 `workspace/` 保存账号、登录态、脚本和设置；`downloads/` 保存任务媒体。后台服务日志以 `service status` 返回的 `logs` 路径为准：macOS 通常位于 `~/Library/Application Support/VideoWorkbench/<目录标识>/logs/`，Windows 位于 `%LOCALAPPDATA%\VideoWorkbench\<目录标识>\logs\`，主日志为 `service.log`。不要只在项目 `logs/` 查找后台服务错误。上述数据、日志及 `.env` 均不应公开，源码仓库不包含个人数据。
 
 | 问题 | 排查方式 |
 |---|---|
-| Python 找不到、版本不符或虚拟环境创建失败 | 核对安装器实际选用的 `python3` / `py -3` / `python`，检查 `venv`、pip 和目录权限；不替换系统 Python，不直接删除已有 `.venv` |
+| Python 找不到、版本不符或虚拟环境创建失败 | 先核对已有 `.venv` 是否为可用的 Python 3.11/3.12，再检查目标版本安装器的解释器选择、`venv`、pip 和目录权限；不替换系统 Python，不直接删除已有 `.venv` |
 | pip 下载失败、证书或网络错误 | 保留具体错误，核对包索引连通性、代理、系统时间与证书；不关闭 TLS 校验，不随意换未核实来源，也不擅自升级固定依赖版本 |
-| FFmpeg/ffprobe 找不到或编码失败 | 检查二者路径、版本、`libmp3lame` 和后台服务 PATH；源码版不会自动下载媒体工具 |
+| FFmpeg/ffprobe 找不到或编码失败 | 检查二者路径、版本、`libmp3lame` 和后台服务 PATH；目标 Release 缺少运行时资产时由 Agent 按官方入口准备预编译工具，不从源码编译 |
 | 8001 端口被占用 | 识别监听进程和已有安装，服务状态及目录须匹配；不强杀未知程序 |
 | 服务注册后未就绪 | 根据 `status` 的日志目录排查，必要时检查 macOS 启动记录或 Windows 任务计划程序；页面可访问但 `running` 为 false 也不能认定本次服务成功 |
 | macOS 外接磁盘权限错误 | 确认磁盘已挂载，按系统提示允许后台 Python 访问该磁盘；不通过放宽整个磁盘权限绕过问题 |

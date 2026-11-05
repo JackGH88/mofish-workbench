@@ -14,6 +14,7 @@ import functools
 import hashlib
 import json
 import logging
+import os
 import re
 import threading
 import uuid
@@ -436,7 +437,8 @@ class MonitorStore:
             if key in stored_settings and stored_settings[key] is not None:
                 settings[key] = stored_settings[key]
         settings = normalize_settings(settings)
-        return {
+        data = {
+            "scheduleSeed": source.get("scheduleSeed") or uuid.uuid4().hex,
             "version": MONITOR_DATA_VERSION,
             "originalRecommendationMigration": source.get("originalRecommendationMigration") or {},
             "settings": settings,
@@ -445,6 +447,46 @@ class MonitorStore:
             "accounts": {str(k): v for k, v in (source.get("accounts") or {}).items() if isinstance(v, dict)},
             "usage": source.get("usage") if isinstance(source.get("usage"), dict) else {},
         }
+
+        changed = not source.get("scheduleSeed")
+        if self._phase_enabled():
+            moment = datetime.now(timezone.utc)
+            for blogger in data["bloggers"].values():
+                collection = blogger.setdefault("collection", {})
+                interval = self._follow_interval(blogger)
+                if self._schedule_protected(collection):
+                    continue
+                if collection.get("phaseIntervalMinutes") != interval:
+                    # Never delay a new blogger's immediate baseline.
+                    if (blogger.get("baselineAt") or collection.get("lastAttemptAt") or
+                            ("phaseIntervalMinutes" not in collection and collection.get("nextCheckAt"))):
+                        collection["nextCheckAt"] = self._next_check(data, blogger, moment)
+                    collection["phaseIntervalMinutes"] = interval
+                    changed = True
+        if changed:
+            self._write(data)
+        return data
+
+    @staticmethod
+    def _phase_enabled() -> bool:
+        """Set MOFISH_MONITOR_PHASE_ENABLED=0 to restore completion + interval scheduling."""
+        return os.environ.get("MOFISH_MONITOR_PHASE_ENABLED", "1").lower() not in {"0", "false", "off"}
+
+    @staticmethod
+    def _schedule_protected(collection: Mapping[str, Any]) -> bool:
+        return (collection.get("status") in (*MONITOR_ACTIVE_STATUSES, *MONITOR_BLOCKING_STATUSES)
+                or collection.get("lastErrorCode") in MONITOR_BLOCKING_ERROR_CODES)
+
+    def _next_check(self, data: Mapping[str, Any], blogger: Mapping[str, Any], moment: datetime,
+                    interval: int | None = None) -> str:
+        interval = interval or self._follow_interval(blogger)
+        if not self._phase_enabled():
+            return (moment + timedelta(minutes=interval)).astimezone(timezone.utc).isoformat()
+        key = f"{data['scheduleSeed']}:{blogger['id']}:{interval}"
+        phase = int(hashlib.sha256(key.encode()).hexdigest(), 16) % interval
+        minute = int(moment.timestamp() // 60)
+        next_minute = minute + ((phase - minute) % interval or interval)
+        return datetime.fromtimestamp(next_minute * 60, timezone.utc).isoformat()
 
     def _write(self, data: Mapping[str, Any]) -> None:
         self._workspace_dir.mkdir(parents=True, exist_ok=True)
@@ -589,9 +631,9 @@ class MonitorStore:
         collection["lastError"] = sanitize_message(str(error or ""))[:300]
         collection["lastErrorCode"] = public_code(str(error_code or ""))[:60]
         blocked = collection["status"] in MONITOR_BLOCKING_STATUSES or error_code in MONITOR_BLOCKING_ERROR_CODES
-        collection["nextCheckAt"] = "" if blocked else (
-            datetime.fromisoformat(stamp) + timedelta(minutes=self._follow_interval(blogger))
-        ).isoformat()
+        collection["nextCheckAt"] = "" if blocked else self._next_check(data, blogger, datetime.fromisoformat(stamp))
+        if self._phase_enabled() and not blocked:
+            collection["phaseIntervalMinutes"] = self._follow_interval(blogger)
         if coverage is not None:
             collection["coverage"] = dict(coverage)
         # 只有本轮成功采到第一页时才更新；失败时保留上一轮的值，「数据监控」标签不会闪掉。
@@ -607,7 +649,11 @@ class MonitorStore:
 
     @_locked
     def recover_orphaned_collections(self, active_ids: Iterable[str]) -> list[str]:
-        """无实际任务的 running 不再永久挡住调度；保留正常重试间隔。"""
+        """每轮只恢复无实际任务的 queued/running；不得重排正常到期任务。
+
+        启动补偿由 reset_running 处理，长时间休眠由 due_bloggers 处理。
+        本方法紧接着就会检查 due，重排普通到期记录会让它永远无法执行。
+        """
         active = set(active_ids)
         orphaned = [key for key, blogger in self._read()["bloggers"].items()
                     if key not in active and (blogger.get("collection") or {}).get("status") in MONITOR_ACTIVE_STATUSES]
@@ -618,7 +664,7 @@ class MonitorStore:
 
     @_locked
     def reset_running(self) -> list[str]:
-        """服务重启后把中断的采集状态复位，避免界面一直显示「采集中」。"""
+        """仅服务启动时复位中断任务并分散过期计划；不可用于每轮调度。"""
         data = self._read()
         reset: list[str] = []
         changed = False
@@ -631,6 +677,17 @@ class MonitorStore:
                 blogger["collection"] = collection
                 reset.append(blogger_id)
                 changed = True
+        if self._phase_enabled():
+            moment = datetime.now(timezone.utc)
+            for blogger_id, blogger in data["bloggers"].items():
+                collection = blogger.setdefault("collection", {})
+                next_check = parse_iso(collection.get("nextCheckAt"))
+                overdue = (next_check and next_check <= moment and
+                           (blogger.get("baselineAt") or collection.get("lastAttemptAt")))
+                if not self._schedule_protected(collection) and (blogger_id in reset or overdue):
+                    collection["nextCheckAt"] = self._next_check(data, blogger, moment)
+                    collection["phaseIntervalMinutes"] = self._follow_interval(blogger)
+                    changed = True
         for bucket in data["accounts"].values():
             job = bucket.get("recommendationJob") if isinstance(bucket.get("recommendationJob"), dict) else None
             if job is not None and (job.get("status") == "running" or
@@ -652,7 +709,7 @@ class MonitorStore:
         """会话恢复后清理登录类阻断：只清提示、恢复为待采，不主动补采。
 
         登录前写入的 ``auth_required`` 会永久阻断自动采集：会话有效后把它改回 ``idle`` 并清空错误，
-        交由原有间隔锚点决定何时采；同样清掉登录类的 AI 建议任务失败。
+        交由未来固定相位决定何时采；同样清掉登录类的 AI 建议任务失败。
         ``insufficient_balance`` 不属于登录问题，保持阻断。
         """
         data = self._read()
@@ -665,7 +722,8 @@ class MonitorStore:
                 collection["status"] = "idle"
                 collection["lastError"] = ""
                 collection["lastErrorCode"] = ""
-                collection["nextCheckAt"] = ""
+                collection["nextCheckAt"] = self._next_check(data, blogger, datetime.now(timezone.utc)) if self._phase_enabled() else ""
+                collection["phaseIntervalMinutes"] = self._follow_interval(blogger)
                 blogger["collection"] = collection
                 released += 1
                 changed = True
@@ -713,7 +771,8 @@ class MonitorStore:
             retry_at = parse_iso(collection.get("subscriptionRetryAt"))
             if retry_at and retry_at > moment and points(available) <= points(collection.get("subscriptionRecoveryBalance")):
                 continue
-            collection.update(status="idle", lastError="", lastErrorCode="", nextCheckAt=moment.isoformat(),
+            collection.update(status="idle", lastError="", lastErrorCode="", nextCheckAt=self._next_check(data, blogger, moment) if self._phase_enabled() else moment.isoformat(),
+                              phaseIntervalMinutes=self._follow_interval(blogger),
                               subscriptionRetryAt=(moment + timedelta(minutes=15)).isoformat(),
                               subscriptionRecoveryBalance=str(available))
             blogger["collection"] = collection
@@ -772,7 +831,9 @@ class MonitorStore:
         follows[account_id] = follow
         collection = blogger.get("collection") if isinstance(blogger.get("collection"), dict) else {}
         if not collection.get("nextCheckAt") or str(collection.get("status")) in MONITOR_BLOCKING_STATUSES:
-            collection["nextCheckAt"] = stamp
+            collection["nextCheckAt"] = (self._next_check(data, blogger, datetime.fromisoformat(stamp))
+                                          if self._phase_enabled() and (blogger.get("baselineAt") or collection.get("lastAttemptAt")) else stamp)
+            collection["phaseIntervalMinutes"] = self._follow_interval(blogger)
             if str(collection.get("status")) in MONITOR_BLOCKING_STATUSES:
                 collection["status"] = "idle"
                 collection["lastError"] = ""
@@ -834,6 +895,7 @@ class MonitorStore:
             return []
         moment = now or datetime.now(timezone.utc)
         due: list[str] = []
+        changed = False
         for blogger_id, blogger in data["bloggers"].items():
             follows = blogger.get("follows") if isinstance(blogger.get("follows"), dict) else {}
             if not any(isinstance(item, Mapping) and item.get("enabled", True) for item in follows.values()):
@@ -844,8 +906,15 @@ class MonitorStore:
                 continue
             last_attempt = parse_iso(collection.get("lastAttemptAt"))
             next_check = parse_iso(collection.get("nextCheckAt"))
+            # A suspended/offline scheduler skips missed slots; allow two 60s ticks of jitter.
+            if (self._phase_enabled() and next_check and
+                    (blogger.get("baselineAt") or collection.get("lastAttemptAt")) and
+                    moment - next_check > timedelta(seconds=120)):
+                collection["nextCheckAt"] = self._next_check(data, blogger, moment)
+                changed = True
+                continue
             # 旧失败记录把 nextCheckAt 写成本轮结束时间；至少等待完整周期。
-            if status in ("failed", "partial") and last_attempt is not None:
+            if not self._phase_enabled() and status in ("failed", "partial") and last_attempt is not None:
                 earliest = last_attempt + timedelta(minutes=self._follow_interval(blogger))
                 next_check = max(next_check, earliest) if next_check is not None else earliest
             if next_check is None:
@@ -856,6 +925,8 @@ class MonitorStore:
             elif next_check > moment:
                 continue
             due.append(blogger_id)
+        if changed:
+            self._write(data)
         return due
 
     @_locked
@@ -880,7 +951,7 @@ class MonitorStore:
             return
         interval = normalize_interval(minutes) if minutes else self._follow_interval(blogger)
         collection = blogger.get("collection") if isinstance(blogger.get("collection"), dict) else {}
-        collection["nextCheckAt"] = (datetime.now(timezone.utc) + timedelta(minutes=interval)).isoformat()
+        collection["nextCheckAt"] = self._next_check(data, blogger, datetime.now(timezone.utc), interval)
         blogger["collection"] = collection
         self._write(data)
 
