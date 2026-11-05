@@ -173,10 +173,13 @@ def rollback(root, run, journal):
 def prepare(root, current, progress=lambda message: None):
     """Prepare fresh/legacy data. Failure leaves a durable recoverable journal."""
     import fcntl
-    root = rules.safe(Path(root))
-    root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    lock_path = rules.safe(root / '.desktop-migration.lock')
-    fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        root = rules.safe(Path(root))
+        root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        lock_path = rules.safe(root / '.desktop-migration.lock')
+        fd = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    except (OSError, ValueError) as exc:
+        raise MigrationError('数据目录或迁移锁不可用，已保留原数据，请检查路径和权限。') from exc
     try:
         try:
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
