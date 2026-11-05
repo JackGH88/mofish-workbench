@@ -83,7 +83,7 @@ CORE_DATA_MARKER = '.core-data-schema.json'
 
 
 def require_core_data_schema(data_root):
-    """Check before opening stores; only the private migration tool upgrades data."""
+    """Check before stores open; desktop startup or offline maintenance upgrades data."""
     roots = [Path(data_root) / name for name in ('workspace', 'downloads')]
     initialize = []
     for root in roots:
