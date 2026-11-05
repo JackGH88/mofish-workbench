@@ -1,0 +1,3 @@
+# Runtime manifests pin the exact requirements bytes on both platforms.
+requirements.txt text eol=lf
+*.sh text eol=lf

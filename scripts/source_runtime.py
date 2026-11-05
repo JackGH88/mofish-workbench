@@ -421,7 +421,7 @@ def install_wheels(root, python, runtime) -> None:
         if name.startswith(('PIP_', 'PYTHON')):
             env.pop(name)
     env['PYTHONDONTWRITEBYTECODE'] = '1'
-    subprocess.run([str(python), '-I', '-B', '-m', 'pip', '--isolated', 'install',
+    subprocess.run([str(python), '-I', '-B', '-X', 'utf8', '-m', 'pip', '--isolated', 'install',
                     '--no-index', '--only-binary=:all:', '--no-compile',
                     '--disable-pip-version-check', '--find-links', str(runtime / 'wheelhouse'),
                     '-r', str(root / 'requirements.txt'), 'tzdata==2025.2'], env=env, check=True, timeout=900)

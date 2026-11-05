@@ -18,14 +18,24 @@ function Test-Python([string]$Exe, [string[]]$PrefixArgs) {
 $python = $null
 $prefix = @()
 $existing = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
-if (Test-Path -LiteralPath $existing) {
+if ($null -ne (Get-Item -LiteralPath (Join-Path $PSScriptRoot '.venv') -Force -ErrorAction SilentlyContinue)) {
     if (-not (Test-Python $existing @())) {
         throw 'Existing .venv requires working Python 3.11/3.12 x64. Environment and data preserved; ask Agent to inspect before migration.'
     }
     $python = $existing
 } else {
+    $bootstrapArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $PSScriptRoot 'scripts\source-runtime.ps1'), '-Root', $PSScriptRoot)
+    if ($Check) { $bootstrapArgs += '-Check' }
+    $bootstrapHost = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    $python = & $bootstrapHost @bootstrapArgs
+    $bootstrapStatus = $LASTEXITCODE
+    if ($bootstrapStatus -eq 0) {
+        if (-not $python -or $python -is [array]) { throw 'Runtime bootstrap must return exactly one Python path.' }
+    } elseif ($bootstrapStatus -eq 3 -or ($bootstrapStatus -eq 4 -and $Check)) {
+        $python = $null
+    } else { throw "Native runtime bootstrap failed (exit $bootstrapStatus)." }
     # py -3 may select an unsupported newer Python; select supported minors explicitly.
-    if (Get-Command py -ErrorAction SilentlyContinue) {
+    if (-not $python -and (Get-Command py -ErrorAction SilentlyContinue)) {
         foreach ($version in @('-3.12', '-3.11')) {
             if (Test-Python 'py' @($version)) { $python = 'py'; $prefix = @($version); break }
         }
