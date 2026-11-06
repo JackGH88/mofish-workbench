@@ -1245,7 +1245,7 @@
               <header class="section-head">
                 <div>
                   <h3 class="am-section-title">封面</h3>
-                  <p class="stage-description">整理提示词和参考图，生成 3:4 / 4:3 封面方案。</p>
+                  <p class="stage-description">由GPT image 2.5模型生成 3:4 / 4:3 尺寸视频封面</p>
                 </div>
               </header>
 
@@ -1291,7 +1291,7 @@
                                 <button class="cover-ratio-option" type="button" role="menuitemradio" data-cover-ratio="both" aria-checked="true">同时生成</button>
                               </div>
                             </div>
-                            <button id="coverTitleGenerateButton" class="am-secondary-action" type="button">生成标题</button>
+                            <button id="coverTitleGenerateButton" class="am-secondary-action" type="button">生成提示词</button>
                             <button id="coverReferencePicker" class="am-secondary-action" type="button" aria-haspopup="dialog" aria-expanded="false">选择模板</button>
                             <button id="coverSaveTemplateButton" class="am-secondary-action" type="button" aria-haspopup="dialog" aria-expanded="false">保存模板</button>
                           </div>
@@ -1691,16 +1691,12 @@
                 <input id="draftAssetFormatSelect" type="hidden" value="video" />
               </div>
             </div>
-            <label class="draft-field">
-              <span id="draftAssetNoteLabel" class="draft-field-label">说明（AI 会参考这些要求设计开头）</span>
-              <textarea id="draftAssetNoteInput" class="am-textarea" rows="1" maxlength="400" placeholder="什么时候用这个素材"></textarea>
-            </label>
             <label id="draftAssetContentField" class="draft-field" hidden>
-              <span class="draft-field-label">结构内容（AI 会参考这些环节和顺序组织正文）</span>
-              <textarea id="draftAssetContentInput" class="am-textarea" maxlength="2000" placeholder="钩子写完整的一句话；结构模板用 → 连接每个环节"></textarea>
+              <span class="draft-field-label">示例（用 → 连接环节，AI 会按此顺序组织正文）</span>
+              <textarea id="draftAssetContentInput" class="am-textarea" rows="1" maxlength="2000" placeholder="钩子写完整的一句话；结构模板用 → 连接每个环节"></textarea>
             </label>
             <label id="draftAssetExampleField" class="draft-field">
-              <span id="draftAssetExampleLabel" class="draft-field-label">示例（选填，AI 会参考示例的句式和语气生成开头）</span>
+              <span id="draftAssetExampleLabel" class="draft-field-label">示例（AI 会参考示例的句式和语气生成开头）</span>
               <textarea id="draftAssetExampleInput" class="am-textarea" rows="1" maxlength="400" placeholder="一句可以直接参考的示例"></textarea>
             </label>
             <p id="draftAssetModalError" class="draft-asset-error" role="alert" hidden></p>

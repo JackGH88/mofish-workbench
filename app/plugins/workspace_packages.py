@@ -192,7 +192,7 @@ class LegacyPackageManager:
                 if not record.get('active') or record.get('uninstalled'): continue
                 try:
                     with manager.transaction(pid):
-                        manager._safe_to_upgrade(pid)
+                        manager._safe_to_upgrade(pid, record.get('pending'))
                 except Exception:
                     blockers.append(f'{pid} 仍有进行中或结果未知的任务，正在等待确认')
         return blockers

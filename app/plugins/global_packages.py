@@ -199,13 +199,13 @@ class PackageManager(LegacyPackageManager):
                 stack.enter_context(lease(account))
             yield
 
-    def _check_safe(self, pid):
+    def _check_safe(self, pid, candidate=None):
         for account in self._accounts():
             if is_blocked(account): reject('工作台正在恢复脚本移动，请稍后重试。', 'script_move_busy', 409)
             manager = self.for_account(account)
             record = manager.state.read(pid)
             if record.get('active') and not record.get('uninstalled'):
-                manager._safe_to_upgrade(pid)
+                manager._safe_to_upgrade(pid, candidate)
             elif manager._requests.get(pid, 0):
                 reject('插件仍有请求，请稍后重试。', 'plugin_busy', 409)
 
@@ -467,7 +467,7 @@ class PackageManager(LegacyPackageManager):
                                     manager._load(active)
                             if pending:
                                 with self._all_leases():
-                                    if active: self._check_safe(pid)
+                                    if active: self._check_safe(pid, pending)
                                     backup = RegistrationBackup(self, [pid])
                                     backup.__enter__()
                                     for manager in self._owners.values(): manager._load(pending)

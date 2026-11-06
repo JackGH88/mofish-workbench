@@ -235,7 +235,7 @@ class WorkspacePackageManager:
                         activeVersion=self.metadata(manifest['id'])['activeVersion'],
                         pendingVersion=self.metadata(manifest['id'])['pendingVersion'])
 
-    def _safe_to_upgrade(self, plugin_id):
+    def _safe_to_upgrade(self, plugin_id, candidate=None):
         if self._requests.get(plugin_id, 0):
             reject('插件仍有请求或本地写入操作，请稍后重试。', 'plugin_busy', 409)
         module = self.modules.get(plugin_id)
@@ -243,7 +243,11 @@ class WorkspacePackageManager:
             reject('无法确认当前插件任务状态，暂不能升级。', 'upgrade_unknown', 409)
         hook = getattr(module, 'upgrade_safe', None)
         try:
-            safe = callable(hook) and hook(self.registry._require_entry(plugin_id).context) is True
+            context = self.registry._require_entry(plugin_id).context
+            safe = callable(hook) and hook(context) is True
+            if not safe and callable(hook) and candidate is not None:
+                from .restart_tasks import compatible_unknown_upgrade
+                safe = compatible_unknown_upgrade(hook, context, self.state.read(plugin_id).get('active'), candidate)
         except Exception:
             safe = False
         if not safe:
@@ -383,7 +387,7 @@ class WorkspacePackageManager:
                         continue
                 if pending:
                     try:
-                        if active: self._safe_to_upgrade(pid)
+                        if active: self._safe_to_upgrade(pid, pending)
                         self._load(pending)
                     except PackageError as exc:
                         record['installError'] = exc.message

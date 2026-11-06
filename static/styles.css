@@ -5408,7 +5408,7 @@ body.is-modal-open {
 .draft-library .asset-card-head h4 { overflow-wrap: anywhere; }
 .draft-library .asset-tag { padding: 0; border-radius: 0; background: transparent; line-height: 1.5; }
 .draft-template-details > .asset-card-example,
-.draft-template-details > .structure-steps { margin: 14px 0 0 18px; line-height: 1.7; }
+.draft-template-details > .structure-steps { margin: 5px 0 0; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-wrap; }
 .draft-library .structure-steps span { padding: 0; background: transparent; }
 /* Keep all actions on one line without increasing custom-row height. */
 .draft-library .asset-card-actions {
@@ -5537,7 +5537,7 @@ body.is-modal-open {
 .draft-asset-modal .modal-header,
 .draft-asset-modal .modal-actions { flex-shrink: 0; }
 .draft-asset-modal .modal-content { display: grid; gap: 12px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
-#draftAssetModal #draftAssetNoteInput,
+#draftAssetModal #draftAssetContentInput,
 #draftAssetModal #draftAssetExampleInput { field-sizing: content; min-height: 48px; height: auto; max-height: none; line-height: 1.6; resize: none; overflow-y: hidden; }
 .draft-asset-delete-action {
   color: #b32626;

@@ -491,6 +491,7 @@ let coverGenerationPollTimer = null;
 let coverGenerationRequestSequence = 0;
 let coverTitleGenerationVersion = 0;
 let coverTitleGenerationInFlight = false;
+let coverTitleGenerationPhase = "title";
 let coverGenerationPollFailures = 0;
 let titleGenerationPollFailures = 0;
 let writingGenerationPollFailures = 0;
@@ -784,7 +785,7 @@ function serializeCoverState() {
   return {
     prompt: coverDemo.prompt,
     ratio: coverDemo.ratio,
-    uploadedImages: coverDemo.uploadedImages.map(({ id, name, url }) => ({ id, name, url })),
+    uploadedImages: coverDemo.uploadedImages.map(({ id, name, url, source, sourceVideoPath, timestamp }) => ({ id, name, url, source, sourceVideoPath, timestamp })),
     results: coverDemo.results,
     pendingJobs: coverDemo.pendingJobs,
     generatedReference: coverDemo.generatedReference,
@@ -1850,7 +1851,9 @@ function renderCoverGenerationStatus() {
 
 function renderCoverTitleGenerateControl() {
   coverTitleGenerateButton.disabled = coverTitleGenerationInFlight;
-  coverTitleGenerateButton.textContent = coverTitleGenerationInFlight ? "正在生成…" : "生成标题";
+  coverTitleGenerateButton.textContent = coverTitleGenerationInFlight
+    ? (coverTitleGenerationPhase === "frame" ? "正在提取参考图…" : "正在生成提示词…")
+    : "生成提示词";
 }
 
 async function pollCoverTitleJob(jobId, generationVersion, scriptId) {
@@ -1866,40 +1869,97 @@ async function pollCoverTitleJob(jobId, generationVersion, scriptId) {
 }
 
 async function generateCoverTitle() {
-  // 封面里的「生成标题」同样走平台能力，未登录先弹登录框。
   if (!(await requireWorkbenchLogin())) return;
   if (!activeScriptId || pendingScriptId) return showToast("请先选择脚本", "error");
   if (coverTitleGenerationInFlight) return;
   const scriptId = activeScriptId;
+  const accountId = activeAccountId;
   const submittedPrompt = coverPromptText();
+  const assetVersion = publishAssetMutationVersion;
   const generationVersion = ++coverTitleGenerationVersion;
+  let expectedImages = JSON.stringify(coverDemo.uploadedImages);
+  const contextCurrent = () => generationVersion === coverTitleGenerationVersion
+    && activeScriptId === scriptId && activeAccountId === accountId && !pendingScriptId;
+  const inputsCurrent = () => contextCurrent() && assetVersion === publishAssetMutationVersion
+    && coverPromptText() === submittedPrompt && JSON.stringify(coverDemo.uploadedImages) === expectedImages;
+  const explainConflict = () => {
+    if (contextCurrent()) showToast(coverPromptText() !== submittedPrompt
+      ? "提示词已修改，未覆盖当前内容，请重新生成。"
+      : "参考图或关联视频已修改，未覆盖当前内容，请重新生成。", "error");
+  };
   coverTitleGenerationInFlight = true;
+  coverTitleGenerationPhase = "frame";
   renderCoverTitleGenerateControl();
+  let selectedReference = null;
+  let warning = "";
   try {
-    const response = await fetch(`/api/scripts/${encodeURIComponent(scriptId)}/cover-title-generate`, { method: "POST" });
+    const manualCount = coverDemo.uploadedImages.filter((image) => image.source !== "publish-video").length;
+    try {
+      const frameResponse = await fetch(`/api/scripts/${encodeURIComponent(scriptId)}/cover-reference-from-video`, { method: "POST" });
+      const framePayload = await readJson(frameResponse);
+      if (!inputsCurrent()) { explainConflict(); return; }
+      if (!frameResponse.ok) {
+        if (framePayload?.detail?.code === "cover_video_changed") {
+          showToast(responseMessage(framePayload, "关联视频已变更，请重新生成提示词。"), "error");
+          return;
+        }
+        throw framePayload;
+      }
+      if (framePayload.reference) {
+        if (manualCount >= COVER_REFERENCE_MAX) {
+          warning = `已有 ${COVER_REFERENCE_MAX} 张手动参考图，请先删除一张再提取视频画面。`;
+        } else {
+          selectedReference = framePayload.reference;
+          // Avoid ambiguous name-based @ resolution when a manual image has the same name.
+          const names = new Set(coverDemo.uploadedImages.filter((image) => image.source !== "publish-video").map((image) => image.name));
+          let suffix = 2;
+          while (names.has(selectedReference.name)) selectedReference.name = `视频封面参考图 ${suffix++}`;
+          const oldIndex = coverDemo.uploadedImages.findIndex((image) => image.source === "publish-video");
+          coverDemo.uploadedImages = coverDemo.uploadedImages.filter((image) => image.source !== "publish-video");
+          coverDemo.uploadedImages.splice(oldIndex < 0 ? coverDemo.uploadedImages.length : oldIndex, 0, selectedReference);
+          coverDemo.activeImageId = selectedReference.id;
+          expectedImages = JSON.stringify(coverDemo.uploadedImages);
+          renderCoverReferenceState();
+          saveCoverState();
+        }
+      }
+    } catch (error) {
+      if (!inputsCurrent()) { explainConflict(); return; }
+      warning = responseMessage(error, "视频抽帧失败。");
+    }
+    coverTitleGenerationPhase = "title";
+    renderCoverTitleGenerateControl();
+    if (warning) showToast(`${warning} 将继续生成主副标题。`, "error");
+    // Persist the exact prompt and references before the backend snapshots the title job.
+    await syncCoverStateToServer(scriptId);
+    if (!inputsCurrent()) { explainConflict(); return; }
+    const response = await fetch(`/api/scripts/${encodeURIComponent(scriptId)}/cover-title-generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ referenceId: selectedReference?.id || "" }),
+    });
     const payload = await readJson(response);
+    if (!response.ok) throw payload;
     if (!payload.jobId) throw { detail: { message: "封面标题生成任务启动失败。" } };
     const result = await pollCoverTitleJob(payload.jobId, generationVersion, scriptId);
-    if (!result || generationVersion !== coverTitleGenerationVersion || activeScriptId !== scriptId) return;
-    if (coverPromptText() !== submittedPrompt) {
-      showToast("提示词已修改，未覆盖当前内容，请重新生成。", "error");
-      return;
-    }
+    if (!result || !contextCurrent()) return;
+    if (!inputsCurrent()) { explainConflict(); return; }
     const mainTitle = String(result.mainTitle || "").trim();
     const subtitle = String(result.subtitle || "").trim();
     if (!mainTitle || !subtitle) throw { detail: { message: "封面标题生成结果无效，请重试。" } };
-    const prompt = `参考XX图片设计视频画面：\n主标题：“${mainTitle}”\n副标题：“${subtitle}”`;
+    const position = selectedReference ? coverDemo.uploadedImages.findIndex((image) => image.id === selectedReference.id) + 1 : 0;
+    const prefix = position ? `参考 @${selectedReference.name}（第${position}张参考图） 视频画面的色调风格生成用于发布抖音/视频号平台的视频封面：\n` : "";
+    const prompt = `${prefix}主标题：“${mainTitle}”\n副标题：“${subtitle}”`;
     setCoverPromptText(prompt);
     coverDemo.prompt = prompt;
     saveCoverState();
-    showToast("封面标题已生成", "success");
+    showToast(warning ? `主副标题已生成；${warning}` : "封面提示词已生成", warning ? "error" : "success");
   } catch (error) {
-    if (generationVersion === coverTitleGenerationVersion && activeScriptId === scriptId) {
-      showToast(responseMessage(error, "封面标题生成失败，请稍后重试。"), "error");
-    }
+    if (contextCurrent()) showToast(responseMessage(error, "封面提示词生成失败，请稍后重试。"), "error");
   } finally {
     if (generationVersion === coverTitleGenerationVersion && activeScriptId === scriptId) {
       coverTitleGenerationInFlight = false;
+      coverTitleGenerationPhase = "title";
       renderCoverTitleGenerateControl();
     }
   }

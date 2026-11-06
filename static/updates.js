@@ -17,6 +17,25 @@
   document.body.append(dialog);
   const elements = Object.fromEntries([...dialog.querySelectorAll('[data-update]')].map(node => [node.dataset.update, node]));
   let state = null, busy = false, polling = false, localError = '', timer;
+  function resizePrompt() {
+    const field = elements.prompt;
+    if (!dialog.open || elements.fallback.hidden || !field.clientWidth) return;
+    // Reset first so shorter text and wider windows also shrink the field.
+    field.style.height = '0px';
+    field.style.height = field.scrollHeight + 'px';
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    let previousWidth;
+    new ResizeObserver(entries => {
+      const width = entries[0].contentRect.width;
+      if (width === previousWidth) return;
+      previousWidth = width;
+      resizePrompt();
+    }).observe(dialog);
+  } else {
+    window.addEventListener?.('resize', resizePrompt);
+  }
+  document.fonts?.ready.then(resizePrompt);
   const formatTime = value => value ? new Date(value * 1000).toLocaleString('zh-CN') : '—';
   function message(text, error = false) {
     elements.message.textContent = text;
@@ -85,6 +104,7 @@
     localError = '';
     if (state) render(state);
     dialog.showModal();
+    resizePrompt();
     poll();
   });
   dialog.querySelector('.update-close').addEventListener('click', () => dialog.close());
@@ -112,6 +132,7 @@
     } catch {
       elements.fallback.hidden = false;
       elements.prompt.value = prompt;
+      resizePrompt();
       elements.prompt.focus(); elements.prompt.select();
       message('无法自动复制，请手动复制下方升级提示词。');
     }

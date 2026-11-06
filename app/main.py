@@ -2723,18 +2723,27 @@ def _sanitize_cover_state(raw: Any) -> dict[str, Any]:
     if not isinstance(raw, dict):
         return {}
 
-    def _images(value: Any) -> list[dict[str, str]]:
+    def _images(value: Any) -> list[dict[str, Any]]:
         if not isinstance(value, list):
             return []
-        images: list[dict[str, str]] = []
+        images: list[dict[str, Any]] = []
         for item in value[:10]:
             if not isinstance(item, dict) or not isinstance(item.get("url"), str):
                 continue
-            images.append({
+            image = {
                 "id": str(item.get("id") or "")[:200],
                 "name": str(item.get("name") or "")[:300],
                 "url": item["url"][:4096],
-            })
+            }
+            # Keep extraction provenance across the HTTP save boundary. The title
+            # endpoint uses this path to reject references from a different video.
+            if item.get("source") == "publish-video" and isinstance(item.get("sourceVideoPath"), str):
+                image["source"] = "publish-video"
+                image["sourceVideoPath"] = item["sourceVideoPath"][:4096]
+                timestamp = item.get("timestamp")
+                if type(timestamp) in (int, float) and math.isfinite(timestamp) and 0 <= timestamp < 5:
+                    image["timestamp"] = timestamp
+            images.append(image)
         return images
 
     def _results(value: Any) -> list[dict[str, Any]]:
@@ -6494,8 +6503,56 @@ def _cover_image_extension(url: str) -> str:
     return suffix if suffix in {".png", ".jpg", ".jpeg", ".webp"} else ".png"
 
 
+@app.post("/api/scripts/{script_id}/cover-reference-from-video")
+async def cover_reference_from_video(script_id: str) -> dict:
+    from .cover_frames import CoverFrameError, extract_cover_frame
+
+    destination = None
+    succeeded = False
+    try:
+        assets = await run_io(workspace_store.get_publish_assets, script_id)
+        video = assets.get("video")
+        if not video:
+            return {"reference": None}
+        source = await run_io(workspace_store.resolve_publish_asset_path, script_id, video["path"])
+        source_stat = source.stat()
+        upload_id = uuid.uuid4().hex
+        destination = DOWNLOAD_DIR / "covers-refs" / upload_id / "video-frame.jpg"
+        timestamp = await run_generation(extract_cover_frame, source, destination)
+        current = await run_io(workspace_store.get_publish_assets, script_id)
+        current_stat = source.stat()
+        same_file = (current_stat.st_size, current_stat.st_mtime_ns, current_stat.st_ino) == (source_stat.st_size, source_stat.st_mtime_ns, source_stat.st_ino)
+        if current.get("video") != video or not same_file:
+            destination.unlink(missing_ok=True)
+            raise HTTPException(status_code=409, detail={"code": "cover_video_changed", "message": "关联视频已变更，请重新生成提示词。"})
+        succeeded = True
+        return {"reference": {
+            "id": "video-frame-" + upload_id,
+            "name": "视频封面参考图",
+            "url": f"/api/files/covers-refs/{upload_id}/video-frame.jpg",
+            "source": "publish-video",
+            "sourceVideoPath": video["path"],
+            "timestamp": timestamp,
+        }}
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail={"code": "workspace_not_found", "message": "未找到脚本。"}) from exc
+    except (ValueError, OSError, CoverFrameError) as exc:
+        raise HTTPException(status_code=422, detail={"code": "cover_frame_failed", "message": str(exc) if isinstance(exc, (ValueError, CoverFrameError)) else "关联视频无法读取。"}) from exc
+    finally:
+        if destination is not None and not succeeded:
+            try:
+                destination.unlink(missing_ok=True)
+                destination.parent.rmdir()
+            except OSError:
+                pass
+
+
+class CoverTitleRequest(BaseModel):
+    referenceId: str = ""
+
+
 @app.post("/api/scripts/{script_id}/cover-title-generate")
-async def generate_cover_title(script_id: str) -> Response:
+async def generate_cover_title(script_id: str, payload: Optional[CoverTitleRequest] = None) -> Response:
     try:
         script = await run_io(workspace_store.get_script, script_id)
     except KeyError as exc:
@@ -6503,6 +6560,12 @@ async def generate_cover_title(script_id: str) -> Response:
             status_code=404,
             detail={"code": "workspace_not_found", "message": str(exc)},
         ) from exc
+    if payload and payload.referenceId:
+        images = (script.get("coverState") or {}).get("uploadedImages") or []
+        reference = next((image for image in images if image.get("id") == payload.referenceId), None)
+        video = (script.get("publishAssets") or {}).get("video") or {}
+        if not reference or reference.get("sourceVideoPath") != video.get("path"):
+            raise HTTPException(status_code=409, detail={"code": "cover_video_changed", "message": "参考图或关联视频已变更，请重新生成提示词。"})
     title = _cover_title_source(script)
     if title is None:
         raise HTTPException(
@@ -6516,7 +6579,7 @@ async def generate_cover_title(script_id: str) -> Response:
             detail={"code": "cover_title_generation_conflict", "message": "封面标题正在生成，请稍候。"},
         )
     job_id = uuid.uuid4().hex
-    await run_io(workspace_store.start_cover_title_generation, script_id, job_id)
+    await run_io(workspace_store.start_cover_title_generation, script_id, job_id, reference_id=payload.referenceId if payload else "")
     job = CoverTitleJobRecord(job_id=job_id, script_id=script_id)
     _register_cover_title_job(job)
     _cover_title_job_tasks[job_id] = asyncio.create_task(
@@ -6595,10 +6658,14 @@ async def run_cover_title_job(job_id: str, title: str, *,
         client = _text_service_client()
         client.business_context = dict(business_context or {})
         job.result = await client.generate_cover_titles(title=title)
-        job.status = "success"
-        await run_io(
+        applied = await run_io(
             workspace_store.complete_cover_title_generation, job.script_id, job_id, job.result
         )
+        if applied:
+            job.status = "success"
+        else:
+            job.status = "failed"
+            job.error = {"code": "cover_title_input_changed", "message": "提示词、参考图或关联视频已修改，未覆盖当前内容，请重新生成。"}
     except TextServiceError as exc:
         logger.exception("cover_title_generation_failed job_id=%s code=%s", job_id, exc.code)
         job.status = "failed"
@@ -6713,63 +6780,67 @@ async def _settle_platform_cover_task(
     generation: Mapping[str, Any],
     client: CreationImageClient,
 ) -> None:
-    """结算一次封面生成：每个比例各自一个平台任务，失败张数只影响该比例。
+    """独立跟踪每个比例，落盘成功后立即刷新对应发布素材。
 
-    只结算成功张数；某个比例没有成功图片时按该张自己的错误码标记失败，
-    不影响另一个比例已经生成的成品。
+    查询或下载暂不可用时保留原任务号，供恢复流程继续结算。
     """
-    aspects = [
-        aspect for aspect in generation.get("aspects", [])
-        if aspect.get("status") == "submitted"
-    ]
-    succeeded: list[str] = []
-    for aspect in aspects:
-        ratio = str(aspect["aspect"])
-        task_id = str(aspect.get("imageTaskId") or "")
-        if not task_id:
-            continue
+    async def settle_aspect(aspect: Mapping[str, Any]) -> None:
         try:
-            outcome = await client.await_task(task_id, ratio)
-        except CreationImageError as exc:
-            if not exc.terminal:
-                # Keep the original task recoverable; never offer a paid resubmission.
-                continue
-            await run_io(
-                workspace_store.fail_cover_aspect,
-                script_id, job_id, ratio, code=exc.code, message=exc.message,
-            )
-            continue
+            ratio = str(aspect["aspect"])
+            task_id = str(aspect.get("imageTaskId") or "")
+            if not task_id:
+                return
+            try:
+                outcome = await client.await_task(task_id, ratio)
+            except CreationImageError as exc:
+                if not exc.terminal:
+                    # Keep the original task recoverable; never offer a paid resubmission.
+                    return
+                await run_io(
+                    workspace_store.fail_cover_aspect,
+                    script_id, job_id, ratio, code=exc.code, message=exc.message,
+                )
+                return
 
-        # 平台的成功张数只带受控地址 url（assetId 只在成果详情接口里），据此判断该比例是否出图。
-        entry = next(
-            (item for item in outcome.get("images", [])
-             if item.get("ok") is not False and (item.get("url") or item.get("assetId"))),
-            None,
-        )
-        if entry is None:
-            failure = next((item for item in outcome.get("images", []) if item.get("ok") is False), {})
-            await run_io(
-                workspace_store.fail_cover_aspect,
-                script_id, job_id, ratio,
-                code=str(failure.get("errorCode") or "image_generation_failed"),
-                message="这一张封面未生成成功，可单独重试。",
+            # 平台的成功张数只带受控地址 url（assetId 只在成果详情接口里），据此判断该比例是否出图。
+            entry = next(
+                (item for item in outcome.get("images", [])
+                 if item.get("ok") is not False and (item.get("url") or item.get("assetId"))),
+                None,
             )
-            continue
-        local_url = _cover_output_url(script_id, job_id, ratio, "")
-        await run_io(workspace_store.reserve_cover_output, script_id, job_id, ratio, local_url)
-        try:
-            saved_url = await _save_cover_image(
-                client, task_id, int(entry.get("index") or 0), ratio, script_id=script_id, job_id=job_id,
+            if entry is None:
+                failure = next((item for item in outcome.get("images", []) if item.get("ok") is False), {})
+                await run_io(
+                    workspace_store.fail_cover_aspect,
+                    script_id, job_id, ratio,
+                    code=str(failure.get("errorCode") or "image_generation_failed"),
+                    message="这一张封面未生成成功，可单独重试。",
+                )
+                return
+            local_url = _cover_output_url(script_id, job_id, ratio, "")
+            await run_io(workspace_store.reserve_cover_output, script_id, job_id, ratio, local_url)
+            try:
+                saved_url = await _save_cover_image(
+                    client, task_id, int(entry.get("index") or 0), ratio, script_id=script_id, job_id=job_id,
+                )
+            except ImageError as exc:
+                logger.info("cover_download_pending script_id=%s job_id=%s code=%s", script_id, job_id, exc.code)
+                return
+            completed = await run_io(workspace_store.complete_cover_aspect, script_id, job_id, ratio, saved_url)
+            if completed is not None:
+                await run_generation(_refresh_publish_assets_after_cover_completion, script_id, ratio)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception(
+                "cover_platform_tracking_failed script_id=%s job_id=%s aspect=%s",
+                script_id, job_id, aspect.get("aspect"),
             )
-        except ImageError as exc:
-            logger.info("cover_download_pending script_id=%s job_id=%s code=%s", script_id, job_id, exc.code)
-            continue
-        completed = await run_io(workspace_store.complete_cover_aspect, script_id, job_id, ratio, saved_url)
-        if completed is not None:
-            succeeded.append(ratio)
-    logger.info("cover_platform_settled script_id=%s job_id=%s succeeded=%s", script_id, job_id, succeeded)
-    for ratio in succeeded:
-        await run_generation(_refresh_publish_assets_after_cover_completion, script_id, ratio)
+
+    await asyncio.gather(*(
+        settle_aspect(aspect) for aspect in generation.get("aspects", [])
+        if aspect.get("status") == "submitted"
+    ))
 
 
 def _start_cover_generation_recovery(script_id: str, job_id: str) -> None:
@@ -6788,6 +6859,7 @@ async def run_persisted_cover_generation(
     settings,
     business_context: Optional[dict[str, str]] = None,
 ) -> None:
+    tracking_tasks: list[asyncio.Task] = []
     try:
         client = _creation_image_client(settings)
         client.business_context = dict(business_context or {})
@@ -6798,8 +6870,10 @@ async def run_persisted_cover_generation(
         if not generation or generation["status"] != "running":
             return
         pending = [aspect["aspect"] for aspect in generation["aspects"] if aspect["status"] == "pending"]
-        if not pending:
-            return
+        # Existing submitted aspects and newly accepted ones use the same recovery path.
+        tracking_tasks.append(asyncio.create_task(
+            _settle_platform_cover_task(script_id, job_id, generation, client)
+        ))
         # Persist each accepted ratio before submitting another or polling results.
         for ratio in pending:
             try:
@@ -6809,10 +6883,16 @@ async def run_persisted_cover_generation(
                              script_id, job_id, ratio, code=exc.code, message=exc.message)
                 continue
             if task_ids.get(ratio):
-                await run_io(workspace_store.record_cover_task, script_id, job_id, ratio, task_ids[ratio])
-        refreshed = await run_io(workspace_store.get_cover_generation, script_id, job_id)
-        if refreshed and refreshed["status"] == "running":
-            await _settle_platform_cover_task(script_id, job_id, refreshed, client)
+                recorded = await run_io(
+                    workspace_store.record_cover_task, script_id, job_id, ratio, task_ids[ratio]
+                )
+                if recorded:
+                    # Track only this newly accepted ratio; earlier workers already own the others.
+                    tracking_tasks.append(asyncio.create_task(_settle_platform_cover_task(
+                        script_id, job_id,
+                        {"aspects": [item for item in recorded["aspects"] if item["aspect"] == ratio]},
+                        client,
+                    )))
     except ImageError as exc:
         generation = await run_io(workspace_store.get_cover_generation, script_id, job_id)
         if generation and generation["status"] == "running":
@@ -6823,6 +6903,8 @@ async def run_persisted_cover_generation(
                         script_id, job_id, aspect["aspect"], code=exc.code, message=exc.message,
                     )
     except asyncio.CancelledError:
+        for task in tracking_tasks:
+            task.cancel()
         raise
     except Exception:
         logger.exception("cover_generation_submission_failed script_id=%s job_id=%s", script_id, job_id)
@@ -6838,6 +6920,10 @@ async def run_persisted_cover_generation(
                         code="cover_generation_unexpected_error",
                         message="封面生成意外中断，请重新生成。",
                     )
+
+    finally:
+        if tracking_tasks:
+            await asyncio.gather(*tracking_tasks)
 
 
 def _cover_reference_paths(image_urls: list[str]) -> list[Path]:

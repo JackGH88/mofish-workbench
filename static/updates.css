@@ -48,7 +48,10 @@
 .workbench-update-dialog [hidden] { display: none !important; }
 .workbench-update-dialog details { font-size: 13px; line-height: 1.7; margin: 16px 0; overflow-wrap: anywhere; }
 .workbench-update-dialog summary { cursor: pointer; font-weight: 500; }
-.workbench-update-dialog textarea { box-sizing: border-box; width: 100%; min-height: 180px; margin-top: 8px; padding: 12px; font: inherit; font-size: 13px; border: 1px solid var(--am-border, #ddd); border-radius: 12px; background: var(--am-soft); color: inherit; }
+.workbench-update-dialog textarea { display: block; box-sizing: border-box; width: 100%; min-height: 44px; max-height: none; margin-top: 8px; padding: 12px; font: inherit; font-size: 13px; font-weight: 400; line-height: 1.65; border: 0; border-radius: 14px; background: #f8f8f8; color: inherit; resize: none; overflow: hidden; }
+.workbench-update-dialog textarea,
+.workbench-update-dialog textarea:hover,
+.workbench-update-dialog textarea:focus { border: 0; outline: none; box-shadow: none; }
 
 /* Shared source/desktop update dialog. */
 .workbench-update-status { display: flex; align-items: center; gap: 12px; margin-top: 25px; }

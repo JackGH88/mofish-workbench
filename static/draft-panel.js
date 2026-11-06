@@ -80,7 +80,6 @@
   const assetContentInput = el("draftAssetContentInput");
   const assetFormatField = el("draftAssetFormatField");
   const assetFormatSelect = el("draftAssetFormatSelect");
-  const assetNoteInput = el("draftAssetNoteInput");
   const assetExampleInput = el("draftAssetExampleInput");
   const assetError = el("draftAssetModalError");
   const saveAssetButton = el("saveDraftAssetButton");
@@ -486,22 +485,11 @@
       const title = document.createElement("h4");
       title.textContent = asset.name || "未命名";
       head.append(title);
-      const hookTag = asset.description || asset.note || (asset.builtin ? "" : "自定义");
-      if (hookTag) {
-        const tag = document.createElement("span");
-        tag.className = "asset-tag";
-        tag.textContent = hookTag;
-        head.append(tag);
-      }
-      const details = document.createElement("details");
+      const details = document.createElement("div");
       details.className = "draft-template-details";
-      const summary = document.createElement("summary");
-      summary.title = "展开或收起模板详情";
-      summary.setAttribute("aria-label", (asset.name || "未命名") + "，展开或收起详情");
-      summary.append(head);
-      details.append(summary);
+      details.append(head);
       card.append(details);
-      const example = asset.example || asset.content;
+      const example = asset.example || "暂无示例";
       if (example) {
         const line = document.createElement("p");
         line.className = "asset-card-example";
@@ -535,17 +523,9 @@
       const title = document.createElement("h4");
       title.textContent = asset.name || "未命名";
       head.append(title);
-      const tag = document.createElement("span");
-      tag.className = "asset-tag";
-      tag.textContent = asset.description || asset.note || asset.tag || (asset.builtin ? "" : "自定义");
-      head.append(tag);
-      const details = document.createElement("details");
+      const details = document.createElement("div");
       details.className = "draft-template-details";
-      const summary = document.createElement("summary");
-      summary.title = "展开或收起模板详情";
-      summary.setAttribute("aria-label", (asset.name || "未命名") + "，展开或收起详情");
-      summary.append(head);
-      details.append(summary);
+      details.append(head);
       card.append(details);
       const steps = Array.isArray(asset.steps) && asset.steps.length
         ? asset.steps
@@ -936,12 +916,11 @@
     const context = externalAssetDraft;
     if (!context || context.saving) return;
     if (state.accountId !== context.accountId || !context.isCurrent()) { closeAssetModal(); return; }
-    const note = assetNoteInput.value.trim();
-    const body = { name: assetNameInput.value.trim(), content: context.kind === "structure" ? assetContentInput.value.trim() : note,
-      note, example: context.kind === "structure" ? "" : assetExampleInput.value.trim() };
+    const body = { name: assetNameInput.value.trim(), content: context.kind === "structure" ? assetContentInput.value.trim() : assetExampleInput.value.trim(),
+      example: context.kind === "structure" ? "" : assetExampleInput.value.trim() };
     if (context.kind === "structure") body.format = "video";
     if (!body.name) return showAssetError("请填写素材名称。");
-    if (!body.content) return showAssetError(context.kind === "structure" ? "请填写结构内容。" : "请填写素材说明。");
+    if (!body.content) return showAssetError("请填写素材示例。");
     context.saving = true;
     saveAssetButton.disabled = true;
     saveAssetButton.textContent = "正在添加…";
@@ -977,13 +956,9 @@
     const isStructure = state.assetKind === "structure";
     el("draftAssetContentField").hidden = !isStructure;
     el("draftAssetExampleField").hidden = isStructure;
-    el("draftAssetNoteLabel").textContent = isStructure
-      ? "说明（选填，帮助 AI 理解结构的适用场景和写作要求）"
-      : state.assetKind === "ending" ? "说明（AI 会参考这些要求设计结尾引导）" : "说明（AI 会参考这些要求设计开头）";
     el("draftAssetExampleLabel").textContent = state.assetKind === "ending"
-      ? "示例（选填，AI 会参考示例的句式和语气生成结尾）"
-      : "示例（选填，AI 会参考示例的句式和语气生成开头）";
-    assetNoteInput.placeholder = isStructure ? "说明适用场景" : "说明这种表达方式的写作要求";
+      ? "示例（AI 会参考示例的句式和语气生成结尾）"
+      : "示例（AI 会参考示例的句式和语气生成开头）";
     assetContentInput.placeholder = state.assetKind === "structure"
       ? "用 → 连接每个环节" : state.assetKind === "ending" ? "填写结尾的写作要求或完整表达" : "填写开头的写作要求或完整表达";
   }
@@ -998,7 +973,6 @@
     assetNameInput.value = asset ? asset.name || "" : "";
     assetContentInput.value = asset ? asset.content || "" : "";
     assetFormatPicker.select("video", { silent: true });
-    assetNoteInput.value = asset ? asset.note || asset.description || (asset.kind !== "structure" ? asset.content : "") || "" : "";
     assetExampleInput.value = asset ? asset.example || "" : "";
     assetError.hidden = true;
     assetError.textContent = "";
@@ -1032,15 +1006,13 @@
     const editingId = state.editingAssetId;
     const kind = state.assetKind;
     const isStructure = kind === "structure";
-    const note = assetNoteInput.value.trim();
     const body = {
       name: assetNameInput.value.trim(),
-      content: isStructure ? assetContentInput.value.trim() : note,
-      note,
+      content: isStructure ? assetContentInput.value.trim() : assetExampleInput.value.trim(),
       example: isStructure ? "" : assetExampleInput.value.trim(),
     };
     if (!body.name) return showAssetError("请填写素材名称。");
-    if (!body.content) return showAssetError(isStructure ? "请填写结构内容。" : "请填写素材说明。");
+    if (!body.content) return showAssetError("请填写素材示例。");
     if (!editingId) body.kind = kind;
     if (kind === "structure") body.format = "video";
     const url = "/api/accounts/" + encodeURIComponent(accountId) + "/writing-assets" +

@@ -1888,7 +1888,7 @@ class WorkspaceStore:
         return state if isinstance(state, dict) else {}
 
     @_locked
-    def start_cover_title_generation(self, script_id: str, job_id: str) -> None:
+    def start_cover_title_generation(self, script_id: str, job_id: str, *, reference_id: str = "") -> None:
         script = self.get_script(script_id)
         current = script.get("coverTitleGeneration")
         if isinstance(current, dict) and current.get("status") == "running":
@@ -1898,6 +1898,8 @@ class WorkspaceStore:
             "jobId": job_id,
             "status": "running",
             "startedAt": now,
+            "referenceId": reference_id,
+            "inputSnapshot": self._cover_title_input_snapshot(script),
             "updatedAt": now,
         }
         script["updatedAt"] = now
@@ -1914,19 +1916,23 @@ class WorkspaceStore:
         if not main_title or not subtitle:
             return False
         state = script.get("coverState") if isinstance(script.get("coverState"), dict) else {}
-        state["prompt"] = f"参考XX图片设计视频画面：\n主标题：“{main_title}”\n副标题：“{subtitle}”"
+        applied = generation.get("inputSnapshot") == self._cover_title_input_snapshot(script)
+        if applied:
+            state["prompt"] = self._cover_title_prompt(state, main_title, subtitle, generation.get("referenceId", ""))
         script["coverState"] = state
         now = self._now()
         script["coverTitleGeneration"] = {
             "jobId": job_id,
             "status": "completed",
             "result": {"mainTitle": main_title, "subtitle": subtitle},
+            "referenceId": generation.get("referenceId", ""),
+            "applied": applied,
             "startedAt": generation.get("startedAt"),
             "updatedAt": now,
         }
         script["updatedAt"] = now
         self._write_json(self._script_path(script_id), script)
-        return True
+        return applied
 
     @_locked
     def fail_cover_title_generation(self, script_id: str, job_id: str, *, code: str, message: str) -> bool:
@@ -2354,9 +2360,25 @@ class WorkspaceStore:
         return state
 
     @staticmethod
+    def _cover_title_input_snapshot(script: dict[str, Any]) -> str:
+        state = script.get("coverState") or {}
+        return json.dumps({"prompt": state.get("prompt", ""), "images": state.get("uploadedImages", []),
+                           "video": (script.get("publishAssets") or {}).get("video")}, sort_keys=True, ensure_ascii=False)
+
+    @staticmethod
+    def _cover_title_prompt(state: dict[str, Any], main_title: str, subtitle: str, reference_id: str) -> str:
+        prefix = ""
+        if reference_id:
+            for index, image in enumerate(state.get("uploadedImages") or []):
+                if image.get("id") == reference_id and image.get("source") == "publish-video":
+                    prefix = f"参考 @{image['name']}（第{index + 1}张参考图） 视频画面的色调风格生成用于发布抖音/视频号平台的视频封面：\n"
+                    break
+        return prefix + f"主标题：“{main_title}”\n副标题：“{subtitle}”"
+
+    @staticmethod
     def _restore_completed_cover_title_prompt(script: dict[str, Any], state: dict[str, Any] | None = None) -> bool:
         generation = script.get("coverTitleGeneration")
-        if not isinstance(generation, dict) or generation.get("status") != "completed":
+        if not isinstance(generation, dict) or generation.get("status") != "completed" or generation.get("applied") is False:
             return False
         result = generation.get("result")
         if not isinstance(result, dict):
@@ -2365,11 +2387,10 @@ class WorkspaceStore:
         subtitle = str(result.get("subtitle") or "").strip()
         if not main_title or not subtitle:
             return False
-        prompt = f"参考XX图片设计视频画面：\n主标题：“{main_title}”\n副标题：“{subtitle}”"
         target = state if state is not None else script.get("coverState")
         if not isinstance(target, dict) or str(target.get("prompt") or "").strip():
             return False
-        target["prompt"] = prompt
+        target["prompt"] = WorkspaceStore._cover_title_prompt(target, main_title, subtitle, generation.get("referenceId", ""))
         if state is None:
             script["coverState"] = target
         return True
