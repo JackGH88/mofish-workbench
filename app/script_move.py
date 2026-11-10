@@ -135,7 +135,7 @@ class ScriptMoveService:
                 if entry.load_error or not all(hasattr(ctx, key) for key in ('studio', 'editing', 'heygen_tasks', 'schedules')):
                     raise ValueError()
             except Exception:
-                fail('plugin_incompatible', '来源和目标工作台需启用兼容的 AI 视频制作插件，并完成待生效升级。')
+                fail('plugin_incompatible', '来源和目标工作台需启用兼容的 AI 视频工作流插件，并完成待生效升级。')
             contexts[account] = ctx
             # The scheduler acquires its lock before calling the editing service.
             for lock in (ctx.schedules.lock, ctx.editing.lock, ctx.heygen_tasks._lock):

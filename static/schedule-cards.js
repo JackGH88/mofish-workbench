@@ -18,7 +18,26 @@
     missed: ['missed', '已错过计划时间'],
     completed: ['check', '成片已回传并关联脚本'],
   };
+  // Reuse existing visual styles, but keep publishing progress distinct from video linking.
+  const postStates = {
+    waiting_video: ['editing', '等待视频回传后生成发布素材'],
+    waiting_host: ['send_uncertain', '成片已回传 · 等待工作台升级以生成发布素材'],
+    title: ['running', '成片已回传 · 正在生成标题'],
+    prompt: ['running', '成片已回传 · 正在生成封面提示词'],
+    covers: ['running', '成片已回传 · 正在生成两种比例封面'],
+    failed: ['failed', '成片已回传 · 发布素材生成失败'],
+    paused: ['send_uncertain', '成片已回传 · 发布素材生成已暂停'],
+    completed: ['completed', '标题及两种比例封面已完成 · 待确认'],
+  };
+  function postState(item) {
+    const stage = item.postProcessing?.stage;
+    // While waiting for video, retain scheduling / assistant / failure status.
+    if (stage === 'waiting_video' && item.status !== 'completed') return null;
+    return Object.hasOwn(postStates, stage) ? postStates[stage] : null;
+  }
   function visualState(item) {
+    const post = postState(item);
+    if (post) return post[0];
     if (item.display === 'completed') return 'completed';
     if (item.status === 'completed' || (item.display === 'waiting' && item.publishStatus)) return 'linking';
     if (['failed', 'missed', 'send_uncertain'].includes(item.status)) return item.status;
@@ -35,6 +54,15 @@
     if (restoreFocus && previous?.isConnected) { restoringFocus = true; previous.focus(); restoringFocus = false; }
   }
   function deferClose() { clearTimeout(closeTimer); closeTimer = setTimeout(closeMenu, 180); }
+  function positionMenu() {
+    if (!menu || !anchor) return;
+    const box = anchor.getBoundingClientRect(), bounds = menu.getBoundingClientRect();
+    const below = box.bottom + 6;
+    const preferredTop = below + bounds.height <= window.innerHeight - 8
+      ? below : box.top - bounds.height - 6;
+    menu.style.left = Math.max(8, Math.min(box.right - bounds.width, window.innerWidth - bounds.width - 8)) + 'px';
+    menu.style.top = Math.max(8, Math.min(preferredTop, window.innerHeight - bounds.height - 8)) + 'px';
+  }
   function openMenu(icon, focusAction = false) {
     clearTimeout(closeTimer);
     if (anchor === icon && menu) {
@@ -61,10 +89,7 @@
     menu.onfocusout = event => { if (!menu?.contains(event.relatedTarget) && event.relatedTarget !== anchor) deferClose(); };
     menu.onclick = event => event.stopPropagation();
     menu.onkeydown = event => { if (event.key === 'Escape') { event.preventDefault(); closeMenu(true); } };
-    const box = icon.getBoundingClientRect(), bounds = menu.getBoundingClientRect();
-    menu.style.left = Math.max(8, Math.min(box.right - bounds.width, window.innerWidth - bounds.width - 8)) + 'px';
-    menu.style.top = Math.max(8, box.bottom + 6 + bounds.height <= window.innerHeight - 8
-      ? box.bottom + 6 : box.top - bounds.height - 6) + 'px';
+    positionMenu();
     hide.onclick = async event => {
       event.stopPropagation(); hide.disabled = true;
       try {
@@ -79,6 +104,7 @@
         hide.disabled = false;
         caption.textContent = error.message || '隐藏失败，请重试。';
         caption.setAttribute('role', 'alert');
+        positionMenu();
       }
     };
     if (focusAction) hide.focus();
@@ -112,7 +138,8 @@
       icon.cardItem = item; icon.cardScriptId = card.dataset.scriptId;
       const state = visualState(item);
       const [shape, label] = icons[state];
-      const text = item.source === 'manual' ? ({running: '正在准备剪辑', editing: '已提交剪辑，等待成片回传', failed: '剪辑启动失败'}[state] || label) : label;
+      const post = postState(item);
+      const text = post ? post[1] : item.executionMode === 'immediate' ? ({scheduled: '立即剪辑待启动', running: '正在准备立即剪辑', failed: '立即剪辑失败'}[state] || label) : item.source === 'manual' ? ({running: '正在准备剪辑', editing: '已提交剪辑，等待成片回传', failed: '剪辑启动失败'}[state] || label) : label;
       if (icon.dataset.visualState !== state) {
         icon.className = 'script-schedule-status is-' + state;
         const drawing = ['loader', 'send', 'scissors', 'link'].includes(shape)
@@ -123,10 +150,13 @@
       }
       icon.dataset.state = item.display;
       const date = new Date(item.scheduledAt);
-      const when = Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN', { hour12: false });
-      icon.title = [text, when, item.error].filter(Boolean).join(' · ');
+      const when = item.executionMode === 'immediate' || Number.isNaN(date.getTime()) ? '' : date.toLocaleString('zh-CN', { hour12: false });
+      icon.title = [text, when, post && item.postProcessing.message, post && item.postProcessing.error, item.error].filter(Boolean).join(' · ');
       icon.setAttribute('role', 'button'); icon.setAttribute('aria-label', icon.title + '，隐藏本次状态');
-      if (anchor === icon && menu && !menu.querySelector('button').disabled) menu.querySelector('.script-card-status-caption').textContent = icon.title;
+      if (anchor === icon && menu && !menu.querySelector('button').disabled) {
+        menu.querySelector('.script-card-status-caption').textContent = icon.title;
+        positionMenu();
+      }
     }
   }
   function schedulePoll() {

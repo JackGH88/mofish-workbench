@@ -276,6 +276,7 @@ class NativeSendClient:
                 write_private(self.root / 'requests' / (request_id + '.json'), request)
                 self.launch('submit', request_id)
                 result = self._wait(request_id, since, 35)
+                self.release_unsent_claim(result, request_id, task_id, digest)
             validate_receipt(result, request_id, task_id, digest)
         except NativeSendError as exc:
             if exc.code != 'send_uncertain':
@@ -292,3 +293,32 @@ class NativeSendClient:
         receipt['stages'] = receipt.get('stages', []) + [{'stage': 'session_accepted', 'timestamp': time.time()}]
         write_private(self.root / 'receipts' / (request_id + '.json'), receipt)
         return sid
+
+    def release_unsent_claim(self, receipt, request_id, task_id, digest):
+        """Only a final, matching pre-action receipt permits a later explicit retry.
+
+        Never clear claims on a timeout, a failed AXPress, or an uncertain receipt.
+        The native process has returned before this is called; no action is pending.
+        """
+        if (receipt.get('state') != 'blocked' or receipt.get('code') not in {
+                'permission_required', 'session_inactive', 'assistant_unavailable',
+                'target_changed', 'composer_unavailable', 'accessibility_init_failed',
+                'draft_mismatch', 'send_control_unavailable',
+            }):
+            return
+        if 'actionResult' in receipt or receipt.get('protocolVersion') != 2 or any(receipt.get(k) != v for k, v in (
+                ('requestID', request_id), ('taskID', task_id), ('promptHash', digest))):
+            raise NativeSendError('send_uncertain', self.desktop)
+        claim = self.root / 'claims' / (task_id.lower() + '.claim')
+        try:
+            info = claim.lstat()
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+                raise NativeSendError('send_uncertain', self.desktop)
+            # Permission/session checks also run BEFORE claim(). Only stages
+            # emitted after this request won the claim prove ownership of it.
+            stages = receipt.get('stages') or []
+            if not any(isinstance(s, dict) and s.get('stage') in ('claim_acquired', 'application_launch', 'launch') for s in stages):
+                raise NativeSendError('send_uncertain', self.desktop)
+            claim.unlink()
+        except FileNotFoundError:
+            pass  # Authorization/session checks can fail before claiming.

@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="/static/images/mofish-logo.png?v=20261020-no-headphones" />
     <link rel="stylesheet" href="/ui-design-standard/apple-minimal.css?v=20261103-workbench-standard" />
     <link rel="stylesheet" href="/static/writing-assistants.css?v=20261023-switch-agent-v1" />
-    <link rel="stylesheet" href="/static/styles.css?v=20261102-breakdown-button-size" />
+    <link rel="stylesheet" href="/static/styles.css?v=20261108-cover-navigation-v2" />
     <link rel="stylesheet" href="/static/breakdown-rewrite.css?v=20261102-v1" />
     <link rel="stylesheet" href="/static/breakdown-results.css?v=20261017-author-actions-v1" />
     <link rel="stylesheet" href="/static/subscription.css?v=20261031-ledger-refresh-weight" />
@@ -1353,8 +1353,14 @@
                   </div>
                 </section>
                 <div class="draft-mode-tabs publish-draft-tabs" role="tablist" aria-label="发布文案平台">
-                  <button id="publishDouyinDraftTab" class="draft-mode-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="publishDouyinDraftPanel">抖音</button>
-                  <button id="publishChannelsDraftTab" class="draft-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="publishChannelsDraftPanel">视频号</button>
+                  <button id="publishDouyinDraftTab" class="draft-mode-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="publishDouyinDraftPanel">
+                    <svg class="publish-platform-icon" width="16" height="16" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16 8.24537V15.5C16 19.0899 13.0899 22 9.5 22C5.91015 22 3 19.0899 3 15.5C3 11.9101 5.91015 9 9.5 9C10.0163 9 10.5185 9.06019 11 9.17393V12.3368C10.5454 12.1208 10.0368 12 9.5 12C7.567 12 6 13.567 6 15.5C6 17.433 7.567 19 9.5 19C11.433 19 13 17.433 13 15.5V2H16C16 4.76142 18.2386 7 21 7V10C19.1081 10 17.3696 9.34328 16 8.24537Z"/></svg>
+                    <span>抖音</span>
+                  </button>
+                  <button id="publishChannelsDraftTab" class="draft-mode-tab" type="button" role="tab" aria-selected="false" aria-controls="publishChannelsDraftPanel">
+                    <svg class="publish-platform-icon" width="16" height="16" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.1937 3.18117C20.3555 2.71123 21.3487 3.16205 21.8663 4.45774C23.2592 7.94366 19.9988 21.1333 17.4407 21.1333C16.6131 21.1333 15.7836 20.4447 14.8173 19.2068C14.3818 18.6489 13.9272 17.9838 13.4597 17.2333C13.0858 16.6328 12.7182 16.0015 12.3651 15.3626L12.0001 14.6901L11.9825 14.722C11.5257 15.5772 11.0385 16.4327 10.5399 17.2333C10.0725 17.9838 9.61783 18.6489 9.18231 19.2068C8.21598 20.4447 7.38653 21.1333 6.55888 21.1333C4.00086 21.1333 0.740407 7.94366 2.13327 4.45778C2.6509 3.16204 3.64414 2.71123 4.80589 3.18117C5.6482 3.5219 6.57782 4.3366 7.61665 5.55703C8.23486 6.28331 8.88155 7.14336 9.54718 8.11022C10.2842 9.18072 11.0062 10.3255 11.6841 11.4699L12.0002 12.0085L12.3156 11.4699C12.8578 10.5544 13.4284 9.63861 14.0123 8.76083L14.4524 8.11022C15.1181 7.14336 15.7648 6.28331 16.383 5.55703C17.4218 4.3366 18.3514 3.5219 19.1937 3.18117ZM4.32415 4.35258C3.83357 4.15413 3.58079 4.26886 3.31915 4.92382C2.86195 6.06804 3.05394 8.9514 3.73172 12.1871L3.89027 12.9114L4.06441 13.6438C4.91993 17.1047 6.15077 19.8682 6.55888 19.8682C6.83822 19.8682 7.44795 19.362 8.17369 18.4323C8.57863 17.9136 9.00904 17.284 9.45462 16.5685C9.8163 15.9877 10.1733 15.3745 10.5167 14.7531L10.9319 13.9859L11.2802 13.315L10.916 12.6774L10.5842 12.1107C9.91996 10.9892 9.21275 9.86797 8.49374 8.82358C7.85084 7.88975 7.22921 7.06302 6.64196 6.37311C5.72617 5.29724 4.92611 4.59608 4.32415 4.35258ZM20.6804 4.92377C20.4188 4.26886 20.1661 4.15413 19.6755 4.35258C19.0735 4.59608 18.2735 5.29724 17.3577 6.37311C16.7704 7.06302 16.1488 7.88975 15.5059 8.82358C14.9307 9.6591 14.363 10.5438 13.8189 11.4384L13.2452 12.3998L12.7184 13.315L12.8991 13.6647L13.1443 14.1298C13.5889 14.9621 14.0628 15.7941 14.545 16.5685C14.9906 17.284 15.421 17.9136 15.8259 18.4323C16.5517 19.362 17.1614 19.8682 17.4407 19.8682C17.8488 19.8682 19.0797 17.1047 19.9352 13.6438L20.1094 12.9114C20.9137 9.3881 21.1715 6.1528 20.6804 4.92377Z"/></svg>
+                    <span>视频号</span>
+                  </button>
                 </div>
                 <div class="publish-draft-panels">
                   <section id="publishDouyinDraftPanel" class="publish-draft-editor" role="tabpanel" aria-labelledby="publishDouyinDraftTab">
@@ -2262,8 +2268,9 @@
     </dialog>
     <script src="/static/writing-assistants.js?v=20261102-rewrite-v1" defer></script>
     <script src="/static/publish-previews.js?v=20261031-title-publish-ready" defer></script>
-    <script src="/static/script-navigation.js?v=20261101-native-scroll" defer></script>
-    <script src="/static/app.js?v=20261102-platform-boundary" defer></script>
+    <script src="/static/script-navigation.js?v=20261108-navigation-error-toast" defer></script>
+    <script src="/static/material-state-sync.js?v=20261108-cover-navigation-v2" defer></script>
+    <script src="/static/app.js?v=20261108-cover-navigation-v2" defer></script>
     <div id="accountPopover" popover="auto" aria-label="账号菜单">
       <div class="account-popover-head" id="accountPopoverHead"></div>
       <div class="account-popover-list">
@@ -2286,8 +2293,9 @@
     </dialog>
     <dialog id="subscriptionModal" aria-label="订阅与积分"></dialog>
     <script src="/static/legal-documents.js?v=20261102-legal-v6" defer></script>
-    <script src="/static/subscription.js?v=20261031-ledger-labels-v3" defer></script>
-    <script src="/static/return-feedback.js?v=20261026-native-return-sound-v2" defer></script>
+    <script src="/static/subscription.js?v=20261110-cover-prompt-label" defer></script>
+    <script src="/static/return-feedback.js?v=20261108-durable-sound-v2" defer></script>
+    <script src="/static/return-sounds.js?v=20261108-durable-sound-v2" defer></script>
     <script src="/static/script-import-notifications.js?v=20261102-return-sync-v4" defer></script>
     <script src="/static/writing-return-notifications.js?v=20261102-live-sync-v3" defer></script>
     <script src="/static/draft-panel.js?v=20261102-live-return" defer></script>
@@ -2305,7 +2313,7 @@
     <script src="/static/workspace-navigation.js?v=20261031-pause-recommendations" defer></script>
     <script src="/static/updates.js?v=20261102-update-dialog-v2" defer></script>
     <script src="/static/restart.js?v=20261031-fast-restart" defer></script>
-    <script src="/static/plugin-host.js?v=20261031-preview-sticky" defer></script>
-    <script src="/static/schedule-cards.js?v=20261027-edit-card-status-v1" defer></script>
+    <script src="/static/plugin-host.js?v=20261110-import-label" defer></script>
+    <script src="/static/schedule-cards.js?v=20261107-post-edit-assets" defer></script>
   </body>
 </html>

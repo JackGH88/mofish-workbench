@@ -127,6 +127,7 @@ PUBLIC_ERROR_MESSAGES: "dict[str, str]" = {
     "sms_template_invalid": "短信签名或模板配置有误，请联系运营方。",
     "sms_channel_unavailable": "短信服务暂时不可用，请稍后再试。",
     "sms_send_failed": "验证码发送失败，请稍后再试。",
+    "image_generation_timeout": "生成超过 30 分钟，可重新生成。",
     "status_pending": "任务结果待确认，请稍后继续查询。",
     "result_expired": "成果已过保留期，需要重新发起。",
     "unsupported_input": "不支持该输入，请检查内容后重试。",

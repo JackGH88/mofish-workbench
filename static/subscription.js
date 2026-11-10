@@ -557,7 +557,7 @@
     const source = { topic_recommendations: "选题推荐", monitor: "监控", radar: "内容采集", script: "脚本", review: "复盘", breakdown: "拆解视频", settings: "项目设置" }[context.source];
     const capabilities = { profile: "博主资料", posts: "博主作品列表", video: "视频详情",
       search: "关键词视频搜索", low_fans: "低粉爆款", trends: "热度飙升榜", suggestions: "关键词联想" };
-    const scriptAction = source === "脚本" && { generate_title: "生成标题", generate_cover_title: "生成封面标题", generate_cover: "生成封面" }[context.action];
+    const scriptAction = source === "脚本" && { generate_title: "生成标题", generate_cover_title: "生成封面提示词", generate_cover: "生成封面" }[context.action];
     const reviewAction = source === "复盘" && { review_video: "AI 辅助复盘", suggest_factors: "AI 因子建议", home_advice: "账号下一步建议" }[context.action];
     // 拆解视频向平台提交解析与转写两个独立结算任务，操作备注要分开，不能都叫「视频文案转写」。
     const breakdownAction = source === "拆解视频"

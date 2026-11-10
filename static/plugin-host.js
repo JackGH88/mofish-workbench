@@ -540,7 +540,7 @@
       });
       actions.appendChild(backButton);
     }
-    const addButton = el("button", "pm-btn", "新增插件");
+    const addButton = el("button", "pm-btn", "导入插件");
     addButton.type = "button";
     addButton.addEventListener("click", openPackageImport);
     actions.appendChild(addButton);

@@ -346,6 +346,14 @@ plugin_registry = PluginRegistry(
     script_snapshot=_plugin_script_snapshot,
     media_root=DATA_ROOT / "workspace" / "plugins",
 )
+def _record_plugin_return(account_id, plugin_id, script_id, notice):
+    workspace_store.return_notifications.record(
+        json.dumps(['video', account_id, plugin_id, notice['id']]),
+        account_id=account_id, script_id=script_id,
+        message=notice['message'], kind='video')
+
+plugin_registry.services['return_notification'] = _record_plugin_return
+
 from .plugins.packages import PackageManager
 from .plugins.package_routes import build_package_router, build_asset_router, PluginRequestGuard
 plugin_packages = PackageManager(DATA_ROOT / "workspace" / "plugin-packages", plugin_registry)
@@ -2563,7 +2571,8 @@ def _save_staged_publish_assets(
     staging_directory: Path,
 ) -> dict:
     try:
-        with _publish_assets_save_lock:
+        with _publish_assets_save_lock, workspace_store._lock:
+            workspace_store.pause_post_edit_automations(script_id)
             assets = publish_assets_store.save(
                 script_id,
                 video_source,
@@ -2622,8 +2631,17 @@ def _cover_sources_for_publish_save(
 def _sync_generated_publish_cover_aspects(script_id: str, aspects: set[str]) -> dict[str, Any]:
     """Copy selected generated covers while retaining every non-selected publish choice."""
     staging_directory: Path | None = None
-    with _publish_assets_save_lock:
+    with _publish_assets_save_lock, workspace_store._lock:
         current_assets = workspace_store.get_publish_assets(script_id)
+        script = workspace_store.get_script(script_id)
+        generation = workspace_store.get_cover_generation(script_id) or {}
+        jobs = {item["jobId"] for item in generation.get("aspects", [])
+                if item["aspect"] in aspects and item["status"] == "success"}
+        automation_job = next((job for job in jobs if post_edit.owner(script, job)), "")
+        if automation_job and not workspace_store.post_edit_generation_allowed(
+            script_id, automation_job, recover_output=True
+        ):
+            return current_assets
         video = current_assets.get("video")
         cover_state = workspace_store.get_cover_state(script_id)
         generated_urls = _successful_generated_cover_urls(cover_state)
@@ -2677,7 +2695,7 @@ def _sync_generated_publish_cover_aspects(script_id: str, aspects: set[str]) -> 
                     cover_sources[aspect] = {"type": "generated", "imageUrl": generated_urls[aspect]}
             if cover_sources:
                 assets["coverSources"] = cover_sources
-            return workspace_store.save_publish_assets(script_id, assets)
+            return workspace_store.save_publish_assets(script_id, assets, automation_job_id=automation_job)
         finally:
             if staging_directory.is_dir():
                 shutil.rmtree(staging_directory)
@@ -2705,11 +2723,16 @@ def _reconcile_generated_publish_covers(script_id: str) -> dict[str, Any]:
     cover_state = workspace_store.get_cover_state(script_id)
     generated_urls = _successful_generated_cover_urls(cover_state)
     cover_sources = current_assets.get("coverSources") if isinstance(current_assets.get("coverSources"), dict) else {}
+    script = workspace_store.get_script(script_id)
+    generation = workspace_store.get_cover_generation(script_id) or {}
+    recoverable = {item["aspect"] for item in generation.get("aspects", [])
+                   if item["status"] == "success" and post_edit.owner(script, item["jobId"])
+                   and post_edit.allowed(script, item["jobId"], workspace_store, recover_output=True)}
     aspects_to_refresh = {
         aspect
         for aspect, image_url in generated_urls.items()
         if (
-            not isinstance(cover_sources.get(aspect), dict)
+            aspect in recoverable or not isinstance(cover_sources.get(aspect), dict)
             or cover_sources[aspect].get("type") != "manual"
         ) and cover_sources.get(aspect, {}).get("imageUrl") != image_url
     }
@@ -3914,6 +3937,52 @@ async def script_import_info(request: Request) -> dict:
             "accounts": await run_io(workspace_store.list_accounts)}
 
 
+class ReturnSoundClaim(BaseModel):
+    clientId: str = Field(min_length=1, max_length=200)
+    desktopInstance: Optional[str] = None
+
+
+class ReturnSoundReceipt(BaseModel):
+    id: str = Field(min_length=1, max_length=100)
+    token: str = Field(min_length=1, max_length=100)
+
+
+def _require_return_client(request: Request):
+    _require_local_origin(request)
+    _require_loopback_client(request)
+
+
+@app.get('/api/return-notifications')
+async def return_notifications(request: Request):
+    _require_return_client(request)
+    return {'items': await run_io(workspace_store.return_notifications.pending)}
+
+
+@app.post('/api/return-notifications/claim')
+async def claim_return_notification(payload: ReturnSoundClaim, request: Request):
+    _require_return_client(request)
+    native = bool(payload.desktopInstance and DESKTOP and payload.desktopInstance == os.environ.get('MOFISH_INSTANCE'))
+    if payload.desktopInstance and not native:
+        raise HTTPException(403, detail='桌面实例不匹配。')
+    return {'item': await run_io(workspace_store.return_notifications.claim, payload.clientId, native)}
+
+
+@app.post('/api/return-notifications/ack')
+async def acknowledge_return_notification(payload: ReturnSoundReceipt, request: Request):
+    _require_return_client(request)
+    if not await run_io(workspace_store.return_notifications.finish, payload.id, payload.token, True):
+        raise HTTPException(409, detail='提示音领取已失效。')
+    return {'ok': True}
+
+
+@app.post('/api/return-notifications/release')
+async def release_return_notification(payload: ReturnSoundReceipt, request: Request):
+    _require_return_client(request)
+    if not await run_io(workspace_store.return_notifications.finish, payload.id, payload.token, False):
+        raise HTTPException(409, detail='提示音领取已失效。')
+    return {'ok': True}
+
+
 @app.get("/api/script-import/notifications")
 async def script_import_notifications(request: Request) -> dict:
     from .script_import import ScriptImporter
@@ -4716,7 +4785,8 @@ async def adopt_publish_media(script_id: str, payload: PublishAdoptRequest,
         )
 
     def _adopt() -> dict:
-        with _publish_assets_save_lock:
+        with _publish_assets_save_lock, workspace_store._lock:
+            workspace_store.pause_post_edit_automations(script_id)
             # 只替换视频：封面文件原地保留，避免把已存在的封面再复制到自己身上。
             assets = dict(workspace_store.get_publish_assets(script_id))
             asset_dir = publish_assets_store._safe_asset_dir(script_id, create=True)
@@ -4743,10 +4813,59 @@ async def _plugin_adopt_video(account_id, script_id, media):
     with plugin_registry.account_scope(account_id):
         return await adopt_publish_media(script_id, PublishAdoptRequest(media=media, replace=True), account_id)
 
+from .post_edit_automation import PostEditAutomation
+from . import post_edit_automation as post_edit
+_post_edit_runtime = None
+
+
+async def _plugin_post_edit_automation(account_id, script_id, schedule_id, result_id, media):
+    global _post_edit_runtime
+    with plugin_registry.account_scope(account_id):
+        try:
+            script = await run_io(workspace_store.get_script, script_id)
+        except (KeyError, ValueError):
+            return {"stage": "paused", "message": "自动流程已暂停", "error": "脚本已删除或不可用，请手动处理。"}
+        if script.get("accountId") != account_id:
+            return {"stage": "paused", "message": "自动流程已暂停", "error": "脚本已移到其他账号，原自动流程已暂停。"}
+        if schedule_id not in (script.get("postEditAutomations") or {}):
+            try:
+                source = _resolve_plugin_media_reference(media)
+                video = (script.get("publishAssets") or {}).get("video") or {}
+                linked = workspace_store.resolve_publish_asset_path(script_id, video.get("path", ""))
+                source_stat, linked_stat = source.stat(), linked.stat()
+                if (video.get("name") != source.name or
+                    (source_stat.st_size, source_stat.st_mtime_ns) != (linked_stat.st_size, linked_stat.st_mtime_ns)):
+                    raise ValueError("本次回传视频已被替换，自动流程已暂停。")
+            except (HTTPException, OSError, KeyError, ValueError):
+                return {"stage": "paused", "message": "自动流程已暂停", "error": "本次回传视频已丢失或被替换，请手动继续。"}
+        if _post_edit_runtime is None or _post_edit_runtime.store is not workspace_store:
+            import sys
+            _post_edit_runtime = PostEditAutomation(sys.modules[__name__])
+        return await _post_edit_runtime.ensure(account_id, script_id, schedule_id, result_id)
+
+
+async def _plugin_stop_post_edit_automation(account_id, script_id, schedule_id, result_id):
+    with plugin_registry.account_scope(account_id):
+        import sys
+        runtime = PostEditAutomation(sys.modules[__name__])
+        result = await run_io(runtime.stop_schedule, account_id, script_id, schedule_id, result_id)
+        return result
+
+
+async def _stop_post_edit_automation():
+    if _post_edit_runtime is not None:
+        await _post_edit_runtime.stop()
+
+
+app.add_event_handler("shutdown", _stop_post_edit_automation)
+
+
 from app.plugin_assistant import PluginAssistantService
 plugin_registry.services.update({
     "assistant": lambda: PluginAssistantService(AssistantManager(workspace_store._workspace_dir)),
     "adopt_video": _plugin_adopt_video,
+    "post_edit_automation": _plugin_post_edit_automation,
+    "stop_post_edit_automation": _plugin_stop_post_edit_automation,
 })
 
 
@@ -5345,7 +5464,7 @@ async def run_title_generation_job(
             code="title_generation_failed",
             message=_model_failure_message(exc, "标题生成失败，已保留现有结果。"),
         )
-    except Exception:
+    except Exception as exc:
         logger.exception("title_generation_unexpected_error script_id=%s job_id=%s", script_id, job_id)
         await run_io(
             workspace_store.fail_title_generation,
@@ -6795,6 +6914,7 @@ async def _settle_platform_cover_task(
             except CreationImageError as exc:
                 if not exc.terminal:
                     # Keep the original task recoverable; never offer a paid resubmission.
+                    await run_io(workspace_store.mark_cover_status_unconfirmed, script_id, job_id, ratio)
                     return
                 await run_io(
                     workspace_store.fail_cover_aspect,
@@ -6876,6 +6996,9 @@ async def run_persisted_cover_generation(
         ))
         # Persist each accepted ratio before submitting another or polling results.
         for ratio in pending:
+            if not await run_io(workspace_store.post_edit_generation_allowed, script_id, job_id):
+                await run_io(workspace_store.interrupt_unsubmitted_cover_aspects, script_id, job_id)
+                break
             try:
                 task_ids = await client.submit(prompt, [ratio], reference_upload_ids=reference_upload_ids or None)
             except CreationImageError as exc:
@@ -8790,6 +8913,8 @@ def _active_update_tasks():
         count += sum(not future.done() for future in publisher_service._task_futures)
         count += sum(task.status in {"queued", "running", "waiting_for_review"}
                      for task in publisher_service._tasks.values())
+    if _post_edit_runtime is not None:
+        count += sum(not task.done() for task in _post_edit_runtime.tasks.values())
     return count
 
 

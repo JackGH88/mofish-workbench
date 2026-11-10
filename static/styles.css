@@ -1495,12 +1495,13 @@ body.is-modal-open {
 }
 
 .cover-demo-grid {
+  --cover-reference-width: clamp(132px, 9.6vw, 180px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   /* The 3:4 reference card owns the creation-row height on desktop. */
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
   gap: var(--stage-inset);
-  height: 100%;
+  height: auto;
   min-height: 0;
 }
 
@@ -1641,7 +1642,7 @@ body.is-modal-open {
 
 .cover-input-grid {
   display: grid;
-  grid-template-columns: clamp(132px, 9.6vw, 180px) minmax(0, 1fr);
+  grid-template-columns: var(--cover-reference-width) minmax(0, 1fr);
   align-items: stretch;
   gap: 20px;
   min-height: 0;
@@ -2133,18 +2134,19 @@ body.is-modal-open {
   justify-content: flex-start;
   gap: 14px;
   min-height: 0;
-  height: 100%;
+  height: auto;
   overflow: hidden;
 }
 
 .cover-result-card {
-  /* Keep both aspect ratios fully visible when height exceeds the row width. */
-  max-height: calc((100cqw - 14px) * 12 / 25);
+  /* Match the reference card; fit both ratios on narrow screens. Content and
+     image loading must never determine the size of a result or placeholder. */
   position: relative;
   display: grid;
   align-content: end;
   gap: 2px;
-  height: 100%;
+  height: min(calc(var(--cover-reference-width) * 4 / 3), calc((100cqw - 14px) * 12 / 25));
+  min-height: 0;
   width: auto;
   flex: 0 0 auto;
   min-width: 0;
@@ -4445,6 +4447,7 @@ body.is-modal-open {
   }
 
   .cover-demo-grid {
+    --cover-reference-width: 240px;
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -5198,6 +5201,25 @@ body.is-modal-open {
   font-weight: 600;
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.publish-draft-tabs > .draft-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.publish-draft-tabs > .draft-mode-tab.is-active {
+  color: #1d1d1f;
+}
+
+.publish-draft-tabs .publish-platform-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  fill: currentColor;
 }
 
 /* -------------------------------------------------- 双栏主体 */
@@ -11321,7 +11343,7 @@ button:disabled .radar-spinner {
   width: 240px; max-width: calc(100vw - 16px); padding: 6px;
   border: 0; border-radius: 14px; background: var(--am-panel); box-shadow: var(--am-shadow-float);
 }
-.script-card-status-caption { padding: 9px 10px 6px; color: var(--am-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; max-height: 72px; overflow: hidden; }
+.script-card-status-caption { padding: 9px 10px 6px; color: var(--am-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .script-card-status-menu button { display: block; width: 100%; border: 0; border-radius: 9px; padding: 9px 10px; background: none; color: var(--am-text); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
 .script-card-status-menu button:hover, .script-card-status-menu button:focus-visible { background: var(--am-control); }
 .script-card-status-menu button:focus-visible { outline: 2px solid var(--am-muted); outline-offset: -2px; }
@@ -11331,6 +11353,17 @@ button:disabled .radar-spinner {
 .script-navigation-status{position:absolute;top:76px;right:24px;z-index:2;max-width:calc(100% - 48px);padding:4px 8px;border-radius:8px;background:#fff;color:#86868b;font-size:13px}
 .script-navigation-status button{margin-left:12px}
 .is-script-switching .workflow-stage:not([data-native-preview]),.is-script-switching .pm-stage-host:not([data-script-preview]){display:none!important}
+.is-script-switching.is-cover-switching #coverStage:not([hidden]) { display: grid !important; }
+/* Inert already blocks toolbar interaction during navigation. Keep its visual
+   state stable while the pending-script guard temporarily disables actions. */
+.is-script-switching .workspace-script-actions .am-secondary-action:disabled {
+  opacity: 1;
+  color: var(--am-text);
+  background: var(--am-control);
+}
+.is-script-switching .workspace-script-actions :is(.script-move-button, .script-workflow-status-button, .script-delete-action):disabled {
+  opacity: 1;
+}
 .script-stage-preview{min-width:0;pointer-events:none}
 .script-stage-preview:not([data-native-preview]){height:100%;min-height:300px;overflow:hidden}
 

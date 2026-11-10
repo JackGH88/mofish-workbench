@@ -75,6 +75,9 @@ class PluginContext:
 
     def notify_return(self, script_id: str, notice: dict) -> None:
         from .events import hub
+        callback = self._registry.services.get('return_notification')
+        if callback and notice.get('success') is True:
+            callback(self.account_id, self.plugin_id, script_id, notice)
         keys = ('id', 'resultId', 'taskId', 'status', 'message', 'success')
         hub.publish(self.account_id, self.plugin_id, script_id,
                     {key: notice[key] for key in keys if key in notice})

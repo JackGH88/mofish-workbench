@@ -82,6 +82,11 @@ class CreationImageClient:
         try:
             client = self._service.business_client()
             view = await workbench.poll_task(client, task_id)
+            if view.get("status") == "failed" and view.get("errorCode") == "image_generation_timeout":
+                message = "生成超过 30 分钟，可重新生成。"
+                if view.get("settlementStatus") == "released":
+                    message = "生成超过 30 分钟，冻结积分已释放，可重新生成。"
+                raise CreationImageError("image_generation_timeout", message, terminal=True)
             workbench.require_success(view)
             result = await client.task_result(task_id)
         except SubscriptionError as exc:

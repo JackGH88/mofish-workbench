@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from . import post_edit_automation as post_edit
+
 import hmac
 import json
 import logging
@@ -151,6 +153,8 @@ def _locked(method: Callable[..., Any]) -> Callable[..., Any]:
 
 class WorkspaceStore:
     def __init__(self, workspace_dir: Path, download_dir: Path) -> None:
+        from .return_notifications import ReturnNotifications
+        self.return_notifications = ReturnNotifications(workspace_dir)
         self._workspace_dir = workspace_dir
         self._download_dir = download_dir
         self._accounts_path = workspace_dir / "accounts.json"
@@ -1916,10 +1920,13 @@ class WorkspaceStore:
         if not main_title or not subtitle:
             return False
         state = script.get("coverState") if isinstance(script.get("coverState"), dict) else {}
-        applied = generation.get("inputSnapshot") == self._cover_title_input_snapshot(script)
+        applied = (post_edit.allowed(script, job_id, self)
+                   and generation.get("inputSnapshot") == self._cover_title_input_snapshot(script))
         if applied:
             state["prompt"] = self._cover_title_prompt(state, main_title, subtitle, generation.get("referenceId", ""))
         script["coverState"] = state
+        if applied:
+            post_edit.accepted(script, job_id, promptDone=True)
         now = self._now()
         script["coverTitleGeneration"] = {
             "jobId": job_id,
@@ -2193,6 +2200,19 @@ class WorkspaceStore:
         return self._cover_generation_job_view(generation, job_id)
 
     @_locked
+    def mark_cover_status_unconfirmed(self, script_id: str, job_id: str, aspect: str) -> None:
+        script = self.get_script(script_id)
+        generation = self._cover_generation_view(script.get("coverGeneration"))
+        if not generation or generation["status"] != "running":
+            return
+        for item in generation["aspects"]:
+            if item["aspect"] == aspect and item["jobId"] == job_id and item["status"] == "submitted":
+                item["message"] = "状态暂无法确认，正在查询原任务；平台提交超过 30 分钟将超时收尾。"
+                script["coverGeneration"] = generation
+                self._write_json(self._script_path(script_id), script)
+                return
+
+    @_locked
     def reserve_cover_output(self, script_id: str, job_id: str, aspect: str, image_url: str) -> dict[str, Any] | None:
         script = self.get_script(script_id)
         generation = self._cover_generation_view(script.get("coverGeneration"))
@@ -2215,10 +2235,16 @@ class WorkspaceStore:
         if not generation or generation["status"] != "running":
             return None
         for item in generation["aspects"]:
-            if item["aspect"] == aspect and item["jobId"] == job_id:
+            if item["aspect"] == aspect and item["jobId"] == job_id and item["status"] in {"pending", "submitted"}:
                 item.update(status="success", imageUrl=str(image_url)[:4096], message="", error={})
                 break
         else:
+            return None
+        if not post_edit.allowed(script, job_id, self):
+            item.update(status="cancelled", message=post_edit.CONFLICT)
+            self._refresh_cover_generation_status(generation)
+            script["coverGeneration"] = generation
+            self._write_json(self._script_path(script_id), script)
             return None
         state = script.get("coverState") if isinstance(script.get("coverState"), dict) else {}
         self._merge_cover_result(state, aspect, str(image_url)[:4096])
@@ -2237,7 +2263,7 @@ class WorkspaceStore:
         if not generation or generation["status"] != "running":
             return None
         for item in generation["aspects"]:
-            if item["aspect"] == aspect and item["jobId"] == job_id:
+            if item["aspect"] == aspect and item["jobId"] == job_id and item["status"] in {"pending", "submitted"}:
                 item.update(
                     status="error",
                     message=sanitize_message(message)[:500],
@@ -2247,7 +2273,8 @@ class WorkspaceStore:
         else:
             return None
         state = script.get("coverState") if isinstance(script.get("coverState"), dict) else {}
-        self._merge_cover_failure(state, aspect, sanitize_message(message))
+        if not post_edit.owner(script, job_id):
+            self._merge_cover_failure(state, aspect, sanitize_message(message))
         script["coverState"] = state
         self._refresh_cover_generation_status(
             generation,
@@ -2351,9 +2378,9 @@ class WorkspaceStore:
             for item in generation["aspects"]:
                 if item["status"] == "success" and item["imageUrl"]:
                     self._merge_cover_result(state, item["aspect"], item["imageUrl"])
-                elif item["status"] == "error":
+                elif item["status"] == "error" and not post_edit.owner(script, item["jobId"]):
                     self._merge_cover_failure(state, item["aspect"], item["message"])
-                elif item["status"] == "cancelled":
+                elif item["status"] == "cancelled" and not post_edit.owner(script, item["jobId"]):
                     self._merge_cover_cancellation(state, item["aspect"])
         script["coverState"] = state
         self._write_json(self._script_path(script_id), script)
@@ -2472,13 +2499,32 @@ class WorkspaceStore:
         return self._normalize_publish_assets(script_id, assets)
 
     @_locked
-    def save_publish_assets(self, script_id: str, assets: dict[str, Any]) -> dict[str, Any]:
+    def save_publish_assets(self, script_id: str, assets: dict[str, Any], *, automation_job_id: str = "") -> dict[str, Any]:
         script = self.get_script(script_id)
         normalized = self._normalize_publish_assets(script_id, assets)
+        if not automation_job_id and normalized != script.get("publishAssets"):
+            post_edit.pause(script)
         script["publishAssets"] = normalized
+        if automation_job_id:
+            post_edit.accepted(script, automation_job_id)
         script["updatedAt"] = self._now()
         self._write_json(self._script_path(script_id), script)
         return normalized
+
+    @_locked
+    def pause_post_edit_automations(self, script_id: str) -> None:
+        script = self.get_script(script_id)
+        if any(state.get("stage") not in post_edit.TERMINAL for state in (script.get("postEditAutomations") or {}).values()):
+            post_edit.pause(script)
+            self._write_json(self._script_path(script_id), script)
+
+    @_locked
+    def post_edit_generation_allowed(self, script_id: str, job_id: str, *, recover_output: bool = False) -> bool:
+        script = self.get_script(script_id)
+        result = post_edit.allowed(script, job_id, self, recover_output=recover_output)
+        if not result:
+            self._write_json(self._script_path(script_id), script)
+        return result
 
     @_locked
     def resolve_publish_asset_path(self, script_id: str, raw_path: str) -> Path:
@@ -2632,7 +2678,15 @@ class WorkspaceStore:
         current = self._title_generation_view(script.get("titleGeneration"))
         if not current or current["status"] != "running" or current["jobId"] != job_id:
             return None
+        if not post_edit.allowed(script, job_id, self):
+            script["titleGeneration"].update(status="interrupted", error={"code": "post_edit_paused", "message": post_edit.CONFLICT})
+            self._write_json(self._script_path(script_id), script)
+            return None
+        if post_edit.owner(script, job_id):
+            # This opt-in workflow explicitly replaces even customized old drafts.
+            script.pop("titleState", None)
         state = self._save_title_candidates_to_script(script, candidates_by_platform)
+        post_edit.accepted(script, job_id, titleDone=True)
         script.pop("titleGeneration", None)
         script["updatedAt"] = self._now()
         self._write_json(self._script_path(script_id), script)
@@ -3934,6 +3988,10 @@ class WorkspaceStore:
         applied["writingAgentTask"] = updated_task
         applied["updatedAt"] = now
         self._write_json(self._script_path(script_id), applied)
+        self.return_notifications.record(
+            json.dumps(['writing', account_id, script_id, task_id, submission_id or now]),
+            account_id=account_id, script_id=script_id,
+            message=f"✓《{applied.get('title') or '未命名脚本'}》脚本已回传", kind='script')
         return {
             "message": "已把回传稿写入工作台的脚本内容。",
             "applied": True,
@@ -3961,6 +4019,10 @@ class WorkspaceStore:
         applied["writingAgentTask"] = updated_task
         applied["updatedAt"] = self._now()
         self._write_json(self._script_path(script_id), applied)
+        self.return_notifications.record(
+            json.dumps(['writing', applied['accountId'], script_id, updated_task.get('taskId'), submission_id or updated_task['appliedAt']]),
+            account_id=applied['accountId'], script_id=script_id,
+            message=f"✓《{applied.get('title') or '未命名脚本'}》脚本已回传", kind='script')
         return applied
 
     @_locked

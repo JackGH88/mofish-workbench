@@ -25,7 +25,12 @@
     snapshots.set(id, {node: clone, stage, time: Date.now()});
     while (snapshots.size > 8) snapshots.delete(snapshots.keys().next().value);
   }
-  function previewPlugin() { preview?.remove(); preview = null; }
+  function previewPlugin() {
+    preview?.remove(); preview = null;
+    // A remembered plugin stage overrides the script's native stage. Release
+    // the retained live cover too, before the plugin measures its viewport.
+    document.getElementById('workspaceContent')?.classList.remove('is-cover-switching');
+  }
   const clear = () => { reset?.(); reset = null; awaitingPublish = false; destination = null; };
   function finish() {
     if (reset && document.getElementById('publishStage')?.hidden === false && document.getElementById('publishAssetsStatus')?.dataset.state === 'loading') {
@@ -39,16 +44,23 @@
     if (preview?.dataset.nativePreview === 'publish') window.WorkbenchPublishPreviews?.seedFromSnapshot?.(preview);
     clear();
   }
-  function begin(context, message) {
+  function begin(context, message, { failed = false } = {}) {
+    const switching = !message && !failed;
     if (!reset) capture();
     clear();
     destination = context;
-    if (!message) document.querySelectorAll('.history-record[data-script-id]').forEach(card => {
+    if (switching) document.querySelectorAll('.history-record[data-script-id]').forEach(card => {
       const selected = card.dataset.scriptId === context.scriptId;
       card.classList.toggle('is-active', selected); card.setAttribute('aria-pressed', String(selected));
     });
     const content = document.getElementById('workspaceContent');
     if (!content) return;
+    // Cover-to-cover navigation commits the new data in one synchronous render.
+    // Keep the current panel visible and inert until then, rather than swapping
+    // it for a clone (or an empty placeholder) and back again.
+    const retainCover = switching && context.stage === 'cover'
+      && document.getElementById('coverStage')?.hidden === false
+      && !document.querySelector('.pm-stage-host:not([hidden])');
     const status = message ? document.createElement('div') : null;
     if (status) {
       status.className = 'script-navigation-status'; status.setAttribute('role', 'status');
@@ -58,7 +70,8 @@
     const previous = panels.map(node => [node, node.inert]);
     panels.forEach(node => { node.inert = true; });
     content.classList.add('is-script-switching');
-    if (!message) {
+    content.classList.toggle('is-cover-switching', retainCover);
+    if (switching && !retainCover) {
       const cached = snapshots.get(key(context));
       const hit = cached && Date.now() - cached.time < 300000;
       preview = hit ? cached.node.cloneNode(true) : document.createElement('div');
@@ -74,17 +87,15 @@
     reset = () => {
       previous.forEach(([node, inert]) => { node.inert = inert; });
       content.classList.remove('is-script-switching'); status?.remove(); previewPlugin();
+      content.classList.remove('is-cover-switching');
       // Snapshots begin at the top. Every native panel must match when revealed,
       // including the outer scrollers used by long editors and cover results.
-      if (!message) content.querySelectorAll('#rewriteStage, #titleStage, #titleStage .title-platform-groups, #coverStage, #publishStage').forEach(node => { node.scrollTop = 0; });
+      if (switching) content.querySelectorAll('#rewriteStage, #titleStage, #titleStage .title-platform-groups, #coverStage, #publishStage').forEach(node => { node.scrollTop = 0; });
     };
   }
-  function fail(context, retry) {
-    begin(context, '脚本读取失败，请重试。');
-    const status = document.querySelector('.script-navigation-status');
-    if (!status) return;
-    const button = document.createElement('button'); button.type = 'button'; button.textContent = '重试';
-    button.addEventListener('click', retry); status.append(button);
+  function fail(context) {
+    // Keep stale panels locked; the caller reports the error through the toast.
+    begin(context, undefined, { failed: true });
   }
   function invalidate() { snapshots.clear(); window.dispatchEvent(new CustomEvent('workbench:script-snapshots-invalidated')); }
   window.WorkbenchScriptNavigation = { begin, finish, fail, invalidate, previewPlugin, publishReady };

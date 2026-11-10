@@ -300,6 +300,7 @@ _PUBLIC_CODES = frozenset({
     'sms_rate_limited',
     'sms_send_failed',
     'sms_template_invalid',
+    'image_generation_timeout',
     'status_pending',
     'storage_upload_failed',
     'submission_conflict',

@@ -105,6 +105,16 @@ class ScriptImporter:
             atomic_json(path, receipt)
             self.store._invalidate_script_cache()
 
+    def _notify_success(self, receipt):
+        if not receipt.get('soundEligible'):
+            return
+        notice = receipt['notice']
+        action = '脚本已更新' if receipt['result'] == 'updated' else '脚本已回传'
+        self.store.return_notifications.record(
+            'script-import:' + self._identity() + ':' + notice['id'],
+            account_id=notice['accountId'], script_id=notice['scriptId'],
+            message=f"✓《{notice['title']}》{action}", kind='script')
+
     def notifications(self):
         with self.locked():
             accounts = {a['id']: a for a in self.store.list_accounts()}
@@ -172,7 +182,7 @@ class ScriptImporter:
                               'content': content, 'source': 'blank', 'stage': 'edit',
                               'processingStatus': 'ready', 'workflowStatus': 'pending',
                               'createdAt': now, 'updatedAt': now}
-                receipt = {'digest': digest, 'state': 'done' if reused else 'pending',
+                receipt = {'soundEligible': True, 'digest': digest, 'state': 'done' if reused else 'pending',
                            'script': script, 'result': 'reused' if reused else 'created',
                            'notice': {'id': key, 'accountId': account, 'scriptId': script['id'],
                                       'title': script['title'], 'result': 'reused' if reused else 'created',
@@ -185,6 +195,7 @@ class ScriptImporter:
                 raise ImportFailure('script_deleted', '此次提交的脚本已删除；不会自动重建。', 410)
             if actual['accountId'] != account:
                 raise ImportFailure('script_moved', '此次提交的脚本已移动到其他账号。')
+            self._notify_success(receipt)
             return {'workbenchId': body['workbenchId'], 'accountId': account,
                     'submissionId': body['submissionId'], 'scriptId': actual['id'],
                     'title': actual['title'], 'result': receipt['result'],
@@ -230,7 +241,7 @@ class ScriptImporter:
                 if content_revision(script) != body['expectedRevision']:
                     raise ImportFailure('content_conflict', '原脚本已在其他地方修改，请核查后再回传。')
                 now = self.store._now()
-                receipt = {'operation': 'update', 'digest': digest, 'state': 'pending',
+                receipt = {'soundEligible': True, 'operation': 'update', 'digest': digest, 'state': 'pending',
                            'script': copy.deepcopy(script), 'result': 'updated', 'submissionKey': key,
                            'expectedRevision': body['expectedRevision'], 'content': content, 'updatedAt': now,
                            'notice': {'id': key, 'accountId': body['accountId'], 'scriptId': script['id'],
@@ -238,6 +249,7 @@ class ScriptImporter:
                 atomic_json(path, receipt)
             self._finish(path, receipt)
             actual = self._existing(body['scriptId'], body['accountId'])
+            self._notify_success(receipt)
             return {'workbenchId': body['workbenchId'], 'accountId': body['accountId'],
                     'submissionId': body['submissionId'], 'scriptId': actual['id'],
                     'title': actual['title'], 'result': 'updated', 'contentRevision': content_revision(actual)}

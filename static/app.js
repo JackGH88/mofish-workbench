@@ -486,6 +486,15 @@ let coverTemplateSequence = 0;
 let coverTemplateArmedDeleteId = "";
 let coverTemplateDeleteArmTimer = null;
 let coverStateSyncTimer = null;
+let materialStateSync = null;
+let coverStateLoading = false;
+let coverStateLoadError = "";
+let coverPromptGenerationError = "";
+let coverEditVersion = 0;
+let coverSavedVersion = 0;
+let coverStateReadVersion = 0;
+let coverManualTitleContext = "";
+const coverSubmittingRequests = new Map();
 let coverGeneration = null;
 let coverGenerationPollTimer = null;
 let coverGenerationRequestSequence = 0;
@@ -777,6 +786,7 @@ function cacheCoverStateLocally() {
 }
 
 function saveCoverState() {
+  coverEditVersion += 1;
   cacheCoverStateLocally();
   scheduleCoverStateSync();
 }
@@ -797,7 +807,9 @@ function scheduleCoverStateSync() {
   if (!activeScriptId) return;
   window.clearTimeout(coverStateSyncTimer);
   const scriptId = activeScriptId;
+  const accountId = activeAccountId;
   coverStateSyncTimer = window.setTimeout(() => {
+    if (activeScriptId !== scriptId || activeAccountId !== accountId) return;
     syncCoverStateToServer(scriptId).catch(() => {
       // Server unavailable: the local cache keeps the current session usable.
     });
@@ -805,12 +817,18 @@ function scheduleCoverStateSync() {
 }
 
 async function syncCoverStateToServer(scriptId, state = serializeCoverState()) {
+  const accountId = activeAccountId;
+  const editVersion = coverEditVersion;
   const response = await fetch(`/api/scripts/${encodeURIComponent(scriptId)}/cover-state`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ state }),
   });
   if (!response.ok) throw await response.json();
+  if (scriptId === activeScriptId && accountId === activeAccountId && editVersion === coverEditVersion) {
+    coverSavedVersion = editVersion;
+    materialStateSync?.sync(true);
+  }
 }
 
 function coverStateHasLocalContent() {
@@ -825,13 +843,17 @@ function coverStateHasLocalContent() {
   );
 }
 
-function applyCoverStatePayload(payload, scriptId, generationVersion) {
+function applyCoverStatePayload(payload, scriptId, generationVersion, { preserveInputs = false } = {}) {
   if (activeScriptId !== scriptId || generationVersion !== coverDemo.generationVersion) return;
   const wasRunning = coverGeneration?.status === "running";
   const serverState = payload?.state;
   const hasServerState = serverState && typeof serverState === "object" && Object.keys(serverState).length > 0;
   if (hasServerState) {
-    applyCoverState(serverState, { renderResults: false });
+    const inputs = state => JSON.stringify([state.prompt || "", state.ratio || "both",
+      state.uploadedImages || [], state.activeImageId || "", state.generatedReference || ""]);
+    if (!preserveInputs && inputs(serverState) !== inputs(coverDemo)) {
+      applyCoverState(serverState, { renderResults: false });
+    } else if (Array.isArray(serverState.results)) coverDemo.results = serverState.results;
   }
   applyCoverGeneration(payload?.generation || null);
   renderCoverGenerateControl();
@@ -844,19 +866,23 @@ function applyCoverStatePayload(payload, scriptId, generationVersion) {
   }
   resumeCoverGenerationPolling(scriptId);
   coverGenerationPollFailures = 0;
-  // Only seed a truly empty server from meaningful local state. Polling a
-  // populated server must remain read-only so an older client snapshot
-  // cannot race a just-completed generation result.
+  // Reading state must never upload a stale local snapshot.
   cacheCoverStateLocally();
-  if (!hasServerState && coverStateHasLocalContent()) scheduleCoverStateSync();
+
 }
 
 async function fetchCoverStateFromServer(scriptId, generationVersion = coverDemo.generationVersion) {
+  const accountId = activeAccountId;
+  const readVersion = ++coverStateReadVersion;
+  const editVersion = coverEditVersion;
   try {
     const response = await fetch(`/api/scripts/${encodeURIComponent(scriptId)}/cover-state`);
     const payload = await response.json();
     if (!response.ok) throw payload;
-    applyCoverStatePayload(payload, scriptId, generationVersion);
+    if (accountId !== activeAccountId || readVersion !== coverStateReadVersion) return false;
+    applyCoverStatePayload(payload, scriptId, generationVersion, {
+      preserveInputs: editVersion !== coverEditVersion || coverEditVersion !== coverSavedVersion,
+    });
     return true;
   } catch (_error) {
     // Server unavailable: keep the local cache for the current session.
@@ -865,6 +891,16 @@ async function fetchCoverStateFromServer(scriptId, generationVersion = coverDemo
 }
 
 function resumeCoverTitleGenerationPolling(generation, scriptId = activeScriptId) {
+  if (materialStateSync) {
+    if (coverManualTitleContext !== `${activeAccountId}:${scriptId}`) {
+      coverTitleGenerationInFlight = generation?.status === "running";
+      coverPromptGenerationError = ["failed", "interrupted"].includes(generation?.status)
+        ? generation.error?.message || "提示词生成失败，已保留原有内容。" : "";
+      coverTitleGenerationPhase = "title";
+      renderCoverTitleGenerateControl();
+    }
+    return;
+  }
   if (
     coverTitleGenerationInFlight
     || !generation
@@ -967,6 +1003,7 @@ function stopCoverGenerationPolling() {
 }
 
 function resumeCoverGenerationPolling(scriptId = activeScriptId) {
+  if (materialStateSync) return;
   if (coverGenerationPollTimer !== null || coverGeneration?.status !== "running" || !scriptId) return;
   const generationVersion = coverDemo.generationVersion;
   coverGenerationPollTimer = schedulePoll("cover-generation", async () => {
@@ -1006,6 +1043,12 @@ function applyCoverState(saved, { renderResults = true } = {}) {
 }
 
 function loadCoverStateForScript({ serverPayload = null } = {}) {
+  coverEditVersion += 1;
+  coverSavedVersion = coverEditVersion;
+  coverStateReadVersion += 1;
+  coverStateLoadError = "";
+  coverPromptGenerationError = "";
+  coverStateLoading = false;
   coverDemo.generationVersion += 1;
   stopCoverGenerationPolling();
   applyCoverGeneration(null);
@@ -1038,11 +1081,13 @@ function loadCoverStateForScript({ serverPayload = null } = {}) {
       saved = null;
     }
   }
-  applyCoverState(saved);
+  // The composite payload will render the authoritative results below. Avoid
+  // replacing loaded cards with an intermediate local-cache version first.
+  applyCoverState(saved, { renderResults: !serverPayload });
   if (migrated) saveCoverState();
   renderCoverGenerateControl();
   renderCoverTitleGenerateControl();
-  renderCoverResults();
+  if (!serverPayload) renderCoverResults();
   if (!activeScriptId) return;
   // A composite panel payload already carries the server state; only fall back
   // to a dedicated request when the caller has none.
@@ -1189,13 +1234,16 @@ function showToast(message, type = "info", duration = 2600) {
 }
 
 function renderCoverResults() {
+  // Keep a bounded set of decoded result images for A → B → A navigation.
+  const cardCache = renderCoverResults.cardCache ||= new Map();
   const entries = [];
   const pendingAspects = coverDemo.pendingJobs.map((job) => job.aspect);
   for (const aspect of ["3:4", "4:3"]) {
     if (pendingAspects.includes(aspect)) {
-      entries.push({ aspect, status: "generating" });
+      entries.push({ aspect, status: "generating", message: coverGenerationItems().find((item) => item.aspect === aspect)?.message || "" });
     } else {
-      const result = coverDemo.results.find((item) => item && item.aspect === aspect);
+      const failed = coverGenerationItems().find((item) => item.aspect === aspect && item.status === "error");
+      const result = failed || coverDemo.results.find((item) => item && item.aspect === aspect);
       if (result) entries.push(result);
     }
   }
@@ -1219,9 +1267,11 @@ function renderCoverResults() {
   const cards = entries.map((result) => {
     // Preserve unchanged images and spinners: rebuilding them can flash a blank
     // image or restart the animation during selection and state refresh.
-    const existing = existingCards.find((card) => card.dataset.coverAspect === result.aspect);
     const renderKey = JSON.stringify([result.aspect, result.status, result.imageUrl || "", result.message || "", coverDemo.generatedReference]);
+    const existing = existingCards.find((card) => card.dataset.coverRenderKey === renderKey) || cardCache.get(renderKey);
     if (existing?.dataset.coverRenderKey === renderKey) {
+      cardCache.delete(renderKey);
+      cardCache.set(renderKey, existing);
       const selected = coverDemo.selectedResult === existing.dataset.coverResult;
       existing.classList.toggle("is-selected", selected);
       existing.setAttribute("aria-pressed", String(selected));
@@ -1258,19 +1308,32 @@ function renderCoverResults() {
     }
     title.textContent = `${aspect === "3:4" ? "人物竖版" : "场景横版"} · ${aspect}`;
     card.append(title);
-    if (!generating) {
+    if (!generating || result.message) {
       const source = document.createElement("span");
       source.className = "cover-result-source";
-      source.textContent = cancelled ? (result.message || "已取消，可重新生成") : failed ? (result.message || "生成失败，可重新生成") : sourceLabel;
+      source.textContent = generating ? result.message : cancelled ? (result.message || "已取消，可重新生成") : failed ? (result.message || "生成失败，可重新生成") : sourceLabel;
       card.append(source);
+      if (failed) {
+        const retry = document.createElement("span");
+        retry.className = "cover-result-source";
+        retry.textContent = `点击重新生成 ${aspect}`;
+        card.append(retry);
+      }
     }
     card.addEventListener("click", () => {
-      if (generating || failed) return;
+      if (generating) return;
+      if (failed) {
+        selectCoverRatio(id);
+        generateCover();
+        return;
+      }
       coverDemo.selectedResult = id;
       renderCoverResults();
     });
+    cardCache.set(renderKey, card);
     return card;
   });
+  while (cardCache.size > 16) cardCache.delete(cardCache.keys().next().value);
   for (const child of existingCards) {
     if (!cards.includes(child)) coverResultList.removeChild(child);
   }
@@ -1786,8 +1849,9 @@ async function generateCover() {
   renderCoverGenerateControl();
   renderCoverResults();
   let response;
+  coverSubmittingRequests.set(requestToken, `${activeAccountId}:${scriptId}`);
   try {
-    response = await fetch(`/api/scripts/${encodeURIComponent(activeScriptId)}/cover-generate`, {
+    response = await fetch(`/api/scripts/${encodeURIComponent(scriptId)}/cover-generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1810,7 +1874,9 @@ async function generateCover() {
     renderCoverGenerateControl();
     showToast(coverGenerationErrorMessage(error, response?.status), "error");
   } finally {
+    coverSubmittingRequests.delete(requestToken);
     if (generationVersion === coverDemo.generationVersion && activeScriptId === scriptId) {
+      materialStateSync?.sync(true);
       renderCoverGenerateControl();
       renderCoverResults();
     }
@@ -1830,7 +1896,7 @@ function mergeCoverResults(incoming) {
 function renderCoverGenerateControl() {
   const selected = coverDemo.ratio === "both" ? ["3:4", "4:3"] : coverDemo.ratio === "portrait" ? ["3:4"] : ["4:3"];
   const pendingAspects = coverDemo.pendingJobs.map((job) => job.aspect);
-  coverGenerateButton.disabled = selected.every((aspect) => pendingAspects.includes(aspect));
+  coverGenerateButton.disabled = coverStateLoading || selected.every((aspect) => pendingAspects.includes(aspect));
   renderCoverGenerationStatus();
 }
 
@@ -1843,15 +1909,15 @@ function serverConfirmedCoverJobs() {
 
 function renderCoverGenerationStatus() {
   const jobs = serverConfirmedCoverJobs();
-  coverGenerationStatus.hidden = jobs.length === 0;
-  coverGenerationStatus.textContent = jobs.length
-    ? `正在生成 ${jobs.length} 张，可离开页面，稍后查看结果`
-    : "";
+  const message = coverStateLoading ? "正在同步状态…" : coverStateLoadError || coverPromptGenerationError
+    || (jobs.length ? `正在生成 ${jobs.length} 张封面，提交后最多等待 30 分钟，可离开页面，稍后查看结果` : "");
+  coverGenerationStatus.hidden = !message;
+  coverGenerationStatus.textContent = message;
 }
 
 function renderCoverTitleGenerateControl() {
-  coverTitleGenerateButton.disabled = coverTitleGenerationInFlight;
-  coverTitleGenerateButton.textContent = coverTitleGenerationInFlight
+  coverTitleGenerateButton.disabled = coverStateLoading || coverTitleGenerationInFlight;
+  coverTitleGenerateButton.textContent = coverStateLoading ? "正在同步状态…" : coverTitleGenerationInFlight
     ? (coverTitleGenerationPhase === "frame" ? "正在提取参考图…" : "正在生成提示词…")
     : "生成提示词";
 }
@@ -1887,6 +1953,7 @@ async function generateCoverTitle() {
       ? "提示词已修改，未覆盖当前内容，请重新生成。"
       : "参考图或关联视频已修改，未覆盖当前内容，请重新生成。", "error");
   };
+  coverManualTitleContext = `${accountId}:${scriptId}`;
   coverTitleGenerationInFlight = true;
   coverTitleGenerationPhase = "frame";
   renderCoverTitleGenerateControl();
@@ -1957,6 +2024,7 @@ async function generateCoverTitle() {
   } catch (error) {
     if (contextCurrent()) showToast(responseMessage(error, "封面提示词生成失败，请稍后重试。"), "error");
   } finally {
+    if (coverManualTitleContext === `${accountId}:${scriptId}`) coverManualTitleContext = "";
     if (generationVersion === coverTitleGenerationVersion && activeScriptId === scriptId) {
       coverTitleGenerationInFlight = false;
       coverTitleGenerationPhase = "title";
@@ -3664,6 +3732,7 @@ function clearTitleGenerationPoll() {
 }
 
 function resumeTitleGenerationPolling() {
+  if (materialStateSync) return;
   if (!titleGenerationInFlight || titleGenerationPollTimer !== null || !activeAccountId || !activeScriptId) return;
   const accountId = activeAccountId;
   const scriptId = activeScriptId;
@@ -5394,6 +5463,7 @@ function renderStage(stage) {
   if (activeStage === "publish") loadPublishWorkspace();
   // 通用扩展点：宿主渲染原生阶段时通知插件收紧自己的阶段视图（插件自身阶段不经过这里）。
   window.WorkbenchPlugins?.onHostStageRender?.(activeStage);
+  materialStateSync?.sync();
 }
 
 function beginWorkspaceSwitch() {
@@ -5791,6 +5861,7 @@ async function selectScript(scriptId, accountId = activeAccountId, { awaitInitia
     assets: publishAssets,
   };
   pendingScriptId = requestedScriptId;
+  materialStateSync?.sync();
   const nextContext = {accountId: requestedAccountId, scriptId: requestedScriptId, stage: scripts.find(script => script.id === requestedScriptId)?.stage || "edit"};
   window.WorkbenchScriptNavigation?.begin(nextContext);
   // Preparation starts beside panel-state, never on the navigation critical path.
@@ -5806,7 +5877,7 @@ async function selectScript(scriptId, accountId = activeAccountId, { awaitInitia
     if (payload.script?.id !== requestedScriptId || payload.script?.accountId !== requestedAccountId) throw new Error("脚本归属已变化，请重新选择。");
   } catch (error) {
     if (switchSequence !== scriptSwitchSequence || activeAccountId !== requestedAccountId) return;
-    window.WorkbenchScriptNavigation?.fail(nextContext, () => selectScript(scriptId, accountId).catch(() => {}));
+    window.WorkbenchScriptNavigation?.fail(nextContext);
     throw error;
   }
   if (
@@ -5825,6 +5896,7 @@ async function selectScript(scriptId, accountId = activeAccountId, { awaitInitia
   resetDeleteScriptControl();
   publishNavigationSnapshot = null;
   loadCoverStateForScript({ serverPayload: payload.coverState });
+  if (payload.coverState) materialStateSync?.seed?.({ accountId: requestedAccountId, scriptId: requestedScriptId, stage: 'cover' });
   const initialTitleStateLoad = loadTitleStateForScript({ serverPayload: payload.titleState });
   saveWorkspaceActiveSelection(requestedAccountId, requestedScriptId);
   renderPublishAutomation();
@@ -6968,6 +7040,72 @@ window.openScriptById = async (scriptId, accountId = activeAccountId) => {
 };
 window.isCreateViewActive = () => createViewActive;
 // 插件宿主读取当前脚本的归属与标识；插件自行取脚本正文，宿主不暴露编辑器实现。
+function visibleMaterialContext() {
+  if (documentIsHidden() || workspaceContent.hidden || taskWorkspace.hidden || pendingScriptId || !activeAccountId || !activeScriptId || createViewActive) return null;
+  const stage = !titleStage.hidden ? "title" : !coverStage.hidden ? "cover" : "";
+  return stage ? { accountId: activeAccountId, scriptId: activeScriptId, stage } : null;
+}
+
+if (window.createMaterialStateSync) {
+  materialStateSync = window.createMaterialStateSync({
+    context: visibleMaterialContext,
+    read: async (owner, signal) => {
+      const editVersion = coverEditVersion;
+      const generationVersion = coverDemo.generationVersion;
+      const mutationVersion = titleMutationVersion;
+      const submissionVersion = coverGenerationRequestSequence;
+      // Manual prompt generation already owns its job polling and input snapshot.
+      if (owner.stage === "cover" && (coverManualTitleContext === `${owner.accountId}:${owner.scriptId}`
+        || [...coverSubmittingRequests.values()].includes(`${owner.accountId}:${owner.scriptId}`))) return null;
+      if (owner.stage === "title" && titleMutationKind) return null;
+      const coverRead = owner.stage === "cover" ? ++coverStateReadVersion : null;
+      const titleRead = titleStateRequestVersion;
+      const payload = await readJson(await fetch(`/api/scripts/${encodeURIComponent(owner.scriptId)}/${owner.stage}-state`, { signal }));
+      return { payload, editVersion, generationVersion, mutationVersion, coverRead, titleRead, submissionVersion };
+    },
+    apply: (owner, result) => {
+      if (!result) return;
+      const { payload, editVersion, generationVersion, mutationVersion, coverRead, titleRead, submissionVersion } = result;
+      if (owner.stage === "title") {
+        if (titleMutationKind || mutationVersion !== titleMutationVersion || titleRead !== titleStateRequestVersion) return;
+        applyTitleState(payload?.state || null);
+        applyTitleSource(payload?.source, payload?.sourceReady);
+        applyTitleGeneration(payload?.generation || null);
+      } else {
+        if (coverRead !== coverStateReadVersion || submissionVersion !== coverGenerationRequestSequence
+          || coverManualTitleContext === `${owner.accountId}:${owner.scriptId}`
+          || [...coverSubmittingRequests.values()].includes(`${owner.accountId}:${owner.scriptId}`)) return;
+        applyCoverStatePayload(payload, owner.scriptId, generationVersion, {
+          preserveInputs: editVersion !== coverEditVersion || coverEditVersion !== coverSavedVersion,
+        });
+      }
+    },
+    status: (owner, value) => {
+      if (owner.accountId !== activeAccountId || owner.scriptId !== activeScriptId) return;
+      if (owner.stage === "title") {
+        titleStateLoading = value.loading;
+        titleStateLoadError = value.error;
+        renderTitleState();
+      } else {
+        coverStateLoading = value.loading;
+        coverStateLoadError = value.error;
+        renderCoverGenerateControl();
+        renderCoverTitleGenerateControl();
+      }
+    },
+  });
+  clearTitleGenerationPoll();
+  stopCoverGenerationPolling();
+  // Plugin stages hide the host panels directly; observe those transitions too.
+  if (typeof MutationObserver !== "undefined") {
+    const observer = new MutationObserver(() => materialStateSync.sync());
+    [titleStage, coverStage, workspaceContent, taskWorkspace].forEach(panel => observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] }));
+  }
+  document.addEventListener("visibilitychange", () => materialStateSync.sync());
+  window.addEventListener?.("workspace-module-change", () => queueMicrotask(() => materialStateSync.sync()));
+  materialStateSync.sync();
+}
+
 window.WorkbenchScriptContext = () => ({
   scriptId: activeScriptId || null,
   accountId: activeAccountId || null,

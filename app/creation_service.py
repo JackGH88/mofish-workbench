@@ -50,6 +50,7 @@ PUBLIC_ERROR_MESSAGES: "dict[str, str]" = {
     "unsupported_input": "创作服务不支持该输入，请检查内容后重试。",
     "content_unavailable": "该内容暂时无法获取，请更换后重试。",
     "upstream_unavailable": "创作服务暂时不可用，请稍后重试。",
+    "image_generation_timeout": "生成超过 30 分钟，可重新生成。",
     "status_pending": "任务结果待确认，请稍后继续查询同一任务。",
     "result_expired": "该成果已过保留期，需要重新发起任务。",
     "idempotency_conflict": "同一请求标识已用于不同参数，请重新发起任务。",
